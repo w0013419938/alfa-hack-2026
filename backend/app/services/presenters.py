@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.business_config import get_business_config
 from app.domain.payments import payment_summary
+from app.domain.progress import EventInfo, build_progress
 from app.domain.state_machine import available_actions, get_current_offer, get_open_info_request
 from app.domain.statuses import FINAL_STATUSES, Actor, ApplicationStatus
 from app.models import Application, ApplicationEvent, Company, Document, InfoRequest, Offer
@@ -18,6 +19,7 @@ from app.schemas.application import (
     InfoRequestOut,
     OfferOut,
     ProductShort,
+    ProgressStep,
     RequestedDocument,
     RequestedField,
     TimelineItem,
@@ -50,11 +52,24 @@ def actor_label(actor_type: str, viewer: Actor) -> str:
     return actors.get(actor_type, actor_type)
 
 
-def build_timeline(db: Session, application: Application, viewer: Actor) -> list[TimelineItem]:
-    labels = get_business_config().labels
-    events = db.scalars(
-        select(ApplicationEvent).where(ApplicationEvent.application_id == application.id).order_by(ApplicationEvent.created_at)
+def load_events(db: Session, application: Application) -> list[ApplicationEvent]:
+    return list(
+        db.scalars(select(ApplicationEvent).where(ApplicationEvent.application_id == application.id).order_by(ApplicationEvent.created_at))
     )
+
+
+def build_progress_steps(application: Application, events: list[ApplicationEvent]) -> list[ProgressStep]:
+    labels = get_business_config().labels
+    event_infos = [EventInfo(action=event.action, from_status=event.from_status, to_status=event.to_status) for event in events]
+    return [
+        ProgressStep(code=code, label=labels.progress_steps[code], state=state, state_label=labels.progress_states[state])
+        for code, state in build_progress(application.status, event_infos)
+    ]
+
+
+def build_timeline(db: Session, application: Application, viewer: Actor, events: list[ApplicationEvent] | None = None) -> list[TimelineItem]:
+    labels = get_business_config().labels
+    events = load_events(db, application) if events is None else events
     return [
         TimelineItem(
             at=event.created_at,
@@ -137,6 +152,7 @@ def build_application_out(db: Session, application: Application, viewer: Actor) 
             info_request = build_info_request(db, open_request, viewer)
 
     offer = get_current_offer(db, application.id)
+    events = load_events(db, application)
     documents_count = db.scalar(select(func.count()).select_from(Document).where(Document.application_id == application.id))
 
     return ApplicationOut(
@@ -161,7 +177,8 @@ def build_application_out(db: Session, application: Application, viewer: Actor) 
         updated_at=application.updated_at,
         submitted_at=application.submitted_at,
         available_actions=build_actions(db, application, viewer),
-        timeline=build_timeline(db, application, viewer),
+        progress=build_progress_steps(application, events),
+        timeline=build_timeline(db, application, viewer, events),
         info_request=info_request,
         offer=build_offer(offer) if offer else None,
         documents_count=documents_count or 0,

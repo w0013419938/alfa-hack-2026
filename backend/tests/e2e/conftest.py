@@ -114,12 +114,14 @@ class Api:
 
 def check_application_shape(data: dict) -> dict:
     """Каждый ответ с заявкой обязан содержать всё, что нужно фронту."""
-    for key in ("status", "status_label", "status_description", "available_actions", "timeline"):
+    for key in ("status", "status_label", "status_description", "available_actions", "timeline", "progress"):
         assert key in data, f"В ответе нет поля {key}"
     assert data["status_label"] and data["status_description"]
     assert data["timeline"], "Таймлайн не может быть пустым: у заявки всегда есть событие создания"
     for action in data["available_actions"]:
         assert action["code"] and action["label"]
+    assert [step["code"] for step in data["progress"]][0] == "submitted"
+    assert all(step["label"] and step["state_label"] for step in data["progress"])
     return data
 
 

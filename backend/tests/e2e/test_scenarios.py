@@ -43,6 +43,7 @@ def test_client_good_auto_approval_to_issue(api):
     assert issued["is_final"] is True
     assert issued["available_actions"] == []
     assert issued["timeline"][-1]["action"] == "issue"
+    assert {step["state"] for step in issued["progress"]} == {"done"}
 
     documents = client.get(f"/applications/{draft['id']}/documents").json()
     assert [item["kind"] for item in documents] == ["contract"]
@@ -126,6 +127,8 @@ def test_client_info_needs_document_then_offer(api):
     needs_info = client.wait_until_processed(draft["id"])
 
     assert needs_info["status"] == "NEEDS_INFO"
+    decision_step = next(step for step in needs_info["progress"] if step["code"] == "decision")
+    assert decision_step["state"] == "action"
     request = needs_info["info_request"]
     assert request["comment"]
     assert [item["kind"] for item in request["documents"]] == ["bank_statement"]
