@@ -150,8 +150,11 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
         return Decision(outcome=MANUAL_REVIEW, reasons=[reason("border_grade")])
 
     rate = offer_rate(data.product_base_rate, data.grade, config)
-    dti = facts.values.debt_to_income
-    too_much_debt = dti is not None and Decimal(str(dti)) > config.max_debt_to_income
+    # Нагрузку проверяем по фактической ставке предложения (с надбавкой за грейд),
+    # а не по базовой, как в скоринге: иначе можно одобрить кредит с нагрузкой выше допустимой
+    payment = annuity_payment(data.amount, rate, data.term_months)
+    dti = (data.facts.current_loan_payments + payment) / data.monthly_revenue
+    too_much_debt = dti > config.max_debt_to_income
 
     reasons = []
     amount_share = Decimal(1)
@@ -162,7 +165,6 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
         reasons.append(reason("high_debt_load", dti=round(dti * 100), max_dti=format_percent(config.max_debt_to_income * 100)))
 
     if not reasons:
-        payment = annuity_payment(data.amount, rate, data.term_months)
         return Decision(
             outcome=APPROVE,
             reasons=[reason("approved")],
