@@ -49,7 +49,7 @@ def test_payment_summary_totals():
     assert summary["overpayment"] == summary["total_payment"] - Decimal(1_200_000)
 
 
-@pytest.mark.parametrize("inn", ["7707083893", "7701001012", "770100010180", "500100732259"])
+@pytest.mark.parametrize("inn", ["7701001012", "7710005052", "770100010180", "770200020287"])
 def test_valid_inn(inn):
     assert is_valid_inn(inn)
 
@@ -57,12 +57,12 @@ def test_valid_inn(inn):
 @pytest.mark.parametrize(
     "inn",
     [
-        "7707083890",  # неверная контрольная цифра
+        "7701001013",  # неверная контрольная цифра
         "770100010181",  # неверная 12-я цифра
         "770100010170",  # неверная 11-я цифра
         "12345",  # неверная длина
-        "77070838933",  # 11 цифр
-        "77070838A3",  # не цифры
+        "77010010121",  # 11 цифр
+        "77010010A2",  # не цифры
         "",
         None,
     ],

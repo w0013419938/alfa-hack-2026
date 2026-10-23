@@ -1,0 +1,2252 @@
+{
+  "info": {
+    "name": "Умный кредитный кабинет — сквозные сценарии",
+    "description": "Запускайте папки по порядку (Run folder). Токены и id заявок сохраняются в переменные коллекции автоматически. Перед проверкой статуса стоят паузы, чтобы фоновая обработка успела завершиться.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Служебное и справочники (без входа)",
+      "item": [
+        {
+          "name": "Liveness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Readiness (БД и mock-external)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ready",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ready"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Продукты",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Цели кредита",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dictionaries/purposes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dictionaries",
+                "purposes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Виды документов",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dictionaries/document-kinds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dictionaries",
+                "document-kinds"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Калькулятор",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/calculator?product=working_capital&amount=1500000&term=24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "calculator"
+              ],
+              "query": [
+                {
+                  "key": "product",
+                  "value": "working_capital"
+                },
+                {
+                  "key": "amount",
+                  "value": "1500000"
+                },
+                {
+                  "key": "term",
+                  "value": "24"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Подбор продукта",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/recommend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "recommend"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purpose_code\": \"equipment\",\n  \"amount\": 2000000,\n  \"term_months\": 36,\n  \"urgency\": \"month\",\n  \"has_collateral\": true\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. client_good — автоодобрение и выдача",
+      "item": [
+        {
+          "name": "Вход: client_good",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"client_good\",\n  \"password\": \"client_good123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_good', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Моя компания",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/company",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "company"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Создать черновик (стандартная анкета)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_code\": \"working_capital\",\n  \"amount\": 1500000,\n  \"term_months\": 24,\n  \"purpose_code\": \"working_capital\",\n  \"monthly_revenue\": 800000,\n  \"monthly_expenses\": 550000,\n  \"current_loan_payments\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Черновик создан', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('app_good', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отправить заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}/actions/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}",
+                "actions",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус SUBMITTED', () => pm.expect(body.status).to.eql('SUBMITTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Через 8 с: предложение как запрошено",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 8 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 8000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус OFFER_SENT', () => pm.expect(body.status).to.eql('OFFER_SENT'));",
+                  "pm.test('Предложение как запрошено', () => pm.expect(body.offer.offer_type).to.eql('as_requested'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Проект договора (HTML)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}/contract",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}",
+                "contract"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Принять предложение",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}/actions/accept_offer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}",
+                "actions",
+                "accept_offer"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус OFFER_ACCEPTED', () => pm.expect(body.status).to.eql('OFFER_ACCEPTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Подписать договор",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}/actions/sign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}",
+                "actions",
+                "sign"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Через 3 с: кредит выдан",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 3 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 3000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус ISSUED', () => pm.expect(body.status).to.eql('ISSUED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Документы (подписанный договор)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}",
+                "documents"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Лента подсказок",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/feed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. client_medium — встречное предложение",
+      "item": [
+        {
+          "name": "Вход: client_medium",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"client_medium\",\n  \"password\": \"client_medium123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_medium', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать черновик (стандартная анкета)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medium}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_code\": \"working_capital\",\n  \"amount\": 1500000,\n  \"term_months\": 24,\n  \"purpose_code\": \"working_capital\",\n  \"monthly_revenue\": 800000,\n  \"monthly_expenses\": 550000,\n  \"current_loan_payments\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Черновик создан', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('app_medium', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отправить заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medium}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_medium}}/actions/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_medium}}",
+                "actions",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус SUBMITTED', () => pm.expect(body.status).to.eql('SUBMITTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Через 8 с: встречное предложение",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medium}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_medium}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_medium}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 8 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 8000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус OFFER_SENT', () => pm.expect(body.status).to.eql('OFFER_SENT'));",
+                  "pm.test('Встречное предложение', () => pm.expect(body.offer.offer_type).to.eql('counter_offer'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отказаться от предложения",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_medium}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_medium}}/actions/decline_offer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_medium}}",
+                "actions",
+                "decline_offer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Нужна вся сумма\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус CLIENT_DECLINED', () => pm.expect(body.status).to.eql('CLIENT_DECLINED'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. client_border — ручное рассмотрение",
+      "item": [
+        {
+          "name": "Вход: client_border",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"client_border\",\n  \"password\": \"client_border123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_border', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать черновик (стандартная анкета)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_border}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_code\": \"working_capital\",\n  \"amount\": 1500000,\n  \"term_months\": 24,\n  \"purpose_code\": \"working_capital\",\n  \"monthly_revenue\": 800000,\n  \"monthly_expenses\": 550000,\n  \"current_loan_payments\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Черновик создан', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('app_border', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отправить заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_border}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_border}}/actions/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_border}}",
+                "actions",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус SUBMITTED', () => pm.expect(body.status).to.eql('SUBMITTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Через 8 с: у специалиста",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_border}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_border}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_border}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 8 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 8000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус MANUAL_REVIEW', () => pm.expect(body.status).to.eql('MANUAL_REVIEW'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Вход: employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"employee\",\n  \"password\": \"employee123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_employee', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Очередь: на рассмотрении",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications?status=MANUAL_REVIEW",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "MANUAL_REVIEW"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Карточка заявки (проверки, скоринг, история)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications/{{app_border}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications",
+                "{{app_border}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Одобрить с изменёнными условиями",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications/{{app_border}}/actions/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications",
+                "{{app_border}}",
+                "actions",
+                "approve"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Одобряем на меньшую сумму\",\n  \"amount\": 1200000,\n  \"term_months\": 30\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус OFFER_SENT', () => pm.expect(pm.response.json().status).to.eql('OFFER_SENT'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Клиент видит предложение специалиста",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_border}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_border}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_border}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус OFFER_SENT', () => pm.expect(body.status).to.eql('OFFER_SENT'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Принять предложение",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_border}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_border}}/actions/accept_offer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_border}}",
+                "actions",
+                "accept_offer"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус OFFER_ACCEPTED', () => pm.expect(body.status).to.eql('OFFER_ACCEPTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Подписать договор",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_border}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_border}}/actions/sign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_border}}",
+                "actions",
+                "sign"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Через 3 с: кредит выдан",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_border}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_border}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_border}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 3 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 3000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус ISSUED', () => pm.expect(body.status).to.eql('ISSUED'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. client_bad — отказ",
+      "item": [
+        {
+          "name": "Вход: client_bad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"client_bad\",\n  \"password\": \"client_bad123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_bad', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать черновик (стандартная анкета)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bad}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_code\": \"working_capital\",\n  \"amount\": 1500000,\n  \"term_months\": 24,\n  \"purpose_code\": \"working_capital\",\n  \"monthly_revenue\": 800000,\n  \"monthly_expenses\": 550000,\n  \"current_loan_payments\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Черновик создан', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('app_bad', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отправить заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bad}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_bad}}/actions/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_bad}}",
+                "actions",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус SUBMITTED', () => pm.expect(body.status).to.eql('SUBMITTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Через 8 с: отказ с причиной",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bad}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_bad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_bad}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 8 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 8000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус REJECTED', () => pm.expect(body.status).to.eql('REJECTED'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. client_info — запрос уточнений",
+      "item": [
+        {
+          "name": "Вход: client_info",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"client_info\",\n  \"password\": \"client_info123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_info', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать черновик (стандартная анкета)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_info}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_code\": \"working_capital\",\n  \"amount\": 1500000,\n  \"term_months\": 24,\n  \"purpose_code\": \"working_capital\",\n  \"monthly_revenue\": 800000,\n  \"monthly_expenses\": 550000,\n  \"current_loan_payments\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Черновик создан', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('app_info', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отправить заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_info}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_info}}/actions/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_info}}",
+                "actions",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус SUBMITTED', () => pm.expect(body.status).to.eql('SUBMITTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Через 8 с: нужны уточнения",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_info}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_info}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_info}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 8 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 8000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус NEEDS_INFO', () => pm.expect(body.status).to.eql('NEEDS_INFO'));",
+                  "pm.test('Банк просит выписку', () => pm.expect(body.info_request.documents[0].kind).to.eql('bank_statement'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Загрузить выписку (выберите любой PDF в поле file)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_info}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_info}}/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_info}}",
+                "documents"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "kind",
+                  "value": "bank_statement",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "description": "В Postman выберите файл PDF в поле file (вкладка Body → form-data)."
+          }
+        },
+        {
+          "name": "Отправить уточнения",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_info}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_info}}/actions/provide_info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_info}}",
+                "actions",
+                "provide_info"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Выписку загрузила\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус SUBMITTED', () => pm.expect(body.status).to.eql('SUBMITTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Через 8 с: предложение",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_info}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_info}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_info}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 8 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 8000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус OFFER_SENT', () => pm.expect(body.status).to.eql('OFFER_SENT'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. client_timeout — сбой БКИ",
+      "item": [
+        {
+          "name": "Вход: client_timeout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"client_timeout\",\n  \"password\": \"client_timeout123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_timeout', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Создать черновик (стандартная анкета)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_timeout}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_code\": \"working_capital\",\n  \"amount\": 1500000,\n  \"term_months\": 24,\n  \"purpose_code\": \"working_capital\",\n  \"monthly_revenue\": 800000,\n  \"monthly_expenses\": 550000,\n  \"current_loan_payments\": 0\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Черновик создан', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('app_timeout', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Отправить заявку",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_timeout}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_timeout}}/actions/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_timeout}}",
+                "actions",
+                "submit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус SUBMITTED', () => pm.expect(body.status).to.eql('SUBMITTED'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Через 15 с: у специалиста (БКИ не ответило)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_timeout}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_timeout}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_timeout}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Ждём 15 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 15000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Ответ содержит тексты, кнопки и таймлайн', () => {",
+                  "  pm.expect(body).to.have.property('status_label');",
+                  "  pm.expect(body).to.have.property('status_description');",
+                  "  pm.expect(body).to.have.property('available_actions');",
+                  "  pm.expect(body).to.have.property('timeline');",
+                  "});",
+                  "pm.test('Статус MANUAL_REVIEW', () => pm.expect(body.status).to.eql('MANUAL_REVIEW'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Вход: employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"employee\",\n  \"password\": \"employee123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_employee', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Карточка: проверка БКИ со статусом timeout",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications/{{app_timeout}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications",
+                "{{app_timeout}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Запросить уточнения",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications/{{app_timeout}}/actions/request_info",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications",
+                "{{app_timeout}}",
+                "actions",
+                "request_info"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Пришлите отчётность за последний год\",\n  \"requested_documents\": [\n    \"financial_report\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Статус NEEDS_INFO', () => pm.expect(pm.response.json().status).to.eql('NEEDS_INFO'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Бэкофис",
+      "item": [
+        {
+          "name": "Вход: employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"employee\",\n  \"password\": \"employee123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Вход выполнен', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token_employee', pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Очередь (все заявки)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Очередь: грейд A",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications?grade=A",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications"
+              ],
+              "query": [
+                {
+                  "key": "grade",
+                  "value": "A"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Статистика",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_employee}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "stats"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Безопасность (запускать после папок 1 и 4)",
+      "item": [
+        {
+          "name": "Чужая заявка → 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bad}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_good}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_good}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Клиент в бэкофисе → 403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_good}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/backoffice/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "backoffice",
+                "applications"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Без токена → 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Недопустимый переход → 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_bad}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{app_bad}}/actions/accept_offer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "applications",
+                "{{app_bad}}",
+                "actions",
+                "accept_offer"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
