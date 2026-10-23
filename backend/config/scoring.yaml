@@ -1,0 +1,110 @@
+# Балльная скоринговая модель.
+# TODO(участник 2): заменить факторы, диапазоны и баллы на финальные правила скоринга.
+#
+# Как устроено:
+# - Для каждого фактора берётся значение из источника (source). Список доступных источников:
+#     business_age_months       — возраст бизнеса в месяцах (дата регистрации из ЕГРЮЛ, иначе из профиля компании)
+#     debt_to_income            — долговая нагрузка DTI = (текущие платежи + новый платёж) / месячная выручка
+#     max_overdue_days          — максимальная просрочка за всю историю в БКИ, дней
+#     bki_rating                — кредитный рейтинг бюро (300–850)
+#     amount_to_annual_revenue  — запрошенная сумма / годовая выручка (выручка из анкеты × 12)
+#     industry_risk_group       — группа риска отрасли по ОКВЭД (low / medium / high, см. industry_risk ниже)
+#   Добавить новый источник можно только в коде (app/domain/scoring.py), а менять диапазоны и баллы — здесь.
+# - bins: диапазоны значений. min включительно, max не включительно, null — без границы.
+#   Каждый диапазон даёт баллы и объяснение для сотрудника и клиента.
+# - categories: то же для категориальных значений.
+# - Если значения нет (например, БКИ не ответило), фактор получает missing_points.
+# - Итоговый балл = сумма баллов факторов. Грейд — первый в списке grades, у которого min_score <= балл.
+
+version: "scoring-draft-1"
+
+grades:
+  - grade: A
+    min_score: 80
+    label: "Низкий риск"
+  - grade: B
+    min_score: 65
+    label: "Умеренный риск"
+  - grade: C
+    min_score: 50
+    label: "Средний риск"
+  - grade: D
+    min_score: 35
+    label: "Повышенный риск"
+  - grade: E
+    min_score: 0
+    label: "Высокий риск"
+
+factors:
+  - code: business_age
+    name: "Возраст бизнеса"
+    source: business_age_months
+    missing_points: 0
+    missing_explanation: "Нет данных о дате регистрации"
+    bins:
+      - {min: null, max: 12, points: 0, explanation: "Бизнес работает меньше года — опыта мало"}
+      - {min: 12, max: 36, points: 10, explanation: "Бизнес работает от 1 до 3 лет"}
+      - {min: 36, max: 60, points: 15, explanation: "Бизнес работает от 3 до 5 лет"}
+      - {min: 60, max: null, points: 20, explanation: "Бизнес работает больше 5 лет — стабильная история"}
+
+  - code: debt_load
+    name: "Долговая нагрузка"
+    source: debt_to_income
+    missing_points: 0
+    missing_explanation: "Не хватает данных о выручке, чтобы посчитать нагрузку"
+    bins:
+      - {min: null, max: 0.3, points: 25, explanation: "Платежи по кредитам занимают меньше 30% выручки"}
+      - {min: 0.3, max: 0.5, points: 15, explanation: "Платежи по кредитам занимают 30–50% выручки"}
+      - {min: 0.5, max: 0.7, points: 5, explanation: "Платежи по кредитам занимают 50–70% выручки — нагрузка высокая"}
+      - {min: 0.7, max: null, points: 0, explanation: "Платежи по кредитам занимают больше 70% выручки — нагрузка критическая"}
+
+  - code: overdue_history
+    name: "Просрочки в кредитной истории"
+    source: max_overdue_days
+    missing_points: 0
+    missing_explanation: "Нет данных из бюро кредитных историй"
+    bins:
+      - {min: null, max: 1, points: 20, explanation: "Просрочек не было"}
+      - {min: 1, max: 30, points: 10, explanation: "Были небольшие просрочки (до 30 дней)"}
+      - {min: 30, max: 90, points: 3, explanation: "Были просрочки от 30 до 90 дней"}
+      - {min: 90, max: null, points: 0, explanation: "Были просрочки больше 90 дней"}
+
+  - code: bki_rating
+    name: "Кредитный рейтинг бюро"
+    source: bki_rating
+    missing_points: 0
+    missing_explanation: "Нет данных из бюро кредитных историй"
+    bins:
+      - {min: null, max: 550, points: 0, explanation: "Низкий кредитный рейтинг"}
+      - {min: 550, max: 650, points: 7, explanation: "Рейтинг ниже среднего"}
+      - {min: 650, max: 750, points: 14, explanation: "Хороший кредитный рейтинг"}
+      - {min: 750, max: null, points: 20, explanation: "Отличный кредитный рейтинг"}
+
+  - code: amount_to_revenue
+    name: "Сумма кредита относительно выручки"
+    source: amount_to_annual_revenue
+    missing_points: 0
+    missing_explanation: "Нет данных о выручке"
+    bins:
+      - {min: null, max: 0.2, points: 10, explanation: "Сумма меньше 20% годовой выручки"}
+      - {min: 0.2, max: 0.5, points: 6, explanation: "Сумма 20–50% годовой выручки"}
+      - {min: 0.5, max: 1.0, points: 2, explanation: "Сумма 50–100% годовой выручки"}
+      - {min: 1.0, max: null, points: 0, explanation: "Сумма больше годовой выручки"}
+
+  - code: industry
+    name: "Отрасль"
+    source: industry_risk_group
+    missing_points: 3
+    missing_explanation: "Отрасль не определена"
+    categories:
+      - {value: low, points: 5, explanation: "Отрасль с низким уровнем риска"}
+      - {value: medium, points: 3, explanation: "Отрасль со средним уровнем риска"}
+      - {value: high, points: 0, explanation: "Отрасль с повышенным риском (сезонность, высокая конкуренция)"}
+
+# Группы риска отраслей по началу кода ОКВЭД (первые 2 цифры).
+# TODO(участник 2): уточнить отраслевые группы.
+industry_risk:
+  default: medium
+  groups:
+    low: ["62", "63", "69", "70", "71", "85", "86"]   # ИТ, консалтинг, образование, медицина
+    high: ["41", "42", "43", "55", "56", "79"]        # стройка, гостиницы, общепит, туризм
