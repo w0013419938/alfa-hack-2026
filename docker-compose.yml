@@ -1,0 +1,92 @@
+# Запуск всего прототипа: docker compose up --build
+# Все настройки можно переопределить в файле .env (образец — .env.example).
+# Значения по умолчанию ниже подходят только для локального демо.
+
+name: credit-cabinet
+
+services:
+  db:
+    image: postgres:16.15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-credit_cabinet}
+      POSTGRES_USER: ${POSTGRES_USER:-credit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-credit}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # Порт базы наружу не публикуем, чтобы не конфликтовать с локальным PostgreSQL
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  mock-external:
+    build:
+      context: .
+      dockerfile: mock-external/Dockerfile
+    restart: unless-stopped
+    environment:
+      MOCK_TIMEOUT_SLEEP_SECONDS: ${MOCK_TIMEOUT_SLEEP_SECONDS:-10}
+    ports:
+      - "${MOCK_EXTERNAL_PORT:-8001}:8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      mock-external:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-credit}:${POSTGRES_PASSWORD:-credit}@db:5432/${POSTGRES_DB:-credit_cabinet}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-in-production}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      EXTERNAL_API_URL: http://mock-external:8001
+      EXTERNAL_TIMEOUT_SECONDS: ${EXTERNAL_TIMEOUT_SECONDS:-2}
+      EXTERNAL_MAX_ATTEMPTS: ${EXTERNAL_MAX_ATTEMPTS:-3}
+      EXTERNAL_BACKOFF_SECONDS: ${EXTERNAL_BACKOFF_SECONDS:-0.5}
+      PIPELINE_STEP_DELAY_SECONDS: ${PIPELINE_STEP_DELAY_SECONDS:-1.5}
+      PIPELINE_WORKERS: ${PIPELINE_WORKERS:-4}
+      UPLOAD_DIR: /data/uploads
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
+      ALLOWED_UPLOAD_EXTENSIONS: ${ALLOWED_UPLOAD_EXTENSIONS:-pdf,jpg,jpeg,png}
+      LOGIN_RATE_LIMIT_ATTEMPTS: ${LOGIN_RATE_LIMIT_ATTEMPTS:-5}
+      LOGIN_RATE_LIMIT_WINDOW_SECONDS: ${LOGIN_RATE_LIMIT_WINDOW_SECONDS:-60}
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  # Место под фронтенд (будет добавлен отдельной задачей)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   environment:
+  #     VITE_API_URL: http://localhost:8000/api/v1
+  #   ports:
+  #     - "5173:5173"
+
+volumes:
+  db_data:
+  uploads:

@@ -1,0 +1,31 @@
+[project]
+name = "credit-cabinet-backend"
+version = "0.1.0"
+description = "Бэкенд прототипа «Умный кредитный кабинет предпринимателя»"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "alembic",
+    "pydantic>=2.7",
+    "pydantic-settings",
+    "pyyaml",
+    "pyjwt",
+    "bcrypt",
+    "httpx",
+    "python-multipart",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

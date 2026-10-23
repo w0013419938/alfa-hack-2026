@@ -1,0 +1,8 @@
+# Используется сборкой mock-external (контекст — корень репозитория)
+.git
+**/.venv
+**/__pycache__
+**/.pytest_cache
+.env
+docs
+frontend
