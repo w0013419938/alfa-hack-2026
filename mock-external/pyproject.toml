@@ -1,0 +1,12 @@
+[project]
+name = "credit-cabinet-mock-external"
+version = "0.1.0"
+description = "Локальные моки внешних систем: ЕГРЮЛ/ЕГРИП и БКИ"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
+
+[tool.uv]
+package = false
