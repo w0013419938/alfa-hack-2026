@@ -36,6 +36,15 @@ class ThreadPoolDispatcher:
         self._executor.shutdown(wait=False, cancel_futures=True)
 
 
+class InlineDispatcher:
+    """Обрабатывает заявку сразу, в текущем потоке и без пауз. Используется при загрузке демо-данных."""
+
+    def dispatch(self, application_id: uuid.UUID) -> None:
+        from app.services.pipeline import run_pipeline
+
+        run_pipeline(application_id, step_delay=0)
+
+
 dispatcher = ThreadPoolDispatcher(get_settings().pipeline_workers)
 
 

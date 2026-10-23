@@ -1,0 +1,93 @@
+{
+  "_comment": "Демо-история: заявки фоновых компаний, чтобы очередь сотрудника не была пустой. Создаются при seed теми же функциями, что и в API (с настоящим пайплайном и мок-сервисами). steps — действия после создания черновика. TODO(участник 3): заменить на истории из синтетического датасета.",
+  "applications": [
+    {
+      "company_inn": "7702007017",
+      "author_login": "demo1",
+      "product_code": "express",
+      "amount": 1000000, "term_months": 24, "purpose_code": "equipment",
+      "monthly_revenue": 600000, "monthly_expenses": 420000, "current_loan_payments": 200000,
+      "steps": [{"actor": "client", "action": "submit"}],
+      "expected_status": "MANUAL_REVIEW"
+    },
+    {
+      "company_inn": "7702008028",
+      "author_login": "demo2",
+      "product_code": "working_capital",
+      "amount": 3000000, "term_months": 36, "purpose_code": "goods_purchase",
+      "monthly_revenue": 1500000, "monthly_expenses": 1100000, "current_loan_payments": 100000,
+      "steps": [
+        {"actor": "client", "action": "submit"},
+        {"actor": "client", "action": "accept_offer"},
+        {"actor": "client", "action": "sign"}
+      ],
+      "expected_status": "ISSUED"
+    },
+    {
+      "company_inn": "7702009039",
+      "author_login": "demo3",
+      "product_code": "working_capital",
+      "amount": 2000000, "term_months": 24, "purpose_code": "working_capital",
+      "monthly_revenue": 700000, "monthly_expenses": 500000, "current_loan_payments": 0,
+      "steps": [{"actor": "client", "action": "submit"}],
+      "expected_status": "MANUAL_REVIEW"
+    },
+    {
+      "company_inn": "7702010041",
+      "author_login": "demo4",
+      "product_code": "express",
+      "amount": 800000, "term_months": 12, "purpose_code": "goods_purchase",
+      "monthly_revenue": 500000, "monthly_expenses": 380000, "current_loan_payments": 90000,
+      "steps": [{"actor": "client", "action": "submit"}],
+      "expected_status": "REJECTED"
+    },
+    {
+      "company_inn": "7702011052",
+      "author_login": "demo5",
+      "product_code": "working_capital",
+      "amount": 5000000, "term_months": 24, "purpose_code": "working_capital",
+      "monthly_revenue": 2000000, "monthly_expenses": 1400000, "current_loan_payments": 0,
+      "steps": [{"actor": "client", "action": "submit"}],
+      "expected_status": "OFFER_SENT"
+    },
+    {
+      "company_inn": "7702012063",
+      "author_login": "demo6",
+      "product_code": "working_capital",
+      "amount": 1500000, "term_months": 24, "purpose_code": "goods_purchase",
+      "monthly_revenue": 700000, "monthly_expenses": 450000, "current_loan_payments": 220000,
+      "steps": [
+        {"actor": "client", "action": "submit"},
+        {"actor": "client", "action": "decline_offer", "comment": "Сумма слишком маленькая"}
+      ],
+      "expected_status": "CLIENT_DECLINED"
+    },
+    {
+      "company_inn": "7702013074",
+      "author_login": "demo7",
+      "product_code": "express",
+      "amount": 500000, "term_months": 12, "purpose_code": "goods_purchase",
+      "monthly_revenue": 300000, "monthly_expenses": 200000, "current_loan_payments": 0,
+      "steps": [],
+      "expected_status": "DRAFT"
+    },
+    {
+      "company_inn": "7702014085",
+      "author_login": "demo8",
+      "product_code": "working_capital",
+      "amount": 2000000, "term_months": 24, "purpose_code": "working_capital",
+      "monthly_revenue": 900000, "monthly_expenses": 650000, "current_loan_payments": 300000,
+      "steps": [
+        {"actor": "client", "action": "submit"},
+        {
+          "actor": "employee", "login": "employee", "action": "request_info",
+          "body": {
+            "comment": "Пришлите, пожалуйста, бухгалтерскую отчётность за последний год — хотим уточнить выручку.",
+            "requested_documents": ["financial_report"]
+          }
+        }
+      ],
+      "expected_status": "NEEDS_INFO"
+    }
+  ]
+}

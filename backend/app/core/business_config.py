@@ -225,6 +225,7 @@ class LabelsFile(BaseModel):
     actors: dict[str, str]
     system_comments: dict[str, str]
     decision_reasons: dict[str, str]
+    decision_outcomes: dict[str, str]
     company_statuses: dict[str, str]
     offer_types: dict[str, str]
     offer_statuses: dict[str, str]

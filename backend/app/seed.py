@@ -20,7 +20,12 @@ from app.core.db import SessionLocal
 from app.core.logging import setup_logging
 from app.core.security import hash_password
 from app.core.settings import get_settings
-from app.models import Company, Product, User
+from app.models import Application, Company, Product, User
+from app.schemas.application import ApplicationCreate
+from app.schemas.backoffice import EmployeeActionRequest
+from app.services.applications import create_draft, perform_client_action
+from app.services.backoffice import perform_employee_action
+from app.services.dispatcher import InlineDispatcher
 
 logger = logging.getLogger("app.seed")
 
@@ -107,6 +112,34 @@ def seed_users(db: Session) -> None:
     db.flush()
 
 
+def seed_applications() -> None:
+    """Демо-заявки создаются через те же функции, что и API, поэтому у них настоящие события, проверки и скоринг.
+
+    Ошибка в одной демо-заявке не мешает запуску: это фоновые данные, а не основной сценарий.
+    """
+    dispatcher = InlineDispatcher()
+    application_fields = set(ApplicationCreate.model_fields)
+    for item in read_seed_file("applications.json")["applications"]:
+        with SessionLocal() as db:
+            company = db.scalar(select(Company).where(Company.inn == item["company_inn"]))
+            if company is None or db.scalar(select(Application.id).where(Application.company_id == company.id).limit(1)):
+                continue  # компании нет или у неё уже есть заявки — значит, seed уже выполнялся
+            try:
+                author = db.scalar(select(User).where(User.login == item["author_login"]))
+                draft = create_draft(db, author, ApplicationCreate(**{key: value for key, value in item.items() if key in application_fields}))
+                for step in item["steps"]:
+                    if step["actor"] == "client":
+                        perform_client_action(db, author, draft.id, step["action"], step.get("comment"), None, dispatcher)
+                    else:
+                        employee = db.scalar(select(User).where(User.login == step["login"]))
+                        perform_employee_action(db, employee, draft.id, step["action"], EmployeeActionRequest(**step["body"]))
+                final_status = db.get(Application, draft.id, populate_existing=True).status
+                if final_status != item.get("expected_status", final_status):
+                    logger.warning(f"Демо-заявка компании {company.name}: статус {final_status}, ожидался {item['expected_status']}")
+            except Exception:
+                logger.exception("Не удалось создать демо-заявку")
+
+
 def run_seed() -> None:
     get_business_config()  # проверяем конфиги до любых изменений в БД
     with SessionLocal() as db:
@@ -120,6 +153,15 @@ def run_seed() -> None:
             db.execute(text("SELECT pg_advisory_unlock(:id)"), {"id": SEED_LOCK_ID})
             db.commit()
     logger.info("Справочники и демо-пользователи загружены")
+
+    with SessionLocal() as db:
+        db.execute(text("SELECT pg_advisory_lock(:id)"), {"id": SEED_LOCK_ID})
+        try:
+            seed_applications()
+        finally:
+            db.execute(text("SELECT pg_advisory_unlock(:id)"), {"id": SEED_LOCK_ID})
+            db.commit()
+    logger.info("Демо-заявки загружены")
 
 
 if __name__ == "__main__":
