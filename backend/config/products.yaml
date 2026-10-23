@@ -1,0 +1,96 @@
+# Кредитные продукты для малого и микробизнеса.
+# TODO(участник 2): заменить значения-заглушки на финальные параметры продуктов.
+#
+# Как устроено:
+# - code — постоянный код продукта (на него ссылаются заявки, менять нельзя);
+# - purposes — коды целей из dictionaries.yaml, для которых подходит продукт;
+# - суммы в рублях, сроки в месяцах, ставка — % годовых (к ней добавляется надбавка по грейду из decision.yaml);
+# - required_fields — какие поля анкеты обязательны (список возможных полей — в labels.yaml, раздел fields);
+# - decision_days — за сколько рабочих дней обычно принимается решение (используется в подборе продукта).
+# Таблица products в БД обновляется из этого файла при каждом старте бэкенда.
+
+version: "products-draft-1"
+
+products:
+  - code: express
+    name: "Экспресс-кредит"
+    description: "Кредит без залога с быстрым решением. Деньги можно потратить на любые цели бизнеса."
+    suitable_for: "Когда деньги нужны срочно и сумма небольшая: закупка, ремонт, кассовый разрыв."
+    purposes: [working_capital, goods_purchase, equipment, vehicles, expansion, other]
+    min_amount: 100000
+    max_amount: 3000000
+    min_term_months: 3
+    max_term_months: 24
+    base_rate: 21.9
+    requires_collateral: false
+    decision_days: 1
+    required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments]
+
+  - code: working_capital
+    name: "Кредит на оборотные средства"
+    description: "Пополнение оборотных средств: закупка товаров и сырья, оплата поставщикам, налоги и зарплаты."
+    suitable_for: "Когда бизнесу нужно закрыть разрыв между оплатой поставщикам и поступлениями от покупателей."
+    purposes: [working_capital, goods_purchase]
+    min_amount: 500000
+    max_amount: 15000000
+    min_term_months: 6
+    max_term_months: 36
+    base_rate: 17.5
+    requires_collateral: false
+    decision_days: 3
+    required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments]
+
+  - code: investment
+    name: "Инвестиционный кредит"
+    description: "Крупная сумма на долгий срок под залог: покупка оборудования, транспорта, помещения, открытие новой точки."
+    suitable_for: "Когда вы вкладываетесь в развитие и готовы предоставить залог — так ставка ниже."
+    purposes: [equipment, vehicles, real_estate, expansion]
+    min_amount: 1000000
+    max_amount: 30000000
+    min_term_months: 12
+    max_term_months: 60
+    base_rate: 16.0
+    requires_collateral: true
+    decision_days: 5
+    required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments, collateral_description]
+
+  - code: refinancing
+    name: "Рефинансирование"
+    description: "Перекредитование займов в других банках, чтобы снизить ежемесячный платёж."
+    suitable_for: "Когда у бизнеса уже есть кредиты и платёж по ним хочется уменьшить."
+    purposes: [refinancing]
+    min_amount: 300000
+    max_amount: 10000000
+    min_term_months: 12
+    max_term_months: 60
+    base_rate: 16.5
+    requires_collateral: false
+    decision_days: 3
+    required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments]
+
+# Подбор продукта (POST /products/recommend): за каждое совпадение продукт получает баллы.
+# TODO(участник 2): уточнить веса и тексты объяснений.
+recommendation:
+  weights:
+    purpose: 4      # продукт подходит под цель
+    amount: 2       # сумма в пределах продукта
+    term: 2         # срок в пределах продукта
+    speed: 1        # решение успеваем принять так быстро, как нужно клиенту
+    collateral: 1   # требования к залогу выполнимы
+  # Сколько дней клиент готов ждать решения при каждом варианте ответа «как быстро нужны деньги»
+  urgency_days:
+    asap: 1
+    week: 5
+    month: 30
+  texts:
+    purpose_ok: "Подходит для цели «{purpose}»"
+    purpose_bad: "Не предназначен для цели «{purpose}»"
+    amount_ok: "Сумма {amount} входит в лимит продукта ({min_amount} – {max_amount})"
+    amount_bad: "Сумма {amount} вне лимита продукта ({min_amount} – {max_amount})"
+    term_ok: "Срок {term} мес. подходит (от {min_term} до {max_term} мес.)"
+    term_bad: "Срок {term} мес. не подходит (от {min_term} до {max_term} мес.)"
+    speed_ok: "Решение обычно за {days} дн. — успеваем"
+    speed_bad: "Решение обычно за {days} дн. — дольше, чем вам удобно"
+    collateral_ok: "Залог не нужен"
+    collateral_have: "Нужен залог — он у вас есть, поэтому ставка ниже"
+    collateral_bad: "Нужен залог, а его нет"

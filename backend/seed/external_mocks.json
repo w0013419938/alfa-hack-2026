@@ -1,1 +1,200 @@
-{"_comment": "заполняется на этапе 5"}
+{
+  "_comment": "Ответы моков ЕГРЮЛ/ЕГРИП и БКИ по ИНН. TODO(участник 3): заменить на данные синтетического датасета. Для ИНН, которых здесь нет, mock-external генерирует ответ детерминированно из ИНН.",
+  "_failure_modes": "Поле failure_mode в разделе egrul или bki: timeout — сервис не отвечает дольше таймаута клиента; error — отвечает 500; flaky — каждый нечётный запрос падает с 503 (видно ретраи).",
+  "_bki_fields": "rating — кредитный рейтинг бюро 300–850; active_loans — действующие кредиты (monthly_payment — платёж в месяц, current_overdue_days — текущая непогашенная просрочка); overdue_history — просрочки за всю историю: count — сколько раз, max_days — максимальная длительность.",
+
+  "7701001012": {
+    "egrul": {
+      "name": "ООО «Северный ветер»", "ogrn": "1177746123451", "company_type": "LLC", "status": "active",
+      "registration_date": "2017-03-15", "okved": "47.19", "region": "г. Москва",
+      "director": {"full_name": "Орлов Дмитрий Викторович", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 790,
+      "active_loans": [
+        {"type": "Кредит на оборотные средства", "amount": 900000, "balance": 420000, "monthly_payment": 30000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "7701002023": {
+    "egrul": {
+      "name": "ООО «Пекарня Каравай»", "ogrn": "1227700234562", "company_type": "LLC", "status": "active",
+      "registration_date": "2022-02-10", "okved": "10.71", "region": "Московская область",
+      "director": {"full_name": "Смирнова Елена Олеговна", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 680,
+      "active_loans": [
+        {"type": "Кредит на оборудование", "amount": 6000000, "balance": 4100000, "monthly_payment": 210000, "current_overdue_days": 0},
+        {"type": "Автокредит", "amount": 3200000, "balance": 2300000, "monthly_payment": 120000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 1, "max_days": 12}
+    }
+  },
+
+  "770100010180": {
+    "egrul": {
+      "name": "ИП Сидоров Павел Андреевич", "ogrn": "324774600012345", "company_type": "IE", "status": "active",
+      "registration_date": "2024-12-01", "okved": "43.32", "region": "г. Москва",
+      "director": {"full_name": "Сидоров Павел Андреевич", "position": "Индивидуальный предприниматель"}
+    },
+    "bki": {
+      "rating": 560,
+      "active_loans": [
+        {"type": "Потребительский кредит", "amount": 2500000, "balance": 1900000, "monthly_payment": 150000, "current_overdue_days": 0},
+        {"type": "Кредитная карта", "amount": 1000000, "balance": 800000, "monthly_payment": 100000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 2, "max_days": 45}
+    }
+  },
+
+  "7701004045": {
+    "egrul": {
+      "name": "ООО «Ромашка-Строй»", "ogrn": "1197746456784", "company_type": "LLC", "status": "liquidating",
+      "registration_date": "2019-06-04", "okved": "41.20", "region": "г. Москва",
+      "director": {"full_name": "Козлов Игорь Петрович", "position": "Ликвидатор"}
+    },
+    "bki": {
+      "rating": 420,
+      "active_loans": [
+        {"type": "Кредит на оборотные средства", "amount": 5000000, "balance": 4700000, "monthly_payment": 260000, "current_overdue_days": 65}
+      ],
+      "overdue_history": {"count": 5, "max_days": 65}
+    }
+  },
+
+  "770200020287": {
+    "egrul": {
+      "name": "ИП Петрова Мария Игоревна", "ogrn": "323774600054321", "company_type": "IE", "status": "active",
+      "registration_date": "2023-05-20", "okved": "96.02", "region": "г. Санкт-Петербург",
+      "director": {"full_name": "Петрова Мария Игоревна", "position": "Индивидуальный предприниматель"}
+    },
+    "bki": {
+      "rating": 720,
+      "active_loans": [],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "7710005052": {
+    "egrul": {
+      "name": "ООО «ТехноСервис»", "ogrn": "1207700567895", "company_type": "LLC", "status": "active",
+      "registration_date": "2020-09-01", "okved": "62.01", "region": "г. Москва",
+      "director": {"full_name": "Волков Артём Сергеевич", "position": "Генеральный директор"}
+    },
+    "bki": {"failure_mode": "timeout"}
+  },
+
+  "7702007017": {
+    "egrul": {
+      "name": "ООО «Лесная поляна»", "ogrn": "1247700700011", "company_type": "LLC", "status": "active",
+      "registration_date": "2024-09-10", "okved": "56.10", "region": "Тверская область",
+      "director": {"full_name": "Лебедева Ольга Николаевна", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 600,
+      "active_loans": [
+        {"type": "Кредит на ремонт помещения", "amount": 3000000, "balance": 2400000, "monthly_payment": 200000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 1, "max_days": 40}
+    }
+  },
+
+  "7702008028": {
+    "egrul": {
+      "name": "ООО «Альфа-Логистик»", "ogrn": "1157746800022", "company_type": "LLC", "status": "active",
+      "registration_date": "2015-04-22", "okved": "49.41", "region": "г. Москва",
+      "director": {"full_name": "Фёдоров Сергей Алексеевич", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 760,
+      "active_loans": [
+        {"type": "Лизинг грузовика", "amount": 4000000, "balance": 2000000, "monthly_payment": 100000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "7702009039": {
+    "egrul": {
+      "name": "ООО «Мастер Окон»", "ogrn": "1187746900033", "company_type": "LLC", "status": "active",
+      "registration_date": "2018-11-12", "okved": "43.34", "region": "Московская область",
+      "director": {"full_name": "Морозов Алексей Ильич", "position": "Генеральный директор"}
+    },
+    "bki": {"failure_mode": "error"}
+  },
+
+  "7702010041": {
+    "egrul": {
+      "name": "ООО «Сладкий дом»", "ogrn": "1167746100044", "company_type": "LLC", "status": "active",
+      "registration_date": "2016-07-07", "okved": "10.71", "region": "г. Москва",
+      "director": {"full_name": "Никитина Ирина Павловна", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 480,
+      "active_loans": [
+        {"type": "Кредит на оборотные средства", "amount": 2000000, "balance": 1500000, "monthly_payment": 90000, "current_overdue_days": 95}
+      ],
+      "overdue_history": {"count": 3, "max_days": 95}
+    }
+  },
+
+  "7702011052": {
+    "egrul": {
+      "name": "ООО «Цифровые решения»", "ogrn": "1197746110055", "company_type": "LLC", "status": "active",
+      "registration_date": "2019-02-18", "okved": "62.01", "region": "г. Москва",
+      "director": {"full_name": "Григорьев Максим Олегович", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "failure_mode": "flaky",
+      "rating": 800,
+      "active_loans": [],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "7702012063": {
+    "egrul": {
+      "name": "ООО «Зелёный сад»", "ogrn": "1217700120066", "company_type": "LLC", "status": "active",
+      "registration_date": "2021-01-25", "okved": "01.13", "region": "Краснодарский край",
+      "director": {"full_name": "Романова Татьяна Юрьевна", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 640,
+      "active_loans": [
+        {"type": "Кредит на технику", "amount": 5000000, "balance": 3500000, "monthly_payment": 220000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 2, "max_days": 35}
+    }
+  },
+
+  "7702013074": {
+    "egrul": {
+      "name": "ООО «Книжный угол»", "ogrn": "1237700130077", "company_type": "LLC", "status": "active",
+      "registration_date": "2023-03-03", "okved": "47.61", "region": "г. Казань",
+      "director": {"full_name": "Белов Кирилл Андреевич", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 700,
+      "active_loans": [],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "7702014085": {
+    "egrul": {
+      "name": "ООО «Фитнес Плюс»", "ogrn": "1247700140088", "company_type": "LLC", "status": "active",
+      "registration_date": "2024-06-01", "okved": "93.13", "region": "г. Екатеринбург",
+      "director": {"full_name": "Тихонова Анастасия Викторовна", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 580,
+      "active_loans": [
+        {"type": "Кредит на оборудование", "amount": 4500000, "balance": 3300000, "monthly_payment": 300000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 2, "max_days": 50}
+    }
+  }
+}

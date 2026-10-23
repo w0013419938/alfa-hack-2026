@@ -6,7 +6,7 @@
 ## Чек-лист этапов (по разделу «Порядок работы» ТЗ)
 
 - [x] 1. Каркас: структура, Docker Compose (`db`, `mock-external`, `backend`), `/health`, lock-файлы, `.env.example`
-- [ ] 2. Модели, миграции, seed-загрузчик, авторизация (JWT) и роли
+- [x] 2. Модели, миграции, seed-загрузчик, авторизация (JWT) и роли
 - [ ] 3. Машина состояний + `ApplicationEvent` + `available_actions` + тексты из `labels.yaml`
 - [ ] 4. Клиентские эндпоинты, продукты, подбор продукта, калькулятор
 - [ ] 5. `mock-external` + клиенты интеграций с ретраями и таймаутами
@@ -34,6 +34,13 @@
 - Порт БД наружу не публикуется (чтобы не конфликтовать с локальным PostgreSQL у жюри).
 - Lock-файлы `uv.lock` для backend и mock-external; образы закреплены по версиям.
 - `/api/v1/health`, `/api/v1/ready` (проверяет БД и mock-external), JSON-логи с request id.
+
+### Этап 2 — модели, миграции, seed, авторизация (готово)
+- Модели всех сущностей ТЗ (`app/models/`), начальная миграция Alembic (autogenerate), UUID-ключи, номер заявки с 1001.
+- Оптимистичная блокировка заявки через `version_id_col`.
+- Бизнес-конфиги `backend/config/*.yaml` проверяются Pydantic-моделями при загрузке (`app/core/business_config.py`).
+- Seed (`python -m app.seed`) идемпотентный, под `pg_advisory_lock`; продукты обновляются из YAML каждый старт.
+- JWT (HS256), bcrypt, роли client/employee, rate limit на вход (in-memory). Проверено: 401, 429, повторный старт.
 
 ## Известные проблемы
 

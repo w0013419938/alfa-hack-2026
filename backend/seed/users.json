@@ -1,0 +1,69 @@
+{
+  "_comment": "Демо-пользователи. Пароль каждого — <логин>123. TODO(участник 3): заменить на персонажей из синтетического датасета. scenario — что демонстрирует учётка (для README и тестов).",
+  "users": [
+    {
+      "login": "employee",
+      "full_name": "Кузнецова Анна Сергеевна",
+      "role": "employee",
+      "position": "bank_underwriter",
+      "company_inn": null,
+      "scenario": "Сотрудник банка: очередь заявок, ручное рассмотрение"
+    },
+    {
+      "login": "client_good",
+      "full_name": "Орлов Дмитрий Викторович",
+      "role": "client",
+      "position": "director",
+      "company_inn": "7701001012",
+      "scenario": "Сильный заёмщик → автоодобрение на запрошенных условиях"
+    },
+    {
+      "login": "client_medium",
+      "full_name": "Смирнова Елена Олеговна",
+      "role": "client",
+      "position": "owner",
+      "company_inn": "7701002023",
+      "scenario": "Высокая долговая нагрузка → встречное предложение"
+    },
+    {
+      "login": "client_border",
+      "full_name": "Сидоров Павел Андреевич",
+      "role": "client",
+      "position": "owner",
+      "company_inn": "770100010180",
+      "scenario": "Пограничный грейд → ручное рассмотрение"
+    },
+    {
+      "login": "client_bad",
+      "full_name": "Козлов Игорь Петрович",
+      "role": "client",
+      "position": "director",
+      "company_inn": "7701004045",
+      "scenario": "Компания в ликвидации и текущая просрочка → отказ"
+    },
+    {
+      "login": "client_info",
+      "full_name": "Петрова Мария Игоревна",
+      "role": "client",
+      "position": "owner",
+      "company_inn": "770200020287",
+      "scenario": "Нет данных о выручке → запрос уточнений (выписка по счёту)"
+    },
+    {
+      "login": "client_timeout",
+      "full_name": "Волков Артём Сергеевич",
+      "role": "client",
+      "position": "financial_manager",
+      "company_inn": "7710005052",
+      "scenario": "БКИ не отвечает (таймаут) → ручное рассмотрение"
+    },
+    {"login": "demo1", "full_name": "Лебедева Ольга Николаевна", "role": "client", "position": "owner", "company_inn": "7702007017", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo2", "full_name": "Фёдоров Сергей Алексеевич", "role": "client", "position": "director", "company_inn": "7702008028", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo3", "full_name": "Морозов Алексей Ильич", "role": "client", "position": "director", "company_inn": "7702009039", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo4", "full_name": "Никитина Ирина Павловна", "role": "client", "position": "accountant", "company_inn": "7702010041", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo5", "full_name": "Григорьев Максим Олегович", "role": "client", "position": "director", "company_inn": "7702011052", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo6", "full_name": "Романова Татьяна Юрьевна", "role": "client", "position": "owner", "company_inn": "7702012063", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo7", "full_name": "Белов Кирилл Андреевич", "role": "client", "position": "owner", "company_inn": "7702013074", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo8", "full_name": "Тихонова Анастасия Викторовна", "role": "client", "position": "director", "company_inn": "7702014085", "scenario": "Фоновая история для очереди сотрудника"}
+  ]
+}

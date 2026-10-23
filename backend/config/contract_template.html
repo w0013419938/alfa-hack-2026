@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!--
+  Шаблон кредитного договора (имитация, без юридической силы).
+  TODO(участник 1): заменить текст на финальный макет договора.
+  Подстановки: $number, $date, $company_name, $company_inn, $company_ogrn, $signer_name,
+  $product_name, $amount, $term_months, $rate, $monthly_payment, $total_payment, $overpayment, $signed_text
+-->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Кредитный договор № $number</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 760px; margin: 32px auto; line-height: 1.5; color: #222; }
+  h1 { font-size: 22px; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  td { border: 1px solid #ccc; padding: 8px; }
+  .note { color: #a00; font-size: 13px; }
+  .signed { margin-top: 24px; padding: 12px; border: 2px solid #2a7; color: #2a7; }
+</style>
+</head>
+<body>
+<p class="note">ДЕМО-ДОКУМЕНТ. Сформирован прототипом для хакатона, юридической силы не имеет.</p>
+<h1>Кредитный договор № $number</h1>
+<p>Дата: $date</p>
+<p>АО «Демо-Банк» (далее — Банк) и $company_name, ИНН $company_inn, ОГРН/ОГРНИП $company_ogrn
+(далее — Заёмщик), в лице $signer_name, заключили договор о нижеследующем.</p>
+<table>
+  <tr><td>Продукт</td><td>$product_name</td></tr>
+  <tr><td>Сумма кредита</td><td>$amount ₽</td></tr>
+  <tr><td>Срок</td><td>$term_months мес.</td></tr>
+  <tr><td>Процентная ставка</td><td>$rate% годовых</td></tr>
+  <tr><td>Ежемесячный платёж (аннуитет)</td><td>$monthly_payment ₽</td></tr>
+  <tr><td>Всего к возврату</td><td>$total_payment ₽</td></tr>
+  <tr><td>Переплата</td><td>$overpayment ₽</td></tr>
+</table>
+<p>Заёмщик обязуется возвращать кредит и уплачивать проценты ежемесячно равными платежами.</p>
+<div class="signed">$signed_text</div>
+</body>
+</html>

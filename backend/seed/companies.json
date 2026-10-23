@@ -1,0 +1,173 @@
+{
+  "_comment": "Синтетические компании. TODO(участник 3): заменить на компании из синтетического датасета. ИНН вымышленные, но с корректной контрольной суммой. annual_revenue = null — у компании нет отчётности о выручке.",
+  "companies": [
+    {
+      "inn": "7701001012",
+      "ogrn": "1177746123451",
+      "company_type": "LLC",
+      "name": "ООО «Северный ветер»",
+      "okved": "47.19",
+      "industry": "Розничная торговля",
+      "registration_date": "2017-03-15",
+      "region": "г. Москва",
+      "annual_revenue": 10200000,
+      "employees_count": 18
+    },
+    {
+      "inn": "7701002023",
+      "ogrn": "1227700234562",
+      "company_type": "LLC",
+      "name": "ООО «Пекарня Каравай»",
+      "okved": "10.71",
+      "industry": "Производство хлеба и выпечки",
+      "registration_date": "2022-02-10",
+      "region": "Московская область",
+      "annual_revenue": 9800000,
+      "employees_count": 12
+    },
+    {
+      "inn": "770100010180",
+      "ogrn": "324774600012345",
+      "company_type": "IE",
+      "name": "ИП Сидоров Павел Андреевич",
+      "okved": "43.32",
+      "industry": "Отделочные и строительные работы",
+      "registration_date": "2024-12-01",
+      "region": "г. Москва",
+      "annual_revenue": 7500000,
+      "employees_count": 6
+    },
+    {
+      "inn": "7701004045",
+      "ogrn": "1197746456784",
+      "company_type": "LLC",
+      "name": "ООО «Ромашка-Строй»",
+      "okved": "41.20",
+      "industry": "Строительство зданий",
+      "registration_date": "2019-06-04",
+      "region": "г. Москва",
+      "annual_revenue": 15400000,
+      "employees_count": 25
+    },
+    {
+      "inn": "770200020287",
+      "ogrn": "323774600054321",
+      "company_type": "IE",
+      "name": "ИП Петрова Мария Игоревна",
+      "okved": "96.02",
+      "industry": "Салон красоты",
+      "registration_date": "2023-05-20",
+      "region": "г. Санкт-Петербург",
+      "annual_revenue": null,
+      "employees_count": 4
+    },
+    {
+      "inn": "7710005052",
+      "ogrn": "1207700567895",
+      "company_type": "LLC",
+      "name": "ООО «ТехноСервис»",
+      "okved": "62.01",
+      "industry": "Разработка программного обеспечения",
+      "registration_date": "2020-09-01",
+      "region": "г. Москва",
+      "annual_revenue": 12000000,
+      "employees_count": 9
+    },
+    {
+      "inn": "7702007017",
+      "ogrn": "1247700700011",
+      "company_type": "LLC",
+      "name": "ООО «Лесная поляна»",
+      "okved": "56.10",
+      "industry": "Кафе и рестораны",
+      "registration_date": "2024-09-10",
+      "region": "Тверская область",
+      "annual_revenue": 7000000,
+      "employees_count": 11
+    },
+    {
+      "inn": "7702008028",
+      "ogrn": "1157746800022",
+      "company_type": "LLC",
+      "name": "ООО «Альфа-Логистик»",
+      "okved": "49.41",
+      "industry": "Грузоперевозки",
+      "registration_date": "2015-04-22",
+      "region": "г. Москва",
+      "annual_revenue": 18500000,
+      "employees_count": 30
+    },
+    {
+      "inn": "7702009039",
+      "ogrn": "1187746900033",
+      "company_type": "LLC",
+      "name": "ООО «Мастер Окон»",
+      "okved": "43.34",
+      "industry": "Монтаж окон и остекление",
+      "registration_date": "2018-11-12",
+      "region": "Московская область",
+      "annual_revenue": 8800000,
+      "employees_count": 14
+    },
+    {
+      "inn": "7702010041",
+      "ogrn": "1167746100044",
+      "company_type": "LLC",
+      "name": "ООО «Сладкий дом»",
+      "okved": "10.71",
+      "industry": "Кондитерское производство",
+      "registration_date": "2016-07-07",
+      "region": "г. Москва",
+      "annual_revenue": 6300000,
+      "employees_count": 8
+    },
+    {
+      "inn": "7702011052",
+      "ogrn": "1197746110055",
+      "company_type": "LLC",
+      "name": "ООО «Цифровые решения»",
+      "okved": "62.01",
+      "industry": "Разработка программного обеспечения",
+      "registration_date": "2019-02-18",
+      "region": "г. Москва",
+      "annual_revenue": 24000000,
+      "employees_count": 21
+    },
+    {
+      "inn": "7702012063",
+      "ogrn": "1217700120066",
+      "company_type": "LLC",
+      "name": "ООО «Зелёный сад»",
+      "okved": "01.13",
+      "industry": "Выращивание овощей",
+      "registration_date": "2021-01-25",
+      "region": "Краснодарский край",
+      "annual_revenue": 8400000,
+      "employees_count": 16
+    },
+    {
+      "inn": "7702013074",
+      "ogrn": "1237700130077",
+      "company_type": "LLC",
+      "name": "ООО «Книжный угол»",
+      "okved": "47.61",
+      "industry": "Розничная торговля книгами",
+      "registration_date": "2023-03-03",
+      "region": "г. Казань",
+      "annual_revenue": 3600000,
+      "employees_count": 3
+    },
+    {
+      "inn": "7702014085",
+      "ogrn": "1247700140088",
+      "company_type": "LLC",
+      "name": "ООО «Фитнес Плюс»",
+      "okved": "93.13",
+      "industry": "Фитнес-центры",
+      "registration_date": "2024-06-01",
+      "region": "г. Екатеринбург",
+      "annual_revenue": 10800000,
+      "employees_count": 13
+    }
+  ]
+}

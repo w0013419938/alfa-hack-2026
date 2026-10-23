@@ -1,0 +1,64 @@
+# Справочники для анкеты и интерфейса.
+# TODO(участник 2): проверить список целей и видов документов.
+
+# Цели финансирования (GET /dictionaries/purposes)
+purposes:
+  - code: working_capital
+    label: "Пополнение оборотных средств"
+    requires_comment: false
+  - code: goods_purchase
+    label: "Закупка товаров и сырья"
+    requires_comment: false
+  - code: equipment
+    label: "Покупка оборудования"
+    requires_comment: false
+  - code: vehicles
+    label: "Покупка транспорта"
+    requires_comment: false
+  - code: real_estate
+    label: "Покупка или ремонт помещения"
+    requires_comment: false
+  - code: expansion
+    label: "Открытие новой точки, расширение бизнеса"
+    requires_comment: false
+  - code: refinancing
+    label: "Рефинансирование других кредитов"
+    requires_comment: false
+  - code: other
+    label: "Другое (опишите в комментарии)"
+    requires_comment: true
+
+# Виды документов (GET /dictionaries/document-kinds)
+# client_can_upload: false — документ формирует только система (например, договор)
+document_kinds:
+  - code: bank_statement
+    label: "Выписка по расчётному счёту за 6 месяцев"
+    client_can_upload: true
+  - code: financial_report
+    label: "Бухгалтерская или налоговая отчётность"
+    client_can_upload: true
+  - code: collateral_docs
+    label: "Документы на залог"
+    client_can_upload: true
+  - code: passport
+    label: "Паспорт руководителя (скан)"
+    client_can_upload: true
+  - code: other
+    label: "Другой документ"
+    client_can_upload: true
+  - code: contract
+    label: "Кредитный договор"
+    client_can_upload: false
+
+# Тип компании
+company_types:
+  LLC: "ООО"
+  IE: "ИП"
+
+# Должность представителя компании
+positions:
+  owner: "Собственник"
+  director: "Директор"
+  accountant: "Главный бухгалтер"
+  financial_manager: "Финансовый менеджер"
+  bank_underwriter: "Кредитный аналитик (андеррайтер)"
