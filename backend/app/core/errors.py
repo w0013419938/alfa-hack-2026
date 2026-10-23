@@ -8,6 +8,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DataError
 from sqlalchemy.orm.exc import StaleDataError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -127,6 +128,14 @@ def register_error_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=409,
             content=error_body("version_conflict", "Заявку только что изменили. Обновите страницу и повторите действие."),
+        )
+
+    @app.exception_handler(DataError)
+    def handle_data_error(request: Request, exc: DataError):
+        # Например, символ NUL (\x00) в тексте: PostgreSQL такие строки не принимает
+        return JSONResponse(
+            status_code=422,
+            content=error_body("invalid_characters", "В данных есть недопустимые символы. Проверьте введённый текст."),
         )
 
     @app.exception_handler(StarletteHTTPException)

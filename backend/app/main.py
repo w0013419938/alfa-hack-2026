@@ -70,6 +70,9 @@ def redoc():
     )
 
 
+# Порядок важен: добавленный последним middleware — внешний. CORS снаружи, чтобы его заголовки
+# были и у ответа 500, который формирует RequestIdMiddleware.
+app.add_middleware(RequestIdMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
@@ -78,7 +81,6 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Request-ID"],
 )
-app.add_middleware(RequestIdMiddleware)
 register_error_handlers(app)
 
 API_PREFIX = "/api/v1"
