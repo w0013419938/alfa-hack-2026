@@ -7,7 +7,7 @@
 
 - [x] 1. Каркас: структура, Docker Compose (`db`, `mock-external`, `backend`), `/health`, lock-файлы, `.env.example`
 - [x] 2. Модели, миграции, seed-загрузчик, авторизация (JWT) и роли
-- [ ] 3. Машина состояний + `ApplicationEvent` + `available_actions` + тексты из `labels.yaml`
+- [x] 3. Машина состояний + `ApplicationEvent` + `available_actions` + тексты из `labels.yaml`
 - [ ] 4. Клиентские эндпоинты, продукты, подбор продукта, калькулятор
 - [ ] 5. `mock-external` + клиенты интеграций с ретраями и таймаутами
 - [ ] 6. Скоринг, кредитное решение, расчёт предложения, пайплайн
@@ -41,6 +41,13 @@
 - Бизнес-конфиги `backend/config/*.yaml` проверяются Pydantic-моделями при загрузке (`app/core/business_config.py`).
 - Seed (`python -m app.seed`) идемпотентный, под `pg_advisory_lock`; продукты обновляются из YAML каждый старт.
 - JWT (HS256), bcrypt, роли client/employee, rate limit на вход (in-memory). Проверено: 401, 429, повторный старт.
+
+### Этап 3 — машина состояний (готово)
+- `app/domain/state_machine.py`: таблица `TRANSITIONS` (из статусов, действие → статус, роли, предусловие, обязательный комментарий).
+- `apply_transition()` — SELECT FOR UPDATE + проверки + запись `ApplicationEvent` в одной транзакции; 409 при недопустимом переходе.
+- `available_actions()` возвращает кнопки с `enabled`/`disabled_reason` (например, «сначала загрузите документ»).
+- `app/services/presenters.py` собирает ответ: `status_label`, `status_description`, `available_actions`, `timeline`, `info_request`, `offer`.
+- Тексты — `config/labels.yaml`. Юнит-тесты таблицы переходов зелёные; через API проверяется на этапе 4.
 
 ## Известные проблемы
 
