@@ -71,8 +71,10 @@ def save_upload(db: Session, application: Application, user: User, kind: str, up
         raise ConflictError(f"В статусе «{status_label}» документы загружать нельзя.", code="not_editable")
 
     kind_config = config.dictionaries.document_kind(kind)
-    if kind_config is None or not kind_config.client_can_upload:
+    if kind_config is None:
         raise AppError("Неизвестный вид документа. Выберите вид из списка.", code="unknown_document_kind")
+    if not kind_config.client_can_upload:
+        raise AppError(f"Документ «{kind_config.label}» формирует банк, загрузить его нельзя.", code="document_kind_not_uploadable")
 
     filename = safe_filename(upload.filename)
     extension = Path(filename).suffix.lower()
