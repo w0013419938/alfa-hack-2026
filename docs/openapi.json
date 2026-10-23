@@ -4275,6 +4275,7 @@
             "type": "string",
             "maxLength": 64,
             "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f]+$",
             "title": "Login",
             "examples": [
               "client_good"

@@ -294,3 +294,39 @@ def test_watchdog_resumes_stuck_application(api):
     recorder.ids.clear()
     resume_unfinished_applications(recorder, idle_seconds=120)
     assert fresh["id"] not in recorder.ids
+
+
+def test_nul_character_gives_422_not_500(api, client):
+    owner = api("client_good")
+    response = owner.post("/applications", json={"product_code": "working_capital", "purpose_comment": "a\u0000b"})
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "invalid_characters"
+    login = client.post("/api/v1/auth/login", json={"login": "cl\u0000ient", "password": "x"})
+    assert login.status_code == 422
+
+
+def test_document_limit_holds_under_parallel_uploads(api, monkeypatch):
+    from app.core.settings import get_settings
+
+    monkeypatch.setattr(get_settings(), "max_documents_per_application", 3)
+    client = api("client_good")
+    draft = client.create_application()
+    codes = []
+
+    def upload():
+        response = client.post(f"/applications/{draft['id']}/documents", data={"kind": "other"}, files={"file": ("d.pdf", PDF)})
+        codes.append(response.status_code)
+
+    threads = [threading.Thread(target=upload) for _ in range(10)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert codes.count(201) == 3
+    assert len(client.get(f"/applications/{draft['id']}/documents").json()) == 3
+
+
+def test_cors_header_present_on_errors(client):
+    response = client.get("/api/v1/applications", headers={"Origin": "http://localhost:5173"})
+    assert response.status_code == 401
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"

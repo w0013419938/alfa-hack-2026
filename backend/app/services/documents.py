@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.business_config import get_business_config
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.settings import get_settings
+from app.domain.state_machine import lock_application
 from app.domain.statuses import EDITABLE_STATUSES
 from app.models import Application, Document, User
 
@@ -76,6 +77,8 @@ def save_upload(db: Session, application: Application, user: User, kind: str, up
     if not kind_config.client_can_upload:
         raise AppError(f"Документ «{kind_config.label}» формирует банк, загрузить его нельзя.", code="document_kind_not_uploadable")
 
+    # Блокируем заявку, чтобы параллельные загрузки не обошли лимит количества документов
+    lock_application(db, application.id)
     documents_count = db.scalar(select(func.count()).select_from(Document).where(Document.application_id == application.id))
     if documents_count >= settings.max_documents_per_application:
         raise AppError(

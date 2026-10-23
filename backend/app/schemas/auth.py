@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field
 
 
 class LoginRequest(BaseModel):
-    login: str = Field(min_length=1, max_length=64, examples=["client_good"])
+    # Без управляющих символов: такой логин всё равно не существует, а неудачная попытка должна засчитаться ограничителю
+    login: str = Field(min_length=1, max_length=64, pattern=r"^[^\x00-\x1f]+$", examples=["client_good"])
     password: str = Field(min_length=1, max_length=128, examples=["client_good123"])
 
 
