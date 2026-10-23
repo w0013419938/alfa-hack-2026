@@ -1,0 +1,5 @@
+# Скрипты и конфиги всегда с переводами строк LF — иначе на Windows (core.autocrlf) start.sh не запустится в контейнере
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary
