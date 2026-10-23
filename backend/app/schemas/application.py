@@ -59,6 +59,13 @@ class ActionOut(BaseModel):
     confirm_text: str | None = None
 
 
+class ProgressStep(BaseModel):
+    code: str
+    label: str
+    state: str = Field(description="done / current / action / stopped / upcoming")
+    state_label: str
+
+
 class TimelineItem(BaseModel):
     at: datetime
     action: str
@@ -135,6 +142,7 @@ class ApplicationOut(BaseModel):
     updated_at: datetime
     submitted_at: datetime | None
     available_actions: list[ActionOut]
+    progress: list[ProgressStep] = Field(description="Шкала этапов заявки с отметкой текущего этапа")
     timeline: list[TimelineItem]
     info_request: InfoRequestOut | None = Field(description="Что нужно предоставить (есть, когда статус NEEDS_INFO)")
     offer: OfferOut | None = Field(description="Действующее или принятое предложение банка")

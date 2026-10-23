@@ -221,6 +221,8 @@ class ActionLabel(BaseModel):
 class LabelsFile(BaseModel):
     statuses: dict[str, StatusLabel]
     actions: dict[str, ActionLabel]
+    progress_steps: dict[str, str]
+    progress_states: dict[str, str]
     timeline: dict[str, str]
     actors: dict[str, str]
     system_comments: dict[str, str]
@@ -266,6 +268,11 @@ class BusinessConfig(BaseModel):
             raise ValueError(f"decision.yaml: нет правил для грейдов {sorted(missing)}")
         if self.decision.manual_review_default_grade not in grades:
             raise ValueError("decision.yaml: manual_review_default_grade должен быть одним из грейдов scoring.yaml")
+        from app.domain.progress import STEPS
+
+        missing_steps = set(STEPS) - set(self.labels.progress_steps)
+        if missing_steps:
+            raise ValueError(f"labels.yaml: нет названий этапов {sorted(missing_steps)} в progress_steps")
         missing_statuses = {status.value for status in ApplicationStatus} - set(self.labels.statuses)
         if missing_statuses:
             raise ValueError(f"labels.yaml: нет текстов для статусов {sorted(missing_statuses)}")

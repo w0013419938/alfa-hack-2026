@@ -2766,6 +2766,14 @@
             "type": "array",
             "title": "Available Actions"
           },
+          "progress": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressStep"
+            },
+            "type": "array",
+            "title": "Progress",
+            "description": "Шкала этапов заявки с отметкой текущего этапа"
+          },
           "timeline": {
             "items": {
               "$ref": "#/components/schemas/TimelineItem"
@@ -2823,6 +2831,7 @@
           "updated_at",
           "submitted_at",
           "available_actions",
+          "progress",
           "timeline",
           "info_request",
           "offer",
@@ -3165,6 +3174,14 @@
             "type": "array",
             "title": "Available Actions"
           },
+          "progress": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressStep"
+            },
+            "type": "array",
+            "title": "Progress",
+            "description": "Шкала этапов заявки с отметкой текущего этапа"
+          },
           "timeline": {
             "items": {
               "$ref": "#/components/schemas/TimelineItem"
@@ -3293,6 +3310,7 @@
           "updated_at",
           "submitted_at",
           "available_actions",
+          "progress",
           "timeline",
           "info_request",
           "offer",
@@ -4537,6 +4555,35 @@
           "name"
         ],
         "title": "ProductShort"
+      },
+      "ProgressStep": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "done / current / action / stopped / upcoming"
+          },
+          "state_label": {
+            "type": "string",
+            "title": "State Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "label",
+          "state",
+          "state_label"
+        ],
+        "title": "ProgressStep"
       },
       "PurposeOut": {
         "properties": {
