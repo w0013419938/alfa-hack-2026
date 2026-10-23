@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, health
+from app.api import applications, auth, catalog, health
 from app.core.errors import register_error_handlers
 from app.core.logging import setup_logging
 from app.core.middleware import RequestIdMiddleware
@@ -32,3 +32,5 @@ register_error_handlers(app)
 API_PREFIX = "/api/v1"
 app.include_router(health.router, prefix=API_PREFIX)
 app.include_router(auth.router, prefix=API_PREFIX)
+app.include_router(catalog.router, prefix=API_PREFIX)
+app.include_router(applications.router, prefix=API_PREFIX)

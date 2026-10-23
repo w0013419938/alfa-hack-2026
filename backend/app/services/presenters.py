@@ -9,10 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.core.business_config import get_business_config
 from app.domain.payments import payment_summary
-from app.domain.state_machine import available_actions, get_open_info_request
+from app.domain.state_machine import available_actions, get_current_offer, get_open_info_request
 from app.domain.statuses import FINAL_STATUSES, Actor, ApplicationStatus
-from app.models import Application, ApplicationEvent, Document, InfoRequest, Offer
-from app.models.offer import OFFER_SUPERSEDED
+from app.models import Application, ApplicationEvent, Company, Document, InfoRequest, Offer
 from app.schemas.application import (
     ActionOut,
     ApplicationOut,
@@ -23,6 +22,7 @@ from app.schemas.application import (
     RequestedField,
     TimelineItem,
 )
+from app.schemas.company import CompanyOut, DocumentOut
 
 
 def build_actions(db: Session, application: Application, viewer: Actor) -> list[ActionOut]:
@@ -89,16 +89,6 @@ def build_offer(offer: Offer) -> OfferOut:
     )
 
 
-def get_current_offer(db: Session, application: Application) -> Offer | None:
-    """Последнее предложение, которое не было заменено новым."""
-    return db.scalar(
-        select(Offer)
-        .where(Offer.application_id == application.id, Offer.status != OFFER_SUPERSEDED)
-        .order_by(Offer.created_at.desc())
-        .limit(1)
-    )
-
-
 def build_info_request(db: Session, info_request: InfoRequest, viewer: Actor) -> InfoRequestOut:
     config = get_business_config()
     uploaded_kinds = set(
@@ -146,7 +136,7 @@ def build_application_out(db: Session, application: Application, viewer: Actor) 
         if open_request:
             info_request = build_info_request(db, open_request, viewer)
 
-    offer = get_current_offer(db, application)
+    offer = get_current_offer(db, application.id)
     documents_count = db.scalar(select(func.count()).select_from(Document).where(Document.application_id == application.id))
 
     return ApplicationOut(
@@ -175,4 +165,43 @@ def build_application_out(db: Session, application: Application, viewer: Actor) 
         info_request=info_request,
         offer=build_offer(offer) if offer else None,
         documents_count=documents_count or 0,
+    )
+
+
+def build_company(company: Company) -> CompanyOut:
+    company_types = get_business_config().dictionaries.company_types
+    return CompanyOut(
+        id=company.id,
+        inn=company.inn,
+        ogrn=company.ogrn,
+        company_type=company.company_type,
+        company_type_label=company_types.get(company.company_type, company.company_type),
+        name=company.name,
+        okved=company.okved,
+        industry=company.industry,
+        registration_date=company.registration_date,
+        region=company.region,
+        annual_revenue=company.annual_revenue,
+        employees_count=company.employees_count,
+    )
+
+
+def build_document(document: Document, viewer: Actor) -> DocumentOut:
+    config = get_business_config()
+    kind = config.dictionaries.document_kind(document.kind)
+    if viewer == Actor.EMPLOYEE:
+        base = f"/api/v1/backoffice/applications/{document.application_id}"
+    else:
+        base = f"/api/v1/applications/{document.application_id}"
+    uploaded_by = actor_label(Actor.SYSTEM.value if document.uploaded_by_user_id is None else Actor.CLIENT.value, viewer)
+    return DocumentOut(
+        id=document.id,
+        kind=document.kind,
+        kind_label=kind.label if kind else document.kind,
+        filename=document.original_filename,
+        content_type=document.content_type,
+        size_bytes=document.size_bytes,
+        uploaded_by=uploaded_by,
+        created_at=document.created_at,
+        download_url=f"{base}/documents/{document.id}/download",
     )
