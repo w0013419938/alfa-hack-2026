@@ -71,7 +71,7 @@ def test_collateral_required_for_secured_product():
 
 
 def test_invalid_company_inn_is_reported():
-    problems = validate_application(application(), product_row(PRODUCT), "7707083890", CONFIG)
+    problems = validate_application(application(), product_row(PRODUCT), "7701001013", CONFIG)
     assert any(problem.field is None for problem in problems)
 
 

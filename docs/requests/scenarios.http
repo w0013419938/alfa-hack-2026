@@ -1,0 +1,236 @@
+### Сквозные сценарии в формате VS Code REST Client (расширение humao.rest-client).
+### Выполняйте запросы сверху вниз («Send Request» над каждым). Токены и id подставляются из ответов по имени запроса.
+### Подробное описание сценариев — docs/test-scenarios.md
+
+@base = http://localhost:8000/api/v1
+
+### ===== Справочники (без входа) =====
+
+GET {{base}}/products
+
+###
+GET {{base}}/calculator?product=working_capital&amount=1500000&term=24
+
+###
+POST {{base}}/products/recommend
+Content-Type: application/json
+
+{"purpose_code": "equipment", "amount": 2000000, "term_months": 36, "urgency": "month", "has_collateral": true}
+
+### ===== 1. client_good: автоодобрение → принятие → подписание → выдача =====
+
+# @name goodLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"login": "client_good", "password": "client_good123"}
+
+###
+# @name goodApp
+POST {{base}}/applications
+Authorization: Bearer {{goodLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"product_code": "working_capital", "amount": 1500000, "term_months": 24, "purpose_code": "working_capital",
+ "monthly_revenue": 800000, "monthly_expenses": 550000, "current_loan_payments": 0}
+
+###
+POST {{base}}/applications/{{goodApp.response.body.id}}/actions/submit
+Authorization: Bearer {{goodLogin.response.body.access_token}}
+
+### Подождите 5–10 секунд: ожидается OFFER_SENT, offer.offer_type = as_requested
+GET {{base}}/applications/{{goodApp.response.body.id}}
+Authorization: Bearer {{goodLogin.response.body.access_token}}
+
+###
+POST {{base}}/applications/{{goodApp.response.body.id}}/actions/accept_offer
+Authorization: Bearer {{goodLogin.response.body.access_token}}
+
+###
+POST {{base}}/applications/{{goodApp.response.body.id}}/actions/sign
+Authorization: Bearer {{goodLogin.response.body.access_token}}
+
+### Через 1–2 секунды: ISSUED
+GET {{base}}/applications/{{goodApp.response.body.id}}
+Authorization: Bearer {{goodLogin.response.body.access_token}}
+
+### ===== 2. client_medium: встречное предложение =====
+
+# @name mediumLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"login": "client_medium", "password": "client_medium123"}
+
+###
+# @name mediumApp
+POST {{base}}/applications
+Authorization: Bearer {{mediumLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"product_code": "working_capital", "amount": 1500000, "term_months": 24, "purpose_code": "working_capital",
+ "monthly_revenue": 800000, "monthly_expenses": 550000, "current_loan_payments": 0}
+
+###
+POST {{base}}/applications/{{mediumApp.response.body.id}}/actions/submit
+Authorization: Bearer {{mediumLogin.response.body.access_token}}
+
+### Через 5–10 секунд: OFFER_SENT, offer.offer_type = counter_offer
+GET {{base}}/applications/{{mediumApp.response.body.id}}
+Authorization: Bearer {{mediumLogin.response.body.access_token}}
+
+### ===== 3. client_border: ручное рассмотрение сотрудником =====
+
+# @name borderLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"login": "client_border", "password": "client_border123"}
+
+###
+# @name borderApp
+POST {{base}}/applications
+Authorization: Bearer {{borderLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"product_code": "working_capital", "amount": 1500000, "term_months": 24, "purpose_code": "working_capital",
+ "monthly_revenue": 800000, "monthly_expenses": 550000, "current_loan_payments": 0}
+
+###
+POST {{base}}/applications/{{borderApp.response.body.id}}/actions/submit
+Authorization: Bearer {{borderLogin.response.body.access_token}}
+
+### Через 5–10 секунд: MANUAL_REVIEW
+GET {{base}}/applications/{{borderApp.response.body.id}}
+Authorization: Bearer {{borderLogin.response.body.access_token}}
+
+###
+# @name employeeLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"login": "employee", "password": "employee123"}
+
+### Карточка: проверки, скоринг с вкладом факторов, история
+GET {{base}}/backoffice/applications/{{borderApp.response.body.id}}
+Authorization: Bearer {{employeeLogin.response.body.access_token}}
+
+###
+POST {{base}}/backoffice/applications/{{borderApp.response.body.id}}/actions/approve
+Authorization: Bearer {{employeeLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"comment": "Одобряем на меньшую сумму", "amount": 1200000, "term_months": 30}
+
+### ===== 4. client_bad: отказ =====
+
+# @name badLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"login": "client_bad", "password": "client_bad123"}
+
+###
+# @name badApp
+POST {{base}}/applications
+Authorization: Bearer {{badLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"product_code": "working_capital", "amount": 1500000, "term_months": 24, "purpose_code": "working_capital",
+ "monthly_revenue": 800000, "monthly_expenses": 550000, "current_loan_payments": 0}
+
+###
+POST {{base}}/applications/{{badApp.response.body.id}}/actions/submit
+Authorization: Bearer {{badLogin.response.body.access_token}}
+
+### Через 5–10 секунд: REJECTED, причина в timeline
+GET {{base}}/applications/{{badApp.response.body.id}}
+Authorization: Bearer {{badLogin.response.body.access_token}}
+
+### ===== 5. client_info: запрос уточнений → выписка → предложение =====
+
+# @name infoLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"login": "client_info", "password": "client_info123"}
+
+###
+# @name infoApp
+POST {{base}}/applications
+Authorization: Bearer {{infoLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"product_code": "working_capital", "amount": 1500000, "term_months": 24, "purpose_code": "working_capital",
+ "monthly_revenue": 800000, "monthly_expenses": 550000, "current_loan_payments": 0}
+
+###
+POST {{base}}/applications/{{infoApp.response.body.id}}/actions/submit
+Authorization: Bearer {{infoLogin.response.body.access_token}}
+
+### Через 5–10 секунд: NEEDS_INFO, info_request.documents = bank_statement
+GET {{base}}/applications/{{infoApp.response.body.id}}
+Authorization: Bearer {{infoLogin.response.body.access_token}}
+
+### Загрузка выписки (PDF создаётся прямо из текста ниже)
+POST {{base}}/applications/{{infoApp.response.body.id}}/documents
+Authorization: Bearer {{infoLogin.response.body.access_token}}
+Content-Type: multipart/form-data; boundary=Boundary
+
+--Boundary
+Content-Disposition: form-data; name="kind"
+
+bank_statement
+--Boundary
+Content-Disposition: form-data; name="file"; filename="statement.pdf"
+Content-Type: application/pdf
+
+%PDF-1.4
+% demo statement
+%%EOF
+--Boundary--
+
+###
+POST {{base}}/applications/{{infoApp.response.body.id}}/actions/provide_info
+Authorization: Bearer {{infoLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"comment": "Выписку загрузила"}
+
+### Через 5–10 секунд: OFFER_SENT
+GET {{base}}/applications/{{infoApp.response.body.id}}
+Authorization: Bearer {{infoLogin.response.body.access_token}}
+
+### ===== 6. client_timeout: БКИ не отвечает =====
+
+# @name timeoutLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{"login": "client_timeout", "password": "client_timeout123"}
+
+###
+# @name timeoutApp
+POST {{base}}/applications
+Authorization: Bearer {{timeoutLogin.response.body.access_token}}
+Content-Type: application/json
+
+{"product_code": "working_capital", "amount": 1500000, "term_months": 24, "purpose_code": "working_capital",
+ "monthly_revenue": 800000, "monthly_expenses": 550000, "current_loan_payments": 0}
+
+###
+POST {{base}}/applications/{{timeoutApp.response.body.id}}/actions/submit
+Authorization: Bearer {{timeoutLogin.response.body.access_token}}
+
+### Через ~15 секунд: MANUAL_REVIEW (3 попытки к БКИ по 2 секунды)
+GET {{base}}/applications/{{timeoutApp.response.body.id}}
+Authorization: Bearer {{timeoutLogin.response.body.access_token}}
+
+### ===== Бэкофис =====
+
+GET {{base}}/backoffice/applications?status=MANUAL_REVIEW
+Authorization: Bearer {{employeeLogin.response.body.access_token}}
+
+###
+GET {{base}}/backoffice/stats
+Authorization: Bearer {{employeeLogin.response.body.access_token}}
