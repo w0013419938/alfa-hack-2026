@@ -23,7 +23,7 @@ from app.core.business_config import get_business_config
 from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.domain.statuses import Actor, ApplicationStatus, EDITABLE_STATUSES
 from app.models import Application, ApplicationEvent, Document, InfoRequest, Offer
-from app.models.offer import OFFER_ACTIVE
+from app.models.offer import OFFER_ACTIVE, OFFER_SUPERSEDED
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +131,16 @@ def get_active_offer(db: Session, application_id: uuid.UUID) -> Offer | None:
     return db.scalar(
         select(Offer)
         .where(Offer.application_id == application_id, Offer.status == OFFER_ACTIVE)
+        .order_by(Offer.created_at.desc())
+        .limit(1)
+    )
+
+
+def get_current_offer(db: Session, application_id: uuid.UUID) -> Offer | None:
+    """Последнее предложение, которое не было заменено новым (действующее, принятое или отклонённое)."""
+    return db.scalar(
+        select(Offer)
+        .where(Offer.application_id == application_id, Offer.status != OFFER_SUPERSEDED)
         .order_by(Offer.created_at.desc())
         .limit(1)
     )
