@@ -1579,13 +1579,17 @@
           ]
         },
         {
-          "name": "Загрузить выписку (выберите любой PDF в поле file)",
+          "name": "Загрузить выписку (тестовый PDF уже в теле запроса)",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{token_info}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data; boundary=DemoBoundary7MA4YWxk"
               }
             ],
             "url": {
@@ -1599,23 +1603,23 @@
                 "documents"
               ]
             },
+            "description": "Тело — multipart/form-data с маленьким тестовым PDF. Можно заменить на свой файл во вкладке Body → form-data.",
             "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "kind",
-                  "value": "bank_statement",
-                  "type": "text"
-                },
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
-                }
-              ]
-            },
-            "description": "В Postman выберите файл PDF в поле file (вкладка Body → form-data)."
-          }
+              "mode": "raw",
+              "raw": "--DemoBoundary7MA4YWxk\r\nContent-Disposition: form-data; name=\"kind\"\r\n\r\nbank_statement\r\n--DemoBoundary7MA4YWxk\r\nContent-Disposition: form-data; name=\"file\"; filename=\"statement.pdf\"\r\nContent-Type: application/pdf\r\n\r\n%PDF-1.4\n% demo bank statement\n%%EOF\n\r\n--DemoBoundary7MA4YWxk--\r\n"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Документ загружен', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Отправить уточнения",
@@ -1844,7 +1848,7 @@
           ]
         },
         {
-          "name": "Через 15 с: у специалиста (БКИ не ответило)",
+          "name": "Через 20 с: у специалиста (БКИ не ответило)",
           "request": {
             "method": "GET",
             "header": [
@@ -1870,8 +1874,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Ждём 15 с, пока фоновая обработка дойдёт до решения",
-                  "setTimeout(() => {}, 15000);"
+                  "// Ждём 20 с, пока фоновая обработка дойдёт до решения",
+                  "setTimeout(() => {}, 20000);"
                 ]
               }
             },

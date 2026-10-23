@@ -197,3 +197,14 @@ def test_counter_offer_impossible_when_no_room_for_payment():
     result = decide(data)
     assert result.outcome == RULES.counter_offer.if_impossible
     assert any(reason.code == "counter_offer_impossible" for reason in result.reasons)
+
+
+def test_after_employee_info_request_decision_returns_to_employee():
+    result = decide(make_input(employee_requested_info=True))
+    assert result.outcome == d.MANUAL_REVIEW
+    assert result.reasons[0].code == "returned_to_employee"
+
+
+def test_stop_factor_still_rejects_after_employee_info_request():
+    data = with_facts(make_input(employee_requested_info=True), company_status=RULES.stop_factors.forbidden_company_statuses[0])
+    assert decide(data).outcome == d.REJECT

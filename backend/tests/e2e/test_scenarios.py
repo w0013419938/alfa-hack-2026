@@ -209,9 +209,15 @@ def test_employee_request_info_then_client_answers(api):
     assert needs_info["info_request"]["fields"][0]["field"] == "monthly_revenue"
 
     client.upload(draft["id"], "financial_report", "отчётность.pdf", PDF)
+    # Клиент «улучшает» анкету — но раз уточнения просил специалист, решение всё равно за ним
+    client.patch(f"/applications/{draft['id']}", json={"monthly_revenue": 9000000, "amount": 500000})
     client.action(draft["id"], "provide_info")
-    # Повторная обработка: тот же пограничный клиент снова попадает к специалисту
-    assert client.wait_until_processed(draft["id"])["status"] == "MANUAL_REVIEW"
+    after = client.wait_until_processed(draft["id"])
+    assert after["status"] == "MANUAL_REVIEW"
+    card = employee.get(f"/backoffice/applications/{draft['id']}").json()
+    assert card["decision"]["reasons"][0]["code"] == "returned_to_employee"
+    # Проверки и скоринг пересчитаны по свежим данным — специалисту видна актуальная картина
+    assert len([check for check in card["checks"] if check["check_type"] == "bki"]) == 2
 
 
 def test_client_can_cancel_draft(api):

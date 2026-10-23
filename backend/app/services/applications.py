@@ -18,7 +18,7 @@ from app.domain.state_machine import (
     lock_application,
     record_creation,
 )
-from app.domain.statuses import EDITABLE_STATUSES, Actor, ApplicationStatus
+from app.domain.statuses import AUTOMATIC_STATUSES, EDITABLE_STATUSES, Actor, ApplicationStatus
 from app.models import Application, ApplicationEvent, Product, User
 from app.models.offer import OFFER_ACCEPTED, OFFER_DECLINED
 from app.schemas.application import ApplicationCreate, ApplicationUpdate
@@ -99,14 +99,24 @@ def update_draft(db: Session, user: User, application_id: uuid.UUID, data: Appli
 
 
 def is_repeat_of_last_action(db: Session, application_id: uuid.UUID, action: str, user_id: uuid.UUID) -> bool:
-    """Повтор того же действия тем же пользователем (двойной клик, повтор запроса после обрыва связи)."""
+    """Повтор того же действия тем же пользователем (двойной клик, повтор запроса после обрыва связи).
+
+    Считаем запрос повтором, только если:
+    - последнее действие человека по заявке — это же действие этого же пользователя;
+    - заявка всё ещё в статусе, куда её привело это действие, или в автоматической обработке после него.
+    Если процесс уже дошёл до нового решения (например, NEEDS_INFO или OFFER_SENT), повтор — это новая попытка,
+    и она получает обычный 409.
+    """
     last_human_event = db.scalar(
         select(ApplicationEvent)
         .where(ApplicationEvent.application_id == application_id, ApplicationEvent.actor_type != Actor.SYSTEM.value)
         .order_by(ApplicationEvent.created_at.desc())
         .limit(1)
     )
-    return last_human_event is not None and last_human_event.action == action and last_human_event.actor_user_id == user_id
+    if last_human_event is None or last_human_event.action != action or last_human_event.actor_user_id != user_id:
+        return False
+    current_status = db.scalar(select(Application.status).where(Application.id == application_id))
+    return current_status == last_human_event.to_status or current_status in AUTOMATIC_STATUSES
 
 
 def perform_client_action(

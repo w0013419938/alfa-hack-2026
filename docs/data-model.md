@@ -54,6 +54,7 @@ erDiagram
         bool requires_collateral
         int decision_days
         json required_fields
+        int sort_order
         bool is_active
     }
     APPLICATIONS {
@@ -99,6 +100,7 @@ erDiagram
         text error_message
         int attempts
         int duration_ms
+        timestamp created_at
     }
     SCORING_RESULTS {
         uuid id PK
@@ -109,6 +111,7 @@ erDiagram
         json factors "вклад каждого фактора"
         numeric debt_to_income
         string rules_version
+        timestamp created_at
     }
     OFFERS {
         uuid id PK
@@ -121,6 +124,7 @@ erDiagram
         timestamp valid_until
         string status "active / accepted / declined / superseded"
         uuid created_by_user_id FK "null — система"
+        timestamp created_at
     }
     INFO_REQUESTS {
         uuid id PK
@@ -129,6 +133,7 @@ erDiagram
         json requested_documents
         text comment
         string created_by_type "system / employee"
+        uuid created_by_user_id FK
         bool is_open
         text response_comment
         timestamp responded_at
@@ -142,6 +147,7 @@ erDiagram
         string stored_path "путь в UPLOAD_DIR"
         string content_type
         int size_bytes
+        timestamp created_at
     }
 ```
 

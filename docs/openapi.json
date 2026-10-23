@@ -813,6 +813,7 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 100000,
               "minimum": 1,
               "default": 1,
               "title": "Page"
@@ -1811,6 +1812,7 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 100000,
               "minimum": 1,
               "default": 1,
               "title": "Page"

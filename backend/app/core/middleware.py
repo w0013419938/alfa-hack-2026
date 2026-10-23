@@ -7,7 +7,9 @@ import uuid
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
+from app.core.errors import error_body
 from app.core.logging import request_id_var
 
 logger = logging.getLogger("app.request")
@@ -24,7 +26,15 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         started = time.perf_counter()
         status_code = 500
         try:
-            response = await call_next(request)
+            try:
+                response = await call_next(request)
+            except Exception:
+                # Непредвиденная ошибка: пишем трейс с request id и отдаём понятный ответ в едином формате
+                logger.exception("Непредвиденная ошибка", extra={"path": request.url.path})
+                response = JSONResponse(
+                    status_code=500,
+                    content=error_body("internal_error", "Что-то пошло не так. Попробуйте ещё раз чуть позже."),
+                )
             status_code = response.status_code
             response.headers["X-Request-ID"] = request_id
             response.headers["X-Content-Type-Options"] = "nosniff"
