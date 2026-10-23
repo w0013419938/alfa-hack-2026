@@ -35,10 +35,14 @@ class Settings(BaseSettings):
     # Пайплайн обработки заявки
     pipeline_step_delay_seconds: float = 1.5
     pipeline_workers: int = 4
+    # Сторож: как часто искать застрявшие заявки и сколько секунд без изменений считать «застряла»
+    pipeline_watchdog_interval_seconds: float = 60
+    pipeline_stuck_after_seconds: float = 120
 
     # Загрузка документов
     upload_dir: Path = Path("/data/uploads")
     max_upload_mb: int = 10
+    max_documents_per_application: int = 20
     allowed_upload_extensions: str = "pdf,jpg,jpeg,png"
 
     # Ограничение попыток входа

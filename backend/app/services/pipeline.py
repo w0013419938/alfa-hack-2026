@@ -11,9 +11,10 @@ SIGNING → ISSUED
 """
 
 import logging
+import threading
 import time
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -29,7 +30,7 @@ from app.domain.state_machine import apply_transition, find_transition, get_curr
 from app.domain.statuses import AUTOMATIC_STATUSES, Actor, ApplicationStatus
 from app.domain.validation import validate_application
 from app.integrations.external_client import ExternalDataClient, get_external_client
-from app.models import Application, Document, ExternalCheck, ScoringResult
+from app.models import Application, Document, ExternalCheck, InfoRequest, ScoringResult
 from app.models.checks import CHECK_BKI, CHECK_EGRUL, CHECK_OK
 from app.services.offers import create_info_request, create_offer
 
@@ -49,9 +50,14 @@ def run_pipeline(application_id: uuid.UUID, step_delay: float | None = None, cli
     client = client or get_external_client()
 
     for _ in range(MAX_STEPS):
-        with SessionLocal() as db:
-            application = db.get(Application, application_id)
-            status = application.status if application else None
+        try:
+            with SessionLocal() as db:
+                application = db.get(Application, application_id)
+                status = application.status if application else None
+        except Exception:
+            # Например, база кратковременно недоступна. Заявку потом подберёт сторож (resume_unfinished_applications)
+            logger.exception("Не удалось прочитать статус заявки", extra={"application_id": str(application_id)})
+            return
         if status not in AUTOMATIC_STATUSES:
             return
 
@@ -191,6 +197,14 @@ def step_scoring(application_id: uuid.UUID) -> None:
 
         # 2. Кредитное решение
         uploaded_kinds = set(db.scalars(select(Document.kind).where(Document.application_id == application_id)))
+        employee_requested_info = (
+            db.scalar(
+                select(InfoRequest.id)
+                .where(InfoRequest.application_id == application_id, InfoRequest.created_by_type == Actor.EMPLOYEE.value)
+                .limit(1)
+            )
+            is not None
+        )
         decision = decisions.make_decision(
             decisions.DecisionInput(
                 amount=application.amount,
@@ -205,6 +219,7 @@ def step_scoring(application_id: uuid.UUID) -> None:
                 failed_checks=failed_checks,
                 company_has_reported_revenue=company.annual_revenue is not None,
                 uploaded_document_kinds=uploaded_kinds,
+                employee_requested_info=employee_requested_info,
             ),
             config.decision,
             labels.decision_reasons,
@@ -286,12 +301,41 @@ def send_to_manual_review_after_error(application_id: uuid.UUID) -> None:
         logger.exception("Не удалось передать заявку специалисту после ошибки", extra={"application_id": str(application_id)})
 
 
-def resume_unfinished_applications(dispatcher) -> int:
-    """При старте бэкенда добираем заявки, обработка которых прервалась (например, из-за перезапуска)."""
+def resume_unfinished_applications(dispatcher, idle_seconds: float = 0) -> int:
+    """Возобновляет заявки, которые застряли в автоматических статусах.
+
+    При старте бэкенда (idle_seconds=0) — все такие заявки: их обработка прервалась перезапуском.
+    Сторож (start_watchdog) — только те, что не менялись дольше idle_seconds: значит, их шаг упал или потерялся.
+    Двойная обработка не страшна: каждый шаг проверяет текущий статус под блокировкой строки.
+    """
+    threshold = datetime.now(UTC) - timedelta(seconds=idle_seconds)
     with SessionLocal() as db:
-        ids = list(db.scalars(select(Application.id).where(Application.status.in_([status.value for status in AUTOMATIC_STATUSES]))))
+        ids = list(
+            db.scalars(
+                select(Application.id).where(
+                    Application.status.in_([status.value for status in AUTOMATIC_STATUSES]),
+                    Application.updated_at <= threshold,
+                )
+            )
+        )
     for application_id in ids:
         dispatcher.dispatch(application_id)
     if ids:
         logger.info(f"Возобновлена обработка заявок: {len(ids)}")
     return len(ids)
+
+
+def start_watchdog(dispatcher) -> threading.Event:
+    """Фоновый сторож: раз в PIPELINE_WATCHDOG_INTERVAL_SECONDS ищет застрявшие заявки. Возвращает флаг остановки."""
+    settings = get_settings()
+    stop = threading.Event()
+
+    def loop() -> None:
+        while not stop.wait(settings.pipeline_watchdog_interval_seconds):
+            try:
+                resume_unfinished_applications(dispatcher, idle_seconds=settings.pipeline_stuck_after_seconds)
+            except Exception:
+                logger.exception("Сторож пайплайна: ошибка при поиске застрявших заявок")
+
+    threading.Thread(target=loop, name="pipeline-watchdog", daemon=True).start()
+    return stop

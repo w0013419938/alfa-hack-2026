@@ -2,10 +2,11 @@
 
 Порядок:
   1. Стоп-факторы → отказ.
-  2. Внешний сервис не ответил → ручное рассмотрение.
-  3. Не хватает данных → запрос уточнений.
-  4. Решение по грейду: одобрить / встречное предложение / ручное рассмотрение / отказ.
-  5. Если нагрузка выше допустимой — встречное предложение с меньшей суммой или большим сроком.
+  2. Уточнения запрашивал сотрудник → снова к сотруднику.
+  3. Внешний сервис не ответил → ручное рассмотрение.
+  4. Не хватает данных → запрос уточнений.
+  5. Решение по грейду: одобрить / встречное предложение / ручное рассмотрение / отказ.
+  6. Если нагрузка выше допустимой — встречное предложение с меньшей суммой или большим сроком.
 Ставка = базовая ставка продукта + надбавка по грейду; платёж — аннуитетный.
 Функции чистые (без БД) — их легко проверить юнит-тестами.
 """
@@ -67,6 +68,8 @@ class DecisionInput:
     failed_checks: list[str]  # названия сервисов, которые не ответили
     company_has_reported_revenue: bool
     uploaded_document_kinds: set[str]
+    # Сотрудник уже запрашивал уточнения по этой заявке — значит, окончательное решение за ним
+    employee_requested_info: bool = False
 
 
 def offer_rate(base_rate: Decimal, grade: str, config: DecisionFile) -> Decimal:
@@ -128,11 +131,16 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
     if stop_reasons:
         return Decision(outcome=REJECT, reasons=stop_reasons)
 
-    # 2. Внешний сервис не ответил — без полной картины решение принимает человек
+    # 2. Заявка уже была у специалиста и он запросил уточнения — после ответа клиента решает снова он,
+    #    иначе клиент мог бы «поправить» анкету и обойти ручное рассмотрение
+    if data.employee_requested_info:
+        return Decision(outcome=MANUAL_REVIEW, reasons=[reason("returned_to_employee")])
+
+    # 3. Внешний сервис не ответил — без полной картины решение принимает человек
     if data.failed_checks:
         return Decision(outcome=config.integration_error_decision, reasons=[reason("integration_error", sources=", ".join(data.failed_checks))])
 
-    # 3. Не хватает данных
+    # 4. Не хватает данных
     revenue_rule = config.needs_info.missing_company_revenue
     if revenue_rule.enabled and not data.company_has_reported_revenue and revenue_rule.document_kind not in data.uploaded_document_kinds:
         return Decision(
@@ -142,7 +150,7 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
             info_comment=revenue_rule.comment,
         )
 
-    # 4. Решение по грейду
+    # 5. Решение по грейду
     rule = config.grade_rules[data.grade]
     if rule.decision == REJECT:
         return Decision(outcome=REJECT, reasons=[reason("low_grade")])
@@ -171,7 +179,7 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
             offer=OfferTerms(OFFER_AS_REQUESTED, Decimal(data.amount), data.term_months, rate, payment),
         )
 
-    # 5. Встречное предложение
+    # 6. Встречное предложение
     offer = find_counter_offer(data, rate, amount_share, config)
     if offer is None:
         return Decision(outcome=config.counter_offer.if_impossible, reasons=[*reasons, reason("counter_offer_impossible")])

@@ -30,7 +30,7 @@ def my_company(user: User = Depends(get_current_client)):
 
 @router.get("/applications", response_model=Page[ApplicationOut], summary="Мои заявки")
 def list_applications(
-    page: int = Query(1, ge=1),
+    page: int = Query(1, ge=1, le=100_000),
     page_size: int = Query(20, ge=1, le=100),
     user: User = Depends(get_current_client),
     db: Session = Depends(get_db),

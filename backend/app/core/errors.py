@@ -90,6 +90,8 @@ def translate_validation_errors(errors: list[dict]) -> list[dict]:
         template = VALIDATION_MESSAGES.get(error.get("type", ""))
         context = error.get("ctx") or {}
         if template:
+            # Pydantic перечисляет варианты по-английски: 'a', 'b' or 'c'
+            context = {key: str(value).replace(" or ", " или ") for key, value in context.items()}
             try:
                 message = template.format(**context)
             except (KeyError, IndexError):
@@ -98,7 +100,9 @@ def translate_validation_errors(errors: list[dict]) -> list[dict]:
             message = "Некорректное значение"
         # Пропускаем служебную часть пути ("body", "query")
         location = [str(part) for part in error.get("loc", []) if part not in ("body", "query", "path")]
-        result.append({"field": ".".join(location), "message": message})
+        # Для ошибок всего тела (пустое тело, неверный JSON) поля нет
+        field = ".".join(location) if location and error.get("type") != "json_invalid" else None
+        result.append({"field": field, "message": message})
     return result
 
 
@@ -138,7 +142,8 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     def handle_unexpected_error(request: Request, exc: Exception):
-        logger.exception("Непредвиденная ошибка", extra={"path": request.url.path})
+        # Обычно сюда не доходит: ошибку раньше перехватывает RequestIdMiddleware. Это запасной вариант.
+        logger.error("Непредвиденная ошибка", exc_info=exc, extra={"path": request.url.path})
         return JSONResponse(
             status_code=500,
             content=error_body("internal_error", "Что-то пошло не так. Попробуйте ещё раз чуть позже."),

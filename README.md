@@ -40,7 +40,7 @@ docker compose up --build
 Готово, когда в логах появится `Uvicorn running on http://0.0.0.0:8000` (первая сборка — 2–4 минуты).
 Миграции и демо-данные применяются автоматически; повторный запуск ничего не дублирует.
 
-- Swagger UI: http://localhost:8000/docs
+- Swagger UI: http://localhost:8000/docs (страница подгружает оформление с CDN, поэтому браузеру нужен интернет; сам API работает без него, схема — в `docs/openapi.json`)
 - Проверка готовности: http://localhost:8000/api/v1/ready
 
 Начать с чистой базы:
@@ -62,7 +62,8 @@ docker compose down -v && docker compose up --build
 | `EXTERNAL_TIMEOUT_SECONDS` / `EXTERNAL_MAX_ATTEMPTS` / `EXTERNAL_BACKOFF_SECONDS` | 2 / 3 / 0.5 | Таймаут, попытки и пауза при запросах к внешним сервисам |
 | `MOCK_TIMEOUT_SLEEP_SECONDS` | 10 | Сколько «зависает» мок в режиме сбоя `timeout` |
 | `LOGIN_RATE_LIMIT_ATTEMPTS` / `LOGIN_RATE_LIMIT_WINDOW_SECONDS` | 5 / 60 | Ограничение неудачных попыток входа |
-| `MAX_UPLOAD_MB` / `ALLOWED_UPLOAD_EXTENSIONS` | 10 / pdf,jpg,jpeg,png | Ограничения загрузки документов |
+| `MAX_UPLOAD_MB` / `MAX_DOCUMENTS_PER_APPLICATION` / `ALLOWED_UPLOAD_EXTENSIONS` | 10 / 20 / pdf,jpg,jpeg,png | Ограничения загрузки документов |
+| `PIPELINE_WATCHDOG_INTERVAL_SECONDS` / `PIPELINE_STUCK_AFTER_SECONDS` | 60 / 120 | Сторож: как часто искать застрявшие в обработке заявки и когда считать их застрявшими |
 | `CORS_ORIGINS` | http://localhost:5173 | Адреса фронтенда |
 | `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | credit_cabinet / credit / credit | База данных |
 | `BACKEND_PORT` / `MOCK_EXTERNAL_PORT` | 8000 / 8001 | Порты на хосте |
@@ -114,7 +115,7 @@ docker compose down -v && docker compose up --build
 docker compose run --rm backend uv run pytest
 ```
 
-158 тестов, около 20 секунд. Юнит-тесты (машина состояний, каждый фактор скоринга, кредитное решение, аннуитет, ИНН,
+164 теста, около 20 секунд. Юнит-тесты (машина состояний, каждый фактор скоринга, кредитное решение, аннуитет, ИНН,
 проверка анкеты, ретраи интеграций) и e2e через API с отдельной тестовой базой (`credit_cabinet_test`) и настоящим
 mock-external: сквозные сценарии всех учёток, ручное рассмотрение, права доступа, конкурентные запросы, идемпотентность.
 Рабочая база тестами не затрагивается.

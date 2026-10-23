@@ -26,7 +26,7 @@ def list_applications(
     status: list[str] = Query(default_factory=list, description="Статусы (можно несколько: ?status=MANUAL_REVIEW&status=OFFER_SENT)"),
     product: str | None = Query(None, description="Код продукта"),
     grade: str | None = Query(None, description="Грейд риска (A–E)"),
-    page: int = Query(1, ge=1),
+    page: int = Query(1, ge=1, le=100_000),
     page_size: int = Query(20, ge=1, le=100),
     user: User = Depends(get_current_employee),
     db: Session = Depends(get_db),

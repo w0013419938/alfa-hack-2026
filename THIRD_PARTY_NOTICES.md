@@ -49,6 +49,13 @@
 | packaging | 26.3 | Apache-2.0 OR BSD-2-Clause | зависимость pytest (dev) |
 | Pygments | 2.21.0 | BSD-2-Clause | зависимость pytest (dev) |
 
+## Загружаются браузером при открытии документации API
+
+| Компонент | Версия | Лицензия | Откуда |
+|---|---|---|---|
+| Swagger UI (`swagger-ui-dist`) | 5.17.14 | Apache-2.0 | cdn.jsdelivr.net, страница `/docs` |
+| ReDoc | 2.1.5 | MIT | cdn.jsdelivr.net, страница `/redoc` |
+
 ## Python-библиотеки mock-external (`mock-external/uv.lock`)
 
 fastapi, starlette, uvicorn, pydantic, pydantic-core, anyio, h11, idna, click, annotated-types, annotated-doc,

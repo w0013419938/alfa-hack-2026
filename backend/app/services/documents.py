@@ -10,7 +10,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import UploadFile
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.business_config import get_business_config
@@ -75,6 +75,13 @@ def save_upload(db: Session, application: Application, user: User, kind: str, up
         raise AppError("Неизвестный вид документа. Выберите вид из списка.", code="unknown_document_kind")
     if not kind_config.client_can_upload:
         raise AppError(f"Документ «{kind_config.label}» формирует банк, загрузить его нельзя.", code="document_kind_not_uploadable")
+
+    documents_count = db.scalar(select(func.count()).select_from(Document).where(Document.application_id == application.id))
+    if documents_count >= settings.max_documents_per_application:
+        raise AppError(
+            f"К заявке можно приложить не больше {settings.max_documents_per_application} документов.",
+            code="too_many_documents",
+        )
 
     filename = safe_filename(upload.filename)
     extension = Path(filename).suffix.lower()

@@ -85,11 +85,14 @@ def test_repeated_action_is_idempotent(api):
     client = api("client_good")
     draft = client.create_application()
     client.action(draft["id"], "submit")
-    client.wait_until_processed(draft["id"])
-    # Повторная отправка той же команды — не ошибка и не новое событие
+    # Повтор сразу (заявка ещё в обработке) — не ошибка и не новое событие
     repeated = client.action(draft["id"], "submit")
-    assert repeated["timeline"].count(next(item for item in repeated["timeline"] if item["action"] == "submit")) == 1
     assert [item["action"] for item in repeated["timeline"]].count("submit") == 1
+
+    # Когда процесс дошёл до нового решения, «повтор» — это уже недопустимое действие
+    assert client.wait_until_processed(draft["id"])["status"] == "OFFER_SENT"
+    late = client.post(f"/applications/{draft['id']}/actions/submit")
+    assert late.status_code == 409
 
     client.action(draft["id"], "accept_offer")
     again = client.action(draft["id"], "accept_offer")
@@ -139,6 +142,15 @@ def test_cannot_edit_after_submit(api):
 
 
 # ---------- Валидация входных данных ----------
+
+
+def test_validation_messages_have_no_english(client):
+    response = client.post(
+        "/api/v1/products/recommend", json={"purpose_code": "equipment", "amount": 1, "term_months": 1, "urgency": "never"}
+    )
+    assert response.status_code == 422
+    message = response.json()["error"]["details"][0]["message"]
+    assert " or " not in message and "или" in message
 
 
 def test_input_validation_errors_are_in_russian(api):
@@ -226,3 +238,59 @@ def test_seed_history_is_present(api):
     employee = api("employee")
     statuses = {item["status"] for item in employee.get("/backoffice/applications", params={"page_size": 100}).json()["items"]}
     assert {"MANUAL_REVIEW", "OFFER_SENT", "REJECTED", "ISSUED", "DRAFT", "NEEDS_INFO"} <= statuses
+
+
+def test_huge_page_number_is_rejected_not_500(api):
+    response = api("client_good").get("/applications", params={"page": 10**20})
+    assert response.status_code == 422
+    assert response.headers["X-Request-ID"]
+
+
+def test_too_many_documents(api, monkeypatch):
+    from app.core.settings import get_settings
+
+    monkeypatch.setattr(get_settings(), "max_documents_per_application", 2)
+    client = api("client_good")
+    draft = client.create_application()
+    client.upload(draft["id"], "other", "1.pdf", PDF)
+    client.upload(draft["id"], "other", "2.pdf", PDF)
+    client.upload(draft["id"], "other", "3.pdf", PDF, expected_status_code=400)
+
+
+def test_watchdog_resumes_stuck_application(api):
+    """Заявка «застряла» в автоматическом статусе (например, упал поток) — сторож её возобновляет."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.core.db import SessionLocal
+    from app.models import Application
+    from app.services.pipeline import resume_unfinished_applications
+
+    client = api("client_good")
+    draft = client.create_application()
+    client.action(draft["id"], "submit")
+    assert client.wait_until_processed(draft["id"])["status"] == "OFFER_SENT"
+
+    # Имитируем зависание: заявка в SUBMITTED и давно не менялась (как будто поток пайплайна погиб)
+    with SessionLocal() as db:
+        application = db.get(Application, draft["id"])
+        application.status = "SUBMITTED"
+        application.updated_at = datetime.now(UTC) - timedelta(minutes=10)
+        db.commit()
+
+    class RecordingDispatcher:
+        def __init__(self):
+            self.ids = []
+
+        def dispatch(self, application_id):
+            self.ids.append(str(application_id))
+
+    recorder = RecordingDispatcher()
+    resume_unfinished_applications(recorder, idle_seconds=120)
+    assert draft["id"] in recorder.ids
+
+    # Свежие заявки в обработке сторож не трогает
+    fresh = client.create_application()
+    client.action(fresh["id"], "submit")
+    recorder.ids.clear()
+    resume_unfinished_applications(recorder, idle_seconds=120)
+    assert fresh["id"] not in recorder.ids
