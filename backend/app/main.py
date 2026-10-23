@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import applications, auth, catalog, health
+from app.api import applications, auth, backoffice, catalog, health
 from app.core.business_config import get_business_config
 from app.core.errors import register_error_handlers
 from app.core.logging import setup_logging
@@ -50,3 +50,4 @@ app.include_router(health.router, prefix=API_PREFIX)
 app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(catalog.router, prefix=API_PREFIX)
 app.include_router(applications.router, prefix=API_PREFIX)
+app.include_router(backoffice.router, prefix=API_PREFIX)

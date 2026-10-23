@@ -156,14 +156,40 @@ def get_open_info_request(db: Session, application_id: uuid.UUID) -> InfoRequest
 
 
 def lock_application(db: Session, application_id: uuid.UUID) -> Application:
-    """Читает заявку с блокировкой строки до конца транзакции."""
-    application = db.get(Application, application_id, with_for_update=True, populate_existing=True)
-    if application is None:
+    """Блокирует строку заявки до конца транзакции и возвращает её свежую версию.
+
+    Два шага (сначала блокировка, потом чтение) нужны потому, что объект заявки мог уже лежать в сессии:
+    если его тем временем изменил пайплайн в другом потоке, мы просто перечитываем свежие данные.
+    """
+    locked_id = db.scalar(select(Application.id).where(Application.id == application_id).with_for_update())
+    if locked_id is None:
         raise NotFoundError("Заявка не найдена")
-    return application
+    return db.get(Application, application_id, populate_existing=True)
 
 
 # ---------- Главные функции ----------
+
+
+def ensure_transition_allowed(db: Session, application: Application, action: str, actor: Actor, comment: str | None) -> Transition:
+    """Проверяет, можно ли сейчас выполнить действие. Если нельзя — бросает ошибку с понятным текстом."""
+    labels = get_business_config().labels
+    transition = find_transition(application.status, action)
+    if transition is None:
+        action_label = labels.actions[action].label if action in labels.actions else action
+        raise ConflictError(
+            f"Действие «{action_label}» сейчас недоступно: заявка в статусе «{labels.statuses[application.status].label}».",
+            code="transition_not_allowed",
+            details={"status": application.status, "action": action},
+        )
+    if actor not in transition.actors:
+        raise ForbiddenError("У вас нет прав на это действие")
+    if transition.requires_comment and not (comment and comment.strip()):
+        raise AppError("Для этого действия нужен комментарий", code="comment_required")
+    if transition.precondition:
+        problem = transition.precondition(db, application)
+        if problem:
+            raise ConflictError(problem, code="precondition_failed")
+    return transition
 
 
 def apply_transition(
@@ -176,26 +202,9 @@ def apply_transition(
     payload: dict | None = None,
 ) -> tuple[Application, ApplicationEvent]:
     """Выполняет переход. Коммит транзакции — на стороне вызывающего кода."""
-    labels = get_business_config().labels
     application = lock_application(db, application_id)
     current = application.status
-
-    transition = find_transition(current, action)
-    if transition is None:
-        action_label = labels.actions[action].label if action in labels.actions else action
-        raise ConflictError(
-            f"Действие «{action_label}» сейчас недоступно: заявка в статусе «{labels.statuses[current].label}».",
-            code="transition_not_allowed",
-            details={"status": current, "action": action},
-        )
-    if actor not in transition.actors:
-        raise ForbiddenError("У вас нет прав на это действие")
-    if transition.requires_comment and not (comment and comment.strip()):
-        raise AppError("Для этого действия нужен комментарий", code="comment_required")
-    if transition.precondition:
-        problem = transition.precondition(db, application)
-        if problem:
-            raise ConflictError(problem, code="precondition_failed")
+    transition = ensure_transition_allowed(db, application, action, actor, comment)
 
     now = datetime.now(UTC)
     application.status = transition.to_status
