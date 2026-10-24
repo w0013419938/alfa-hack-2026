@@ -15,7 +15,10 @@ export function useClientAction(application: Application) {
           body: { comment: comment || null, version: application.version },
         }),
       ),
-    onSuccess: (updated) => {
+    onSuccess: (updated, variables) => {
+      // Короткое подтверждение, названное так же, как кнопка, и новый статус заявки
+      const label = application.available_actions.find((action) => action.code === variables.action)?.label ?? "Действие";
+      notifications.show({ color: "lime", title: `Готово: «${label}»`, message: `Статус заявки: ${updated.status_label}.`, autoClose: 4000 });
       // Сразу показываем новый статус, не дожидаясь очередного опроса
       queryClient.setQueryData(["application", application.id], updated);
       void queryClient.invalidateQueries({ queryKey: ["applications"] });

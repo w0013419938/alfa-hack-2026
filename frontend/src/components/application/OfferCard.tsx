@@ -1,23 +1,28 @@
-/** Предложение банка: «Вы просили / Банк предлагает» и объяснение, если условия изменены. */
-import { Alert, Badge, Box, Card, Divider, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core";
-import type { ReactNode } from "react";
+/**
+ * Предложение банка. Главная цифра — платёж в месяц. Ниже сравнение «Вы просили / Банк предлагает»:
+ * изменённое значение выделено, старое зачёркнуто, а объяснение банка стоит прямо под строками, которые изменились.
+ * Все числа и тексты — из API; здесь только сравнение «совпадает / не совпадает» для выделения.
+ */
+import { Badge, Box, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { IconArrowRight } from "@tabler/icons-react";
+import { Fragment, type ReactNode } from "react";
 
 import type { Application } from "../../api/client";
 import { COLORS, RADIUS } from "../../theme";
 import { dateTime, money, months, percent } from "../../utils/format";
+import { MoneyFigure } from "../MoneyFigure";
 import { Term } from "../Term";
 
-function Row({ label, asked, offered, highlight }: { label: ReactNode; asked: string; offered: string; highlight?: boolean }) {
+type CompareRow = { key: string; label: ReactNode; asked: string; offered: string; changed: boolean };
+
+function Figure({ label, value }: { label: ReactNode; value: number | null | undefined }) {
   return (
-    <>
-      <Text c={COLORS.textSecondary}>{label}</Text>
-      <Text className="num" ta="right">
-        {asked}
+    <Stack gap={2}>
+      <Text size="sm" c={COLORS.textSecondary}>
+        {label}
       </Text>
-      <Text className="num" ta="right" fw={600} c={highlight ? COLORS.accent : COLORS.text}>
-        {offered}
-      </Text>
-    </>
+      <MoneyFigure value={value} fontSize={22} />
+    </Stack>
   );
 }
 
@@ -25,82 +30,101 @@ export function OfferCard({ application }: { application: Application }) {
   const offer = application.offer;
   if (!offer) return null;
 
-  const changedAmount = offer.amount !== application.amount;
-  const changedTerm = offer.term_months !== application.term_months;
+  const isCounter = offer.offer_type === "counter_offer";
   // Пояснение банка к предложению — комментарий последнего события, после которого появилось предложение
   const explanation = [...application.timeline].reverse().find((item) => item.status === "OFFER_SENT")?.comment;
 
+  const rows: CompareRow[] = [
+    { key: "amount", label: "Сумма", asked: money(application.amount), offered: money(offer.amount), changed: Number(offer.amount) !== Number(application.amount) },
+    { key: "term", label: <Term id="term">Срок</Term>, asked: months(application.term_months), offered: months(offer.term_months), changed: offer.term_months !== application.term_months },
+    { key: "rate", label: <Term id="rate">Ставка</Term>, asked: "—", offered: `${percent(offer.rate)} годовых`, changed: false },
+  ];
+  // Объяснение ставим после последней изменённой строки — рядом с теми цифрами, которые оно объясняет
+  // (если сумма и срок те же, а изменилась только ставка, — после строки ставки)
+  const changedIndex = rows.map((row) => row.changed).lastIndexOf(true);
+  const lastChanged = changedIndex === -1 ? rows.length - 1 : changedIndex;
+
   return (
     <Card data-testid="offer">
-      <Stack gap="md">
-        <Group justify="space-between" wrap="wrap">
+      <Stack gap="lg">
+        <Group justify="space-between" wrap="wrap" gap="xs">
           <Title order={3}>Предложение банка</Title>
-          <Group gap="xs">
-            <Badge color={offer.offer_type === "counter_offer" ? "violet" : "lime"} variant="light" c={offer.offer_type === "counter_offer" ? undefined : COLORS.positiveText}>
-              {offer.offer_type === "counter_offer" ? <Term id="counter_offer">{offer.offer_type_label}</Term> : offer.offer_type_label}
-            </Badge>
-            <Badge color="gray" variant="light">
-              {offer.status_label}
-            </Badge>
+          <Badge color={isCounter ? "violet" : "lime"} variant="light" c={isCounter ? COLORS.attentionText : COLORS.positiveText}>
+            {isCounter ? <Term id="counter_offer">{offer.offer_type_label}</Term> : offer.offer_type_label}
+          </Badge>
+        </Group>
+
+        {/* Главная цифра: сколько платить каждый месяц */}
+        <Group align="flex-end" justify="space-between" wrap="wrap" gap="lg">
+          <Stack gap={4}>
+            <Text c={COLORS.textSecondary}>
+              <Term id="monthly_payment">Платёж в месяц</Term>
+            </Text>
+            <MoneyFigure value={offer.monthly_payment} fontSize={44} data-testid="offer-payment" />
+            <Text size="sm" c={COLORS.textSecondary}>
+              <Term id="annuity">Аннуитетный</Term>: одинаковый каждый месяц, {months(offer.term_months)}
+            </Text>
+          </Stack>
+          <Group gap="xl" wrap="nowrap">
+            <Figure label="Всего вернуть" value={offer.total_payment} />
+            <Figure label={<Term id="overpayment">Переплата</Term>} value={offer.overpayment} />
           </Group>
         </Group>
 
-        <Box style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr 1fr", columnGap: 16, rowGap: 12, alignItems: "baseline" }}>
+        {/* Сравнение условий */}
+        <Box
+          p="md"
+          bg={COLORS.page}
+          style={{ borderRadius: RADIUS.block, display: "grid", gridTemplateColumns: "minmax(80px, 1fr) auto 20px auto", columnGap: 16, rowGap: 10, alignItems: "baseline" }}
+        >
           <span />
           <Text size="sm" c={COLORS.textSecondary} ta="right">
             Вы просили
           </Text>
+          <span />
           <Text size="sm" fw={600} ta="right">
             Банк предлагает
           </Text>
-          <Row label="Сумма" asked={money(application.amount)} offered={money(offer.amount)} highlight={changedAmount} />
-          <Row label={<Term id="term">Срок</Term>} asked={months(application.term_months)} offered={months(offer.term_months)} highlight={changedTerm} />
-          <Row label={<Term id="rate">Ставка</Term>} asked="—" offered={`${percent(offer.rate)} годовых`} />
+          {rows.map((row, index) => (
+            <Fragment key={row.key}>
+              <Text c={COLORS.textSecondary}>{row.label}</Text>
+              <Text
+                className="num"
+                ta="right"
+                c={COLORS.textSecondary}
+                td={row.changed ? "line-through" : undefined}
+                style={{ textDecorationThickness: 1 }}
+              >
+                {row.asked}
+              </Text>
+              <Box c={row.changed ? COLORS.accentText : "transparent"} style={{ alignSelf: "center", display: "grid" }} aria-hidden>
+                <IconArrowRight size={16} />
+              </Box>
+              <Text className="num" ta="right" fw={600} c={row.changed ? COLORS.accentText : COLORS.text} data-changed={row.changed || undefined}>
+                {row.offered}
+              </Text>
+              {index === lastChanged && explanation && isCounter && (
+                <Box
+                  style={{ gridColumn: "1 / -1", borderLeft: `3px solid ${COLORS.attention}`, borderRadius: 4 }}
+                  bg={COLORS.card}
+                  px="md"
+                  py="sm"
+                >
+                  <Text size="sm" fw={600} c={COLORS.attentionText}>
+                    Почему условия изменены
+                  </Text>
+                  <Text size="sm" mt={2}>
+                    {explanation}
+                  </Text>
+                </Box>
+              )}
+            </Fragment>
+          ))}
         </Box>
 
-        <Divider />
-
-        <SimpleGrid cols={{ base: 1, sm: 3 }}>
-          <Box p="md" bg={COLORS.accentSoft} style={{ borderRadius: RADIUS.block }}>
-            <Text size="sm" c={COLORS.textSecondary}>
-              <Term id="monthly_payment">Платёж в месяц</Term>
-            </Text>
-            <Text fz={28} fw={700} c={COLORS.accent} className="num">
-              {money(offer.monthly_payment)}
-            </Text>
-            <Text size="xs" c={COLORS.textSecondary}>
-              <Term id="annuity">аннуитетный</Term>, одинаковый каждый месяц
-            </Text>
-          </Box>
-          <Box p="md" bg={COLORS.page} style={{ borderRadius: RADIUS.block }}>
-            <Text size="sm" c={COLORS.textSecondary}>
-              Всего вернуть
-            </Text>
-            <Text fz={22} fw={600} className="num">
-              {money(offer.total_payment)}
-            </Text>
-          </Box>
-          <Box p="md" bg={COLORS.page} style={{ borderRadius: RADIUS.block }}>
-            <Text size="sm" c={COLORS.textSecondary}>
-              <Term id="overpayment">Переплата</Term>
-            </Text>
-            <Text fz={22} fw={600} className="num">
-              {money(offer.overpayment)}
-            </Text>
-          </Box>
-        </SimpleGrid>
-
-        {/* Объяснение показываем, только если условия изменены — иначе оно повторяет условия выше */}
-        {explanation && offer.offer_type === "counter_offer" && (
-          <Alert color="violet" radius="lg" title="Почему условия изменены">
-            {explanation}
-          </Alert>
-        )}
-        {offer.status === "active" && (
-          <Text size="sm" c={COLORS.textSecondary}>
-            Предложение действует до {dateTime(offer.valid_until)}.
-          </Text>
-        )}
+        <Text size="sm" c={COLORS.textSecondary}>
+          {offer.status === "active" ? `Предложение действует до ${dateTime(offer.valid_until)}.` : `Предложение: ${offer.status_label.toLowerCase()}.`}
+        </Text>
       </Stack>
     </Card>
   );

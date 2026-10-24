@@ -1,9 +1,15 @@
 /**
- * Шкала этапов заявки. Строится строго по полю progress из API — фронт не знает,
- * какому этапу соответствует статус. Изменившийся этап коротко подсвечивается.
+ * Шкала этапов заявки — живая линия. Строится строго по полю progress из API: фронт не знает,
+ * какому этапу соответствует статус.
+ *
+ * Движение отвечает только на изменение данных:
+ * - когда этап пройден, заливка линии дорастает до следующего шага;
+ * - новый текущий шаг один раз отмечается расходящимся кольцом (после того, как линия дошла);
+ * - пока банк работает над шагом (state = current), кольцо вокруг него мягко «дышит».
+ * При prefers-reduced-motion всё это отключено (см. global.css).
  */
-import { Box, Group, Stack, Text, Tooltip } from "@mantine/core";
-import { IconCheck, IconPlayerPause, IconX } from "@tabler/icons-react";
+import { Box, Text, VisuallyHidden } from "@mantine/core";
+import { IconCheck, IconUser, IconX } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 
 import type { Schemas } from "../api/client";
@@ -11,92 +17,137 @@ import { COLORS } from "../theme";
 
 type Step = Schemas["ProgressStep"];
 
+const DOT = 36;
+const SEGMENT_MS = 450; // задержка между отрезками, когда пройдено сразу несколько этапов
+
 const DOT_STYLE: Record<string, { bg: string; color: string; border: string }> = {
   done: { bg: COLORS.positive, color: COLORS.text, border: COLORS.positive },
   current: { bg: COLORS.accent, color: "#fff", border: COLORS.accent },
   action: { bg: COLORS.attention, color: "#fff", border: COLORS.attention },
-  stopped: { bg: "#B9BBC2", color: "#fff", border: "#B9BBC2" },
-  upcoming: { bg: COLORS.card, color: COLORS.textSecondary, border: COLORS.border },
+  stopped: { bg: "#8E9099", color: "#fff", border: "#8E9099" },
+  upcoming: { bg: COLORS.card, color: COLORS.textSecondary, border: "#D3D5DB" },
+};
+
+const SUBLABEL_COLOR: Record<string, string> = {
+  current: COLORS.accentText,
+  action: COLORS.attentionText,
+  stopped: COLORS.textSecondary,
 };
 
 function StepIcon({ step, index }: { step: Step; index: number }) {
-  if (step.state === "done") return <IconCheck size={18} stroke={3} />;
-  if (step.state === "stopped") return <IconX size={18} stroke={3} />;
-  if (step.state === "action") return <IconPlayerPause size={16} stroke={3} />;
-  return <>{index + 1}</>;
+  if (step.state === "done") return <IconCheck size={18} stroke={3} aria-hidden />;
+  if (step.state === "stopped") return <IconX size={18} stroke={3} aria-hidden />;
+  if (step.state === "action") return <IconUser size={18} stroke={2.5} aria-hidden />;
+  return <span aria-hidden>{index + 1}</span>;
 }
 
 export function ProgressSteps({ steps }: { steps: Step[] }) {
-  // Запоминаем, какой этап был активным, чтобы подсветить переход на новый
+  // Запоминаем активный этап, чтобы отметить переход на новый
   const activeCode = steps.find((step) => step.state !== "done" && step.state !== "upcoming")?.code ?? "all-done";
   const previous = useRef(activeCode);
-  const [changed, setChanged] = useState<string | null>(null);
+  const [arrived, setArrived] = useState<string | null>(null);
+
+  // Сколько этапов было пройдено при прошлом показе. За один опрос заявка может пройти несколько этапов —
+  // тогда отрезки линии заполняются по очереди, и линия «бежит» от шага к шагу
+  const doneCount = steps.filter((step) => step.state === "done").length;
+  const previousDone = useRef(doneCount);
+  const fromDone = Math.min(previousDone.current, doneCount);
+  const runMs = (doneCount - fromDone) * SEGMENT_MS;
+
+  useEffect(() => {
+    previousDone.current = doneCount;
+  }, [doneCount]);
 
   useEffect(() => {
     if (previous.current !== activeCode) {
-      setChanged(activeCode);
       previous.current = activeCode;
-      const timer = setTimeout(() => setChanged(null), 3500);
+      setArrived(activeCode);
+      const timer = setTimeout(() => setArrived(null), 2600 + runMs);
       return () => clearTimeout(timer);
     }
-  }, [activeCode]);
+  }, [activeCode, runMs]);
 
   return (
     <Box style={{ overflowX: "auto" }} data-testid="progress">
-      <Group gap={0} wrap="nowrap" align="flex-start" miw={620}>
+      <Box component="ol" aria-label="Этапы заявки" m={0} p={0} miw={640} style={{ display: "flex", listStyle: "none", alignItems: "flex-start" }}>
         {steps.map((step, index) => {
           const style = DOT_STYLE[step.state] ?? DOT_STYLE.upcoming;
           const isLast = index === steps.length - 1;
+          const isActive = step.code === activeCode;
+          const dotClass = [step.code === arrived ? "step-arrived" : "", step.state === "current" ? "step-working" : ""].join(" ").trim();
           return (
-            <Stack key={step.code} gap={8} align="center" style={{ flex: 1, position: "relative" }} data-step={step.code} data-state={step.state}>
+            <Box
+              component="li"
+              key={step.code}
+              aria-current={isActive ? "step" : undefined}
+              style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}
+              data-step={step.code}
+              data-state={step.state}
+            >
               {!isLast && (
+                // Дорожка до следующего шага; заливка растёт, когда этот шаг пройден
                 <Box
+                  aria-hidden
                   style={{
                     position: "absolute",
-                    top: 17,
-                    left: "calc(50% + 22px)",
-                    right: "calc(-50% + 22px)",
-                    height: 3,
+                    top: DOT / 2 - 2,
+                    left: `calc(50% + ${DOT / 2 + 6}px)`,
+                    right: `calc(-50% + ${DOT / 2 + 6}px)`,
+                    height: 4,
                     borderRadius: 2,
-                    background: step.state === "done" ? COLORS.positive : COLORS.border,
-                  }}
-                />
-              )}
-              <Tooltip label={step.state_label}>
-                <Box
-                  className={changed === step.code ? "just-changed" : undefined}
-                  w={36}
-                  h={36}
-                  style={{
-                    borderRadius: "50%",
-                    display: "grid",
-                    placeItems: "center",
-                    background: style.bg,
-                    color: style.color,
-                    border: `2px solid ${style.border}`,
-                    fontWeight: 600,
-                    zIndex: 1,
+                    background: "#E6E7EB",
+                    overflow: "hidden",
                   }}
                 >
-                  <span className={step.state === "current" ? "pulse" : undefined} style={{ display: "grid", placeItems: "center" }}>
-                    <StepIcon step={step} index={index} />
-                  </span>
+                  <Box
+                    className="step-line-fill"
+                    h="100%"
+                    bg={COLORS.positive}
+                    style={{
+                      transform: `scaleX(${step.state === "done" ? 1 : 0})`,
+                      transitionDelay: index >= fromDone ? `${(index - fromDone) * SEGMENT_MS}ms` : undefined,
+                    }}
+                  />
                 </Box>
-              </Tooltip>
-              <Stack gap={0} align="center" px={4}>
-                <Text size="sm" fw={step.state === "upcoming" ? 400 : 600} ta="center" c={step.state === "upcoming" ? COLORS.textSecondary : COLORS.text}>
+              )}
+              <Box
+                className={dotClass || undefined}
+                w={DOT}
+                h={DOT}
+                style={{
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  background: style.bg,
+                  color: style.color,
+                  border: `2px solid ${style.border}`,
+                  fontWeight: 600,
+                  zIndex: 1,
+                  transition: "background-color 300ms ease, border-color 300ms ease",
+                  // Кольцо прибытия ждёт, пока линия добежит до шага; «дыхание» начинается после кольца
+                  animationDelay:
+                    step.code === arrived ? (step.state === "current" ? `${runMs + 300}ms, ${runMs + 2100}ms` : `${runMs + 300}ms`) : undefined,
+                  ["--ring-color" as string]: step.state === "action" ? "rgba(155, 92, 255, 0.5)" : "rgba(239, 49, 36, 0.45)",
+                }}
+              >
+                <StepIcon step={step} index={index} />
+              </Box>
+              <Box px={4} ta="center">
+                <Text size="sm" fw={step.state === "upcoming" ? 400 : 600} c={step.state === "upcoming" ? COLORS.textSecondary : COLORS.text} lh={1.3}>
                   {step.label}
                 </Text>
-                {step.state !== "upcoming" && step.state !== "done" && (
-                  <Text size="xs" fw={600} c={step.state === "action" ? COLORS.attention : step.state === "current" ? COLORS.accent : COLORS.textSecondary}>
+                {step.state !== "upcoming" && step.state !== "done" ? (
+                  <Text size="xs" fw={600} c={SUBLABEL_COLOR[step.state] ?? COLORS.textSecondary} mt={2}>
                     {step.state_label}
                   </Text>
+                ) : (
+                  <VisuallyHidden>{step.state_label}</VisuallyHidden>
                 )}
-              </Stack>
-            </Stack>
+              </Box>
+            </Box>
           );
         })}
-      </Group>
+      </Box>
     </Box>
   );
 }

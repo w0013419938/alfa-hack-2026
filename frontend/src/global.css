@@ -38,42 +38,127 @@ h3 {
   background: #f4f5f7;
 }
 
-/* Подсветка того, что только что изменилось (новый шаг, новое событие истории) */
-@keyframes just-changed {
+/* ---------- Движение. Только в ответ на изменение данных или действие пользователя ---------- */
+
+/* Шкала этапов: заливка линии дорастает до нового шага */
+.step-line-fill {
+  transform-origin: left center;
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Новый текущий шаг: одно расходящееся кольцо после того, как линия дошла. Заливку кружка не трогаем */
+@keyframes step-arrived {
   0% {
-    box-shadow: 0 0 0 0 rgba(239, 49, 36, 0.45);
-    background-color: rgba(239, 49, 36, 0.08);
+    box-shadow: 0 0 0 0 var(--ring-color, rgba(239, 49, 36, 0.45));
   }
   100% {
-    box-shadow: 0 0 0 14px rgba(239, 49, 36, 0);
-    background-color: transparent;
+    box-shadow: 0 0 0 16px rgba(239, 49, 36, 0);
   }
 }
 
-.just-changed {
-  animation: just-changed 1.6s ease-out 2;
+.step-arrived {
+  animation: step-arrived 900ms ease-out 600ms 2 backwards;
 }
 
-/* «Банк работает»: мягкая пульсация текущего шага */
-@keyframes pulse-dot {
+/* Банк работает над текущим шагом: кольцо мягко «дышит» */
+@keyframes step-working {
   0%,
   100% {
-    transform: scale(1);
-    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 49, 36, 0.32);
   }
   50% {
-    transform: scale(1.25);
-    opacity: 0.7;
+    box-shadow: 0 0 0 7px rgba(239, 49, 36, 0);
   }
 }
 
-.pulse {
-  animation: pulse-dot 1.4s ease-in-out infinite;
+.step-working {
+  animation: step-working 2.2s ease-in-out infinite;
+}
+
+/* Шаг только что стал текущим и банк над ним работает: сначала кольцо прибытия, потом «дыхание» */
+.step-arrived.step-working {
+  animation:
+    step-arrived 900ms ease-out 600ms 2 backwards,
+    step-working 2.2s ease-in-out 2.4s infinite;
+}
+
+/* Индикатор «банк проверяет»: короткий отрезок бежит по дорожке */
+@keyframes working-run {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.working-track {
+  position: relative;
+  overflow: hidden;
+  height: 4px;
+  border-radius: 2px;
+  background: #ffd9d5;
+}
+
+.working-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: 2px;
+  background: #ef3124;
+  animation: working-run 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* Новое событие в истории: въезжает сверху, фон коротко подсвечен */
+@keyframes event-new {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+    background-color: rgba(239, 49, 36, 0.1);
+  }
+  30% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    background-color: rgba(239, 49, 36, 0);
+  }
+}
+
+.event-new {
+  animation: event-new 2.4s ease-out;
+}
+
+/* Финал «Кредит выдан»: галочка прорисовывается один раз */
+@keyframes check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.check-draw {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: check-draw 600ms ease-out 200ms forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .just-changed,
-  .pulse {
+  .step-line-fill {
+    transition: none;
+  }
+  .step-arrived,
+  .step-working,
+  .event-new {
     animation: none;
+  }
+  .working-track::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.6;
+  }
+  .check-draw {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }
