@@ -26,7 +26,8 @@ function SummaryLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Долговая нагрузка: какая часть месячной выручки уйдёт на платежи по всем кредитам вместе с новым */
+/** Долговая нагрузка: какая часть месячной выручки уйдёт на платежи по всем кредитам вместе с новым.
+ *  Округляем до целого процента, как в факторе скоринга, чтобы на экране было одно число */
 function DebtLoad({ value }: { value: number }) {
   const share = Math.min(Math.max(value, 0), 1);
   return (
@@ -36,7 +37,7 @@ function DebtLoad({ value }: { value: number }) {
           <Term id="debt_load">Долговая нагрузка</Term>
         </Text>
         <Text fw={600} className="num">
-          {percent(Math.round(value * 1000) / 10)} выручки
+          {percent(Math.round(value * 100))} выручки
         </Text>
       </Group>
       <Box h={10} bg="#E6E7EB" style={{ borderRadius: 5, overflow: "hidden" }} aria-hidden>

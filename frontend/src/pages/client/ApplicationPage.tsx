@@ -123,6 +123,8 @@ export function ApplicationPage() {
   const application = query.data;
   const working = workingStep(application);
   const finished = allStepsDone(application);
+  // Пока предложение действует, кнопки ответа стоят в карточке предложения, рядом с условиями
+  const offerOpen = application.offer?.status === "active" && application.available_actions.length > 0;
 
   return (
     <Stack gap="lg">
@@ -184,7 +186,7 @@ export function ApplicationPage() {
             </Alert>
           )}
           {working && <BankWorking label={working.label} />}
-          {application.available_actions.length > 0 && (
+          {application.available_actions.length > 0 && !offerOpen && (
             <Box mt="xs">
               <ActionBar application={application} />
             </Box>
@@ -201,7 +203,7 @@ export function ApplicationPage() {
           <Stack gap="lg">
             <InfoRequestPanel application={application} />
             {/* После выдачи условия уже показаны в итоге сверху — второй раз их не повторяем */}
-            {!finished && <OfferCard application={application} />}
+            {!finished && <OfferCard application={application} actions={offerOpen ? <ActionBar application={application} /> : undefined} />}
             <ApplicationDetails application={application} />
             <DocumentsBlock application={application} />
           </Stack>

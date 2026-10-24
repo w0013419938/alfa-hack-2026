@@ -5,6 +5,7 @@
  */
 import { Alert, Box, Button, Card, Group, NumberInput, Select, SimpleGrid, Stack, Stepper, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { IconCheck } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -244,7 +245,15 @@ export function ApplicationFormPage() {
       )}
 
       <Card>
-        <Stepper active={step} onStepClick={(target) => target < step && setStep(target)} size="sm" color="brand" allowNextStepsSelect={false}>
+        <Stepper
+          active={step}
+          onStepClick={(target) => target < step && setStep(target)}
+          size="sm"
+          color="brand"
+          allowNextStepsSelect={false}
+          className="form-stepper"
+          completedIcon={<IconCheck size={16} stroke={3} />}
+        >
           {STEPS.map((label) => (
             <Stepper.Step key={label} label={label} />
           ))}

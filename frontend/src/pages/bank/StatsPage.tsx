@@ -47,11 +47,13 @@ export function StatsPage() {
             <Table.Tbody>
               {data.by_status.map((item) => (
                 <Table.Tr key={item.status}>
-                  <Table.Td w="35%">{item.label}</Table.Td>
+                  <Table.Td w="35%" c={item.count ? COLORS.text : COLORS.textSecondary}>
+                    {item.label}
+                  </Table.Td>
                   <Table.Td>
                     <Box h={10} w={`${(item.count / maxCount) * 100}%`} miw={item.count ? 6 : 0} bg={item.status === "MANUAL_REVIEW" ? COLORS.accent : "#C9CBD2"} style={{ borderRadius: 6 }} />
                   </Table.Td>
-                  <Table.Td ta="right" className="num" w={60} fw={600}>
+                  <Table.Td ta="right" className="num" w={60} fw={item.count ? 600 : 400} c={item.count ? COLORS.text : COLORS.textSecondary}>
                     {item.count}
                   </Table.Td>
                 </Table.Tr>

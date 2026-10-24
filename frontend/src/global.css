@@ -44,6 +44,35 @@ h3 {
   background: #e9eaee;
 }
 
+/* Шаги анкеты: пройденный шаг салатовый с галочкой, как на шкале заявки; текущий залит красным */
+.form-stepper .mantine-Stepper-stepIcon[data-completed] {
+  background: #8fee52;
+  border-color: #8fee52;
+  color: #222222;
+}
+
+.form-stepper .mantine-Stepper-stepIcon[data-progress] {
+  background: #d52418;
+  border-color: #d52418;
+  color: #ffffff;
+}
+
+.form-stepper .mantine-Stepper-separator[data-active] {
+  background: #8fee52;
+}
+
+/* Шапка: на ширине меньше 992px разделы уходят второй строкой на всю ширину */
+@media (max-width: 61.99em) {
+  .header-nav {
+    order: 3;
+    width: 100%;
+  }
+}
+
+.header-nav {
+  flex: 1;
+}
+
 /* ---------- Фокус с клавиатуры ---------- */
 /* Видимое кольцо у всего, до чего можно дойти Tab: кнопки, ссылки, строки таблиц, термины с подсказкой */
 :focus-visible {
