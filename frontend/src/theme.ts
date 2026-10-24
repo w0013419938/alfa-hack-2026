@@ -65,7 +65,8 @@ export const theme = createTheme({
   components: {
     Card: { defaultProps: { radius: "xl", padding: "xl", shadow: undefined } },
     Paper: { defaultProps: { radius: "xl" } },
-    Button: { defaultProps: { radius: "md", size: "md" } },
+    // Кнопки не ниже 44px: в них удобно попасть и мышью, и пальцем
+    Button: { defaultProps: { radius: "md", size: "md" }, styles: { root: { minHeight: 44 } } },
     TextInput: { defaultProps: { radius: "md", size: "md" } },
     NumberInput: { defaultProps: { radius: "md", size: "md" } },
     Select: { defaultProps: { radius: "md", size: "md" } },

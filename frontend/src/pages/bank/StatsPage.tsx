@@ -3,7 +3,7 @@ import { Box, Card, SimpleGrid, Stack, Table, Text, Title } from "@mantine/core"
 import { useQuery } from "@tanstack/react-query";
 
 import { api, call } from "../../api/client";
-import { ErrorState, LoadingState } from "../../components/States";
+import { ErrorState, RowsSkeleton } from "../../components/States";
 import { COLORS } from "../../theme";
 
 function Metric({ label, value, hint, accent }: { label: string; value: string | number; hint?: string; accent?: boolean }) {
@@ -26,7 +26,7 @@ function Metric({ label, value, hint, accent }: { label: string; value: string |
 
 export function StatsPage() {
   const stats = useQuery({ queryKey: ["stats"], queryFn: () => call(api.GET("/api/v1/backoffice/stats")), refetchInterval: 10_000 });
-  if (stats.isLoading) return <LoadingState />;
+  if (stats.isLoading) return <RowsSkeleton rows={6} height={64} />;
   if (stats.isError || !stats.data) return <ErrorState error={stats.error} onRetry={() => void stats.refetch()} />;
   const data = stats.data;
   const maxCount = Math.max(1, ...data.by_status.map((item) => item.count));

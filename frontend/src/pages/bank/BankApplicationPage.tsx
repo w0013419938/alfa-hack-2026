@@ -13,7 +13,7 @@ import { api, call, downloadFile, errorText, type Schemas } from "../../api/clie
 import { DecisionPanel } from "../../components/bank/DecisionPanel";
 import { ScoringBars, ScoringSummary } from "../../components/bank/ScoringBars";
 import { ProgressSteps } from "../../components/ProgressSteps";
-import { ErrorState, LoadingState } from "../../components/States";
+import { ApplicationSkeleton, ErrorState } from "../../components/States";
 import { Term } from "../../components/Term";
 import { COLORS, RADIUS } from "../../theme";
 import { date, dateTime, money, months } from "../../utils/format";
@@ -70,7 +70,7 @@ export function BankApplicationPage() {
     refetchInterval: (state) => (state.state.data && !state.state.data.is_final ? 3000 : false),
   });
 
-  if (query.isLoading) return <LoadingState text="Загружаем карточку заявки…" />;
+  if (query.isLoading) return <ApplicationSkeleton label="Загружаем карточку заявки" />;
   if (query.isError || !query.data) return <ErrorState error={query.error} onRetry={() => void query.refetch()} />;
   const application = query.data;
 

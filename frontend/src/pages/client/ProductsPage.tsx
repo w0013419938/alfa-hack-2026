@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { api, call, type Schemas } from "../../api/client";
 import { Calculator, defaultAmount, defaultTerm } from "../../components/Calculator";
 import { NumberedCard } from "../../components/NumberedCard";
-import { EmptyState, ErrorState, LoadingState } from "../../components/States";
+import { EmptyState, ErrorState, RowsSkeleton } from "../../components/States";
 import { Term } from "../../components/Term";
 import { COLORS } from "../../theme";
 
@@ -200,7 +200,7 @@ function Picker() {
 
 function Catalog() {
   const products = useProducts();
-  if (products.isLoading) return <LoadingState />;
+  if (products.isLoading) return <RowsSkeleton rows={2} height={360} />;
   if (products.isError) return <ErrorState error={products.error} onRetry={() => void products.refetch()} />;
   if (!products.data?.length) return <EmptyState title="Продуктов пока нет" />;
   return (

@@ -52,7 +52,7 @@ export function DecisionPanel({ application }: { application: BankApplication })
       queryClient.setQueryData(["bank-application", application.id], updated);
       void queryClient.invalidateQueries({ queryKey: ["queue"] });
       void queryClient.invalidateQueries({ queryKey: ["stats"] });
-      notifications.show({ color: "lime", title: "Решение принято", message: `Клиент увидит его у себя: «${updated.status_label}».` });
+      notifications.show({ color: "lime", title: `Готово: «${actions.find((item) => item.code === action)?.label ?? "Решение"}»`, message: `Клиент увидит новый статус у себя: «${updated.status_label}».`, autoClose: 4000 });
       setComment("");
       setConfirming(false);
     },
