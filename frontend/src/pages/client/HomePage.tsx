@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { api, call, type Application } from "../../api/client";
 import { useAuth } from "../../auth/AuthContext";
-import { EmptyState, ErrorState, LoadingState } from "../../components/States";
+import { EmptyState, ErrorState, RowsSkeleton } from "../../components/States";
 import { COLORS, RADIUS } from "../../theme";
 import { dateTime, money, months } from "../../utils/format";
 
@@ -138,7 +138,7 @@ function Feed() {
     <Card>
       <Stack gap="md">
         <Title order={3}>Подсказки для вас</Title>
-        {feed.isLoading && <LoadingState />}
+        {feed.isLoading && <RowsSkeleton rows={3} height={140} />}
         {feed.isError && <ErrorState error={feed.error} onRetry={() => void feed.refetch()} />}
         {feed.data?.length === 0 && <Text c={COLORS.textSecondary}>Пока подсказок нет.</Text>}
         {feed.data?.map((item) => (
@@ -190,7 +190,7 @@ export function HomePage() {
       <Grid gap="lg">
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Stack gap="lg">
-            {applications.isLoading && <LoadingState />}
+            {applications.isLoading && <RowsSkeleton rows={3} height={110} />}
             {applications.isError && <ErrorState error={applications.error} onRetry={() => void applications.refetch()} />}
             {current && <CurrentApplication application={current} />}
             {applications.data && (

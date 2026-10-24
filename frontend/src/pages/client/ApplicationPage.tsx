@@ -14,7 +14,7 @@ import { DocumentsBlock } from "../../components/application/DocumentsBlock";
 import { InfoRequestPanel } from "../../components/application/InfoRequestPanel";
 import { OfferCard } from "../../components/application/OfferCard";
 import { ProgressSteps } from "../../components/ProgressSteps";
-import { ErrorState, LoadingState } from "../../components/States";
+import { ApplicationSkeleton, ErrorState } from "../../components/States";
 import { Term } from "../../components/Term";
 import { Timeline } from "../../components/Timeline";
 import { MoneyFigure } from "../../components/MoneyFigure";
@@ -117,7 +117,7 @@ export function ApplicationPage() {
   const { id = "" } = useParams();
   const query = useApplication(id);
 
-  if (query.isLoading) return <LoadingState text="Загружаем заявку…" />;
+  if (query.isLoading) return <ApplicationSkeleton />;
   if (query.isError || !query.data) return <ErrorState error={query.error} onRetry={() => void query.refetch()} />;
 
   const application = query.data;

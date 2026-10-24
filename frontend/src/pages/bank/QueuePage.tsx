@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, call } from "../../api/client";
-import { EmptyState, ErrorState, LoadingState } from "../../components/States";
+import { EmptyState, ErrorState, RowsSkeleton } from "../../components/States";
 import { gradeColor } from "../../components/bank/grade";
 import { Term } from "../../components/Term";
 import { COLORS } from "../../theme";
@@ -102,7 +102,7 @@ export function QueuePage() {
             />
           </Group>
 
-          {queue.isLoading && <LoadingState />}
+          {queue.isLoading && <RowsSkeleton rows={8} height={52} />}
           {queue.isError && <ErrorState error={queue.error} onRetry={() => void queue.refetch()} />}
           {queue.data && queue.data.items.length === 0 && (
             <EmptyState
