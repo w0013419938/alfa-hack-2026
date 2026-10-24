@@ -1,0 +1,79 @@
+/* Глобальные стили. Цвета и скругления — в src/theme.ts, здесь только то, что нельзя задать темой Mantine. */
+
+body {
+  background: #f4f5f7;
+  color: #222222;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Заголовки — с межбуквенным интервалом −2%, как в макете */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Цифры в таблицах и суммах одной ширины — колонки не «прыгают» */
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Таблицы как в макете: без вертикальных линий, тонкие горизонтальные разделители */
+.clean-table th {
+  font-weight: 600;
+  color: #6b6b6b;
+  font-size: 13px;
+}
+
+.clean-table tr.row-highlight td {
+  background: rgba(239, 49, 36, 0.05);
+}
+
+.clean-table tr.row-clickable {
+  cursor: pointer;
+}
+
+.clean-table tr.row-clickable:hover td {
+  background: #f4f5f7;
+}
+
+/* Подсветка того, что только что изменилось (новый шаг, новое событие истории) */
+@keyframes just-changed {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 49, 36, 0.45);
+    background-color: rgba(239, 49, 36, 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(239, 49, 36, 0);
+    background-color: transparent;
+  }
+}
+
+.just-changed {
+  animation: just-changed 1.6s ease-out 2;
+}
+
+/* «Банк работает»: мягкая пульсация текущего шага */
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.7;
+  }
+}
+
+.pulse {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .just-changed,
+  .pulse {
+    animation: none;
+  }
+}
