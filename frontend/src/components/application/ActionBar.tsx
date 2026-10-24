@@ -48,7 +48,7 @@ export function ActionBar({ application }: { application: Application }) {
     <>
       <Group gap="sm" data-testid="actions">
         {actions.map((action) => {
-          const variant = action === primary ? "filled" : QUIET_ACTIONS.has(action.code) ? "default" : "light";
+          const variant = action === primary ? "filled" : NAVIGATION_ACTIONS.has(action.code) || QUIET_ACTIONS.has(action.code) ? "default" : "light";
           const button = (
             <Button
               key={action.code}
@@ -102,7 +102,7 @@ export function ActionBar({ application }: { application: Application }) {
               Назад
             </Button>
             <Button
-              color={confirming && QUIET_ACTIONS.has(confirming.code) ? "gray" : "brand"}
+              color={confirming && QUIET_ACTIONS.has(confirming.code) ? "dark" : "brand"}
               loading={mutation.isPending}
               disabled={Boolean(confirming?.requires_comment && !comment.trim())}
               onClick={() => {

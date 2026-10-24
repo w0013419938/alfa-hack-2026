@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal
 
 from app.core.business_config import DecisionFile
-from app.domain.formatting import format_percent
+from app.domain.formatting import format_money, format_percent
 from app.domain.payments import annuity_payment, max_amount_for_payment
 from app.domain.scoring import ScoringFacts
 from app.models.offer import OFFER_AS_REQUESTED, OFFER_COUNTER
@@ -170,7 +170,14 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
         amount_share = rule.amount_share
         reasons.append(reason("grade_counter_offer", share=format_percent(rule.amount_share * 100)))
     if too_much_debt:
-        reasons.append(reason("high_debt_load", dti=round(dti * 100), max_dti=format_percent(config.max_debt_to_income * 100)))
+        reasons.append(
+            reason(
+                "high_debt_load",
+                dti=round(dti * 100),
+                max_dti=format_percent(config.max_debt_to_income * 100),
+                current_payments=format_money(data.facts.current_loan_payments),
+            )
+        )
 
     if not reasons:
         return Decision(

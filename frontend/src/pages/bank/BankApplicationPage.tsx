@@ -22,11 +22,11 @@ type BankApplication = Schemas["BackofficeApplicationOut"];
 
 function Field({ label, value }: { label: ReactNode; value: ReactNode }) {
   return (
-    <Group justify="space-between" wrap="nowrap" py={5} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
-      <Text size="sm" c={COLORS.textSecondary}>
+    <Group justify="space-between" wrap="nowrap" align="flex-start" py={5} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+      <Text size="sm" c={COLORS.textSecondary} style={{ flexShrink: 0 }}>
         {label}
       </Text>
-      <Text size="sm" fw={500} ta="right" className="num">
+      <Text size="sm" fw={500} ta="right" style={{ overflowWrap: "anywhere" }}>
         {value ?? "—"}
       </Text>
     </Group>

@@ -96,9 +96,11 @@ export function OfferCard({ application }: { application: Application }) {
             {explanation}
           </Alert>
         )}
-        <Text size="sm" c={COLORS.textSecondary}>
-          Предложение действует до {dateTime(offer.valid_until)}.
-        </Text>
+        {offer.status === "active" && (
+          <Text size="sm" c={COLORS.textSecondary}>
+            Предложение действует до {dateTime(offer.valid_until)}.
+          </Text>
+        )}
       </Stack>
     </Card>
   );
