@@ -11,7 +11,7 @@ test("ручное рассмотрение: сотрудник одобряет
 
   const employee = await newClientPage(browser, "employee");
   await employee.getByTestId("filter-manual").click();
-  await employee.getByTestId("queue-row").filter({ hasText: number }).click();
+  await employee.locator(`[data-testid="queue-row"][data-number="${number}"]`).click();
   await expect(employee.getByTestId("scoring")).toBeVisible();
   await expect(employee.getByTestId("check-bki")).toBeVisible();
 
@@ -40,7 +40,7 @@ test("запрос уточнений сотрудником → клиент з
 
   const employee = await newClientPage(browser, "employee");
   await employee.getByTestId("filter-manual").click();
-  await employee.getByTestId("queue-row").filter({ hasText: number }).click();
+  await employee.locator(`[data-testid="queue-row"][data-number="${number}"]`).click();
   await employee.getByTestId("decision-actions").getByText("Запросить уточнения").click();
   await employee.getByTestId("request-documents").click();
   await employee.getByRole("option", { name: "Бухгалтерская или налоговая отчётность" }).click();

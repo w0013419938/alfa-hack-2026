@@ -1,11 +1,13 @@
 /** Форматирование чисел и дат для показа (без вычислений — только вид). */
 
-const moneyFormat = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+const moneyFormat = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const roundMoneyFormat = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
 
 export function money(value: number | null | undefined, round = false): string {
   if (value === null || value === undefined) return "—";
-  return `${(round ? roundMoneyFormat : moneyFormat).format(value)} ₽`;
+  // Копейки показываем, только если они есть: «1 500 000 ₽», но «54 213,15 ₽» и «115,60 ₽»
+  const whole = Number.isInteger(value);
+  return `${(round || whole ? roundMoneyFormat : moneyFormat).format(value)} ₽`;
 }
 
 export function percent(value: number | null | undefined): string {
