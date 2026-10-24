@@ -1,11 +1,12 @@
 /** Очередь заявок сотрудника: фильтры по статусу, продукту и грейду, пагинация, выделение ручного рассмотрения. */
-import { Badge, Button, Card, Group, MultiSelect, Pagination, Select, Stack, Table, Text, Title } from "@mantine/core";
+import { Box, Button, Card, Group, MultiSelect, Pagination, Select, Stack, Table, Text, Title } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, call } from "../../api/client";
 import { EmptyState, ErrorState, LoadingState } from "../../components/States";
+import { gradeColor } from "../../components/bank/grade";
 import { Term } from "../../components/Term";
 import { COLORS } from "../../theme";
 import { dateTime, money, months } from "../../utils/format";
@@ -14,10 +15,6 @@ import { useProducts } from "../client/ProductsPage";
 const PAGE_SIZE = 15;
 const GRADES = ["A", "B", "C", "D", "E"];
 
-// Бейджи в узкой таблице переносят текст, а не обрезают его многоточием
-const BADGE_NO_TRUNCATE = { root: { height: "auto", paddingBlock: 2 }, label: { whiteSpace: "normal" as const, overflow: "visible", textOverflow: "clip" } };
-
-export const GRADE_COLOR: Record<string, string> = { A: "lime", B: "lime", C: "yellow", D: "violet", E: "brand" };
 
 export function QueuePage() {
   const navigate = useNavigate();
@@ -60,7 +57,7 @@ export function QueuePage() {
         <Stack gap={4}>
           <Title order={1}>Очередь заявок</Title>
           <Text c={COLORS.textSecondary} size="lg">
-            Заявки на ручном рассмотрении выделены цветом: по ним нужно ваше решение.
+            Красная точка у заявок, по которым нужно ваше решение.
           </Text>
         </Stack>
         <Button
@@ -107,7 +104,19 @@ export function QueuePage() {
 
           {queue.isLoading && <LoadingState />}
           {queue.isError && <ErrorState error={queue.error} onRetry={() => void queue.refetch()} />}
-          {queue.data && queue.data.items.length === 0 && <EmptyState title="Заявок не найдено" text="Попробуйте убрать часть фильтров." />}
+          {queue.data && queue.data.items.length === 0 && (
+            <EmptyState
+              title="Заявок не найдено"
+              text="Под выбранные фильтры заявок нет."
+              action={
+                params.toString() ? (
+                  <Button variant="default" onClick={() => setParams(new URLSearchParams(), { replace: true })}>
+                    Сбросить фильтры
+                  </Button>
+                ) : undefined
+              }
+            />
+          )}
           {queue.data && queue.data.items.length > 0 && (
             <Table.ScrollContainer minWidth={600}>
               <Table className="clean-table" verticalSpacing="sm" highlightOnHover={false} withRowBorders data-testid="queue-table">
@@ -127,8 +136,17 @@ export function QueuePage() {
                   {queue.data.items.map((item) => (
                     <Table.Tr
                       key={item.id}
-                      className={`row-clickable ${item.status === "MANUAL_REVIEW" ? "row-highlight" : ""}`}
+                      className="row-clickable"
                       onClick={() => navigate(`/bank/applications/${item.id}`)}
+                      // Строку можно открыть и с клавиатуры: Tab до строки, затем Enter
+                      tabIndex={0}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          navigate(`/bank/applications/${item.id}`);
+                        }
+                      }}
+                      aria-label={`Заявка № ${item.number}, ${item.company_name}, ${item.status_label}`}
                       data-testid="queue-row"
                       data-status={item.status}
                       data-number={item.number}
@@ -152,15 +170,31 @@ export function QueuePage() {
                         {months(item.term_months)}
                       </Table.Td>
                       <Table.Td>
-                        <Badge variant="light" color={item.status === "MANUAL_REVIEW" ? "brand" : "gray"} styles={BADGE_NO_TRUNCATE}>
-                          {item.status_label}
-                        </Badge>
+                        {/* Ждёт решения — красная точка и жирный текст; остальные статусы спокойные */}
+                        <Group gap={8} wrap="nowrap" align="baseline">
+                          <Box
+                            w={8}
+                            h={8}
+                            style={{ borderRadius: "50%", flexShrink: 0, alignSelf: "center" }}
+                            bg={item.status === "MANUAL_REVIEW" ? COLORS.accent : "transparent"}
+                            aria-hidden
+                          />
+                          <Text size="sm" fw={item.status === "MANUAL_REVIEW" ? 600 : 400} c={item.is_final ? COLORS.textSecondary : COLORS.text}>
+                            {item.status_label}
+                          </Text>
+                        </Group>
                       </Table.Td>
                       <Table.Td>
                         {item.grade ? (
-                          <Badge color={GRADE_COLOR[item.grade] ?? "gray"} variant="light" styles={BADGE_NO_TRUNCATE}>
-                            {item.grade}, {item.score} б.
-                          </Badge>
+                          <Text size="sm" className="num" style={{ whiteSpace: "nowrap" }}>
+                            <Text span fw={700} c={gradeColor(item.grade)}>
+                              {item.grade}
+                            </Text>
+                            <Text span c={COLORS.textSecondary}>
+                              {" "}
+                              {item.score} б.
+                            </Text>
+                          </Text>
                         ) : (
                           <Text size="sm" c={COLORS.textSecondary}>
                             —

@@ -58,6 +58,7 @@ test("@screenshots ключевые экраны", async ({ page, browser }) => 
   const number = await applicationNumber(border);
 
   const employee = await newClientPage(browser, "employee");
+  await expect(employee.getByTestId("queue-row").first()).toBeVisible();
   await employee.screenshot({ path: `${DIR}/08-bank-queue.png`, fullPage: true });
   await employee.locator(`[data-testid="queue-row"][data-number="${number}"]`).click();
   await expect(employee.getByTestId("scoring")).toBeVisible();

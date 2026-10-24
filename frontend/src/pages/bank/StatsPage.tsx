@@ -46,7 +46,7 @@ export function StatsPage() {
           <Table className="clean-table" verticalSpacing="xs">
             <Table.Tbody>
               {data.by_status.map((item) => (
-                <Table.Tr key={item.status} className={item.status === "MANUAL_REVIEW" ? "row-highlight" : undefined}>
+                <Table.Tr key={item.status}>
                   <Table.Td w="35%">{item.label}</Table.Td>
                   <Table.Td>
                     <Box h={10} w={`${(item.count / maxCount) * 100}%`} miw={item.count ? 6 : 0} bg={item.status === "MANUAL_REVIEW" ? COLORS.accent : "#C9CBD2"} style={{ borderRadius: 6 }} />

@@ -11,12 +11,12 @@ import { Link, useParams } from "react-router-dom";
 
 import { api, call, downloadFile, errorText, type Schemas } from "../../api/client";
 import { DecisionPanel } from "../../components/bank/DecisionPanel";
-import { ScoringBars } from "../../components/bank/ScoringBars";
+import { ScoringBars, ScoringSummary } from "../../components/bank/ScoringBars";
 import { ProgressSteps } from "../../components/ProgressSteps";
 import { ErrorState, LoadingState } from "../../components/States";
 import { Term } from "../../components/Term";
 import { COLORS, RADIUS } from "../../theme";
-import { date, dateTime, money, months, percent } from "../../utils/format";
+import { date, dateTime, money, months } from "../../utils/format";
 
 type BankApplication = Schemas["BackofficeApplicationOut"];
 
@@ -83,21 +83,19 @@ export function BankApplicationPage() {
       </Anchor>
 
       <Card>
-        <Stack gap="sm">
-          <Group justify="space-between" wrap="wrap">
+        <Stack gap="lg">
+          <Stack gap="sm">
             <Text c={COLORS.textSecondary}>
               Заявка № {application.number}, {application.company.name}, {application.product.name.toLowerCase()}
             </Text>
-            {application.scoring && (
-              <Badge size="lg" variant="light" color="gray">
-                <Term id="grade">Грейд</Term> {application.scoring.grade}, {application.scoring.total_score} баллов
-              </Badge>
-            )}
-          </Group>
-          <Title order={1} data-testid="status-label" data-status={application.status}>
-            {application.status_label}
-          </Title>
-          <Text size="lg">{application.status_description}</Text>
+            <Title order={1} data-testid="status-label" data-status={application.status} aria-live="polite">
+              {application.status_label}
+            </Title>
+            <Text size="lg">{application.status_description}</Text>
+          </Stack>
+          <Box pt="lg" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+            <ScoringSummary application={application} />
+          </Box>
         </Stack>
       </Card>
 
@@ -108,30 +106,10 @@ export function BankApplicationPage() {
       <Grid gap="lg">
         <Grid.Col span={{ base: 12, md: 8 }} order={{ base: 2, md: 1 }}>
           <Stack gap="lg">
-            {application.decision && (
-              <Card>
-                <Stack gap="xs">
-                  <Title order={3}>Автоматическое решение</Title>
-                  <Text fw={600}>{application.decision.outcome_label}</Text>
-                  <List size="sm">
-                    {application.decision.reasons.map((reason) => (
-                      <List.Item key={reason.code}>{reason.text}</List.Item>
-                    ))}
-                  </List>
-                  {application.suggested_offer && (
-                    <Text size="sm" c={COLORS.textSecondary} className="num">
-                      Расчёт по запрошенным условиям: {money(application.suggested_offer.amount)} на {months(application.suggested_offer.term_months)} под{" "}
-                      {percent(application.suggested_offer.rate)}, платёж {money(application.suggested_offer.monthly_payment)} в месяц.
-                    </Text>
-                  )}
-                </Stack>
-              </Card>
-            )}
-
             <Card>
               <Stack gap="md">
                 <Title order={3}>
-                  <Term id="scoring">Скоринг</Term>
+                  <Term id="scoring">Скоринг</Term>: из чего сложилась оценка
                 </Title>
                 {application.scoring ? <ScoringBars scoring={application.scoring} /> : <Text c={COLORS.textSecondary}>Скоринг ещё не проводился.</Text>}
               </Stack>
