@@ -71,7 +71,9 @@ export function ActionBar({ application }: { application: Application }) {
           );
         })}
       </Group>
-      {actions.map(
+      {/* Почему кнопка неактивна. Если открыт запрос уточнений, это уже объясняет блок «Что нужно от вас» */}
+      {!application.info_request?.is_open &&
+        actions.map(
         (action) =>
           !action.enabled &&
           action.disabled_reason && (

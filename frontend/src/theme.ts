@@ -46,7 +46,9 @@ const violet: MantineColorsTuple = [
 
 export const theme = createTheme({
   primaryColor: "brand",
-  primaryShade: 6,
+  // Заливка кнопок — оттенок 7 (#D52418): белый текст на нём даёт контраст около 5:1 (WCAG AA),
+  // а на фирменном #EF3124 только 4.1:1. Сам #EF3124 остаётся акцентом шкалы, сумм и логотипа
+  primaryShade: 7,
   colors: { brand: red, lime, violet },
   black: COLORS.text,
   fontFamily: "'Golos Text', system-ui, -apple-system, 'Segoe UI', sans-serif",

@@ -24,45 +24,45 @@ export function Layout() {
     <Box bg={COLORS.page} mih="100vh">
       <Box component="header" bg={COLORS.card} style={{ borderBottom: `1px solid ${COLORS.border}` }}>
         <Container size="xl" py="sm">
+          {/* До 992px: логотип и «Выйти» в первой строке, разделы второй строкой (см. .header-nav в global.css) */}
           <Group justify="space-between" wrap="wrap" gap="sm">
-            <Group gap="lg" wrap="wrap">
-              <Group gap={10}>
-                <Box
-                  w={36}
-                  h={36}
-                  bg={COLORS.accent}
-                  style={{ borderRadius: 12, display: "grid", placeItems: "center", color: "white", fontWeight: 700 }}
+            <Group gap={10} wrap="nowrap">
+              <Box
+                w={36}
+                h={36}
+                bg={COLORS.accent}
+                style={{ borderRadius: 12, display: "grid", placeItems: "center", color: "white", fontWeight: 700 }}
+                aria-hidden
+              >
+                К
+              </Box>
+              <Text fw={700} size="lg">
+                Кредитный кабинет
+              </Text>
+            </Group>
+            <Group gap="xs" component="nav" className="header-nav" aria-label="Разделы">
+              {links.map((link) => (
+                <Anchor
+                  key={link.to}
+                  component={NavLink}
+                  to={link.to}
+                  end={link.end}
+                  underline="never"
+                  c={COLORS.text}
+                  px="sm"
+                  py={10}
+                  style={({ isActive }: { isActive: boolean }) => ({
+                    borderRadius: RADIUS.control,
+                    fontWeight: 500,
+                    background: isActive ? COLORS.page : "transparent",
+                  })}
                 >
-                  К
-                </Box>
-                <Text fw={700} size="lg">
-                  Кредитный кабинет
-                </Text>
-              </Group>
-              <Group gap="xs" component="nav">
-                {links.map((link) => (
-                  <Anchor
-                    key={link.to}
-                    component={NavLink}
-                    to={link.to}
-                    end={link.end}
-                    underline="never"
-                    c={COLORS.text}
-                    px="sm"
-                    py={6}
-                    style={({ isActive }: { isActive: boolean }) => ({
-                      borderRadius: RADIUS.control,
-                      fontWeight: 500,
-                      background: isActive ? COLORS.page : "transparent",
-                    })}
-                  >
-                    {link.label}
-                  </Anchor>
-                ))}
-              </Group>
+                  {link.label}
+                </Anchor>
+              ))}
             </Group>
             {user && (
-              <Group gap="md" wrap="nowrap">
+              <Group gap="md" wrap="nowrap" className="header-user">
                 <Stack gap={0} align="flex-end">
                   <Text size="sm" fw={600} data-testid="current-user">
                     {user.full_name}

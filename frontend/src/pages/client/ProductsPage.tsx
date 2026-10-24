@@ -187,7 +187,8 @@ function Picker() {
           {recommend.data.some((item) => item.suitable) ? null : (
             <Text c={COLORS.textSecondary}>Под эти условия ни один продукт не подходит полностью. Ниже видно, что можно изменить.</Text>
           )}
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+          {/* Карточки разной высоты (у подходящей есть калькулятор) не растягиваются друг под друга */}
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg" style={{ alignItems: "start" }}>
             {recommend.data.map((item) => (
               <Recommendation key={item.product.code} item={item} request={request} />
             ))}
@@ -204,7 +205,7 @@ function Catalog() {
   if (products.isError) return <ErrorState error={products.error} onRetry={() => void products.refetch()} />;
   if (!products.data?.length) return <EmptyState title="Продуктов пока нет" />;
   return (
-    <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+    <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg" style={{ alignItems: "start" }}>
       {products.data.map((product) => (
         <ProductCard key={product.code} product={product} />
       ))}

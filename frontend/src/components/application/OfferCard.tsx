@@ -26,7 +26,8 @@ function Figure({ label, value }: { label: ReactNode; value: number | null | und
   );
 }
 
-export function OfferCard({ application }: { application: Application }) {
+/** actions — кнопки «Принять / Отказаться»: стоят прямо под условиями, чтобы решение принималось рядом с цифрами */
+export function OfferCard({ application, actions }: { application: Application; actions?: ReactNode }) {
   const offer = application.offer;
   if (!offer) return null;
 
@@ -39,10 +40,6 @@ export function OfferCard({ application }: { application: Application }) {
     { key: "term", label: <Term id="term">Срок</Term>, asked: months(application.term_months), offered: months(offer.term_months), changed: offer.term_months !== application.term_months },
     { key: "rate", label: <Term id="rate">Ставка</Term>, asked: "—", offered: `${percent(offer.rate)} годовых`, changed: false },
   ];
-  // Объяснение ставим после последней изменённой строки — рядом с теми цифрами, которые оно объясняет
-  // (если сумма и срок те же, а изменилась только ставка, — после строки ставки)
-  const changedIndex = rows.map((row) => row.changed).lastIndexOf(true);
-  const lastChanged = changedIndex === -1 ? rows.length - 1 : changedIndex;
 
   return (
     <Card data-testid="offer">
@@ -85,7 +82,7 @@ export function OfferCard({ application }: { application: Application }) {
           <Text size="sm" fw={600} ta="right">
             Банк предлагает
           </Text>
-          {rows.map((row, index) => (
+          {rows.map((row) => (
             <Fragment key={row.key}>
               <Text c={COLORS.textSecondary}>{row.label}</Text>
               <Text
@@ -103,24 +100,23 @@ export function OfferCard({ application }: { application: Application }) {
               <Text className="num" ta="right" fw={600} c={row.changed ? COLORS.accentText : COLORS.text} data-changed={row.changed || undefined}>
                 {row.offered}
               </Text>
-              {index === lastChanged && explanation && isCounter && (
-                <Box
-                  style={{ gridColumn: "1 / -1", borderLeft: `3px solid ${COLORS.attention}`, borderRadius: 4 }}
-                  bg={COLORS.card}
-                  px="md"
-                  py="sm"
-                >
-                  <Text size="sm" fw={600} c={COLORS.attentionText}>
-                    Почему условия изменены
-                  </Text>
-                  <Text size="sm" mt={2}>
-                    {explanation}
-                  </Text>
-                </Box>
-              )}
             </Fragment>
           ))}
         </Box>
+
+        {/* Объяснение сразу под сравнением: изменённые строки выделены выше, здесь — почему */}
+        {explanation && isCounter && (
+          <Box style={{ borderLeft: `3px solid ${COLORS.attention}`, borderRadius: 4 }} px="md" py={4}>
+            <Text size="sm" fw={600} c={COLORS.attentionText}>
+              Почему условия изменены
+            </Text>
+            <Text size="sm" mt={2}>
+              {explanation}
+            </Text>
+          </Box>
+        )}
+
+        {actions}
 
         <Text size="sm" c={COLORS.textSecondary}>
           {offer.status === "active" ? `Предложение действует до ${dateTime(offer.valid_until)}.` : `Предложение: ${offer.status_label.toLowerCase()}.`}
