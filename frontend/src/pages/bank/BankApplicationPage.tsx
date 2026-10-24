@@ -121,7 +121,7 @@ export function BankApplicationPage() {
                   {application.suggested_offer && (
                     <Text size="sm" c={COLORS.textSecondary} className="num">
                       Расчёт по запрошенным условиям: {money(application.suggested_offer.amount)} на {months(application.suggested_offer.term_months)} под{" "}
-                      {percent(application.suggested_offer.rate)} — платёж {money(application.suggested_offer.monthly_payment)} в месяц.
+                      {percent(application.suggested_offer.rate)}, платёж {money(application.suggested_offer.monthly_payment)} в месяц.
                     </Text>
                   )}
                 </Stack>

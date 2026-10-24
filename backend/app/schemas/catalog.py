@@ -49,7 +49,7 @@ class RecommendRequest(BaseModel):
     amount: Decimal = Field(gt=0, le=1_000_000_000, examples=[1500000])
     term_months: int = Field(gt=0, le=360, examples=[24])
     urgency: Literal["asap", "week", "month"] = Field(
-        default="week", description="Как быстро нужны деньги: asap — срочно, week — в течение недели, month — в течение месяца"
+        default="week", description="Как быстро нужны деньги: asap значит срочно, week в течение недели, month в течение месяца"
     )
     has_collateral: bool = Field(default=False, description="Есть ли залог (недвижимость, транспорт, оборудование)")
 

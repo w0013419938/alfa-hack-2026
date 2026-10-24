@@ -39,12 +39,12 @@ class ApplicationUpdate(BaseModel):
     monthly_revenue: Decimal | None = Field(default=None, ge=0, le=10_000_000_000)
     monthly_expenses: Decimal | None = Field(default=None, ge=0, le=10_000_000_000)
     current_loan_payments: Decimal | None = Field(default=None, ge=0, le=10_000_000_000)
-    version: int | None = Field(default=None, description="Версия заявки из последнего ответа. Если передана и не совпадает — 409.")
+    version: int | None = Field(default=None, description="Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409.")
 
 
 class ClientActionRequest(BaseModel):
     comment: str | None = Field(default=None, max_length=2000, description="Необязательный комментарий (например, к уточнениям)")
-    version: int | None = Field(default=None, description="Версия заявки из последнего ответа. Если передана и не совпадает — 409.")
+    version: int | None = Field(default=None, description="Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409.")
 
 
 # ---------- Ответы ----------

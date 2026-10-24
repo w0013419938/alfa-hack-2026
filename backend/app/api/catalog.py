@@ -115,13 +115,13 @@ def calculator(
         raise AppError("Такого кредитного продукта нет. Выберите продукт из списка.", code="unknown_product")
     if not item.min_amount <= amount <= item.max_amount:
         raise AppError(
-            f"Сумма для продукта «{item.name}» — от {format_money(item.min_amount)} до {format_money(item.max_amount)} ₽.",
+            f"Сумма для продукта «{item.name}» от {format_money(item.min_amount)} до {format_money(item.max_amount)} ₽.",
             code="amount_out_of_range",
             details={"min_amount": float(item.min_amount), "max_amount": float(item.max_amount)},
         )
     if not item.min_term_months <= term <= item.max_term_months:
         raise AppError(
-            f"Срок для продукта «{item.name}» — от {item.min_term_months} до {item.max_term_months} мес.",
+            f"Срок для продукта «{item.name}» от {item.min_term_months} до {item.max_term_months} мес.",
             code="term_out_of_range",
             details={"min_term_months": item.min_term_months, "max_term_months": item.max_term_months},
         )

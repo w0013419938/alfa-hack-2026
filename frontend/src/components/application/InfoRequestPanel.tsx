@@ -32,7 +32,7 @@ export function InfoRequestPanel({ application }: { application: Application }) 
               {request.fields.map((field) => (
                 <List.Item key={field.field}>
                   <b>{field.label}</b>
-                  {field.message ? ` — ${field.message}` : ""}
+                  {field.message ? `: ${field.message}` : ""}
                 </List.Item>
               ))}
             </List>
@@ -68,7 +68,7 @@ export function InfoRequestPanel({ application }: { application: Application }) 
         ))}
 
         <Text size="sm" c={COLORS.textSecondary}>
-          Когда всё будет готово, нажмите «Отправить уточнения» вверху страницы — заявка снова уйдёт на проверку.
+          Когда всё будет готово, нажмите «Отправить уточнения» вверху страницы, и заявка снова уйдёт на проверку.
         </Text>
       </Stack>
     </Card>

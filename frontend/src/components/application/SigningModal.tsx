@@ -25,8 +25,8 @@ export function SigningModal({ application, opened, onClose, signAction }: Props
     <Modal opened={opened} onClose={onClose} title="Подписание кредитного договора" size="xl" radius="lg" centered>
       <Stack>
         <Alert color="violet" radius="lg">
-          Это демо: <Term id="signing">подписание</Term> имитируется. Прочитайте договор и подтвердите согласие — после этого банк перечислит
-          деньги на счёт компании.
+          Это демо: <Term id="signing">подписание</Term> здесь имитируется. Прочитайте договор и подтвердите согласие. После этого банк
+          перечислит деньги на счёт компании.
         </Alert>
         {contract.isLoading && <LoadingState text="Готовим договор…" />}
         {contract.isError && <ErrorState error={contract.error} onRetry={() => void contract.refetch()} />}

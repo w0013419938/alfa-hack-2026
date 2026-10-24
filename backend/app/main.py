@@ -31,14 +31,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Умный кредитный кабинет предпринимателя — API",
+    title="Умный кредитный кабинет предпринимателя: API",
     version="0.1.0",
     description=(
         "Бэкенд прототипа цифрового кредитного конвейера для малого и микробизнеса.\n\n"
         "**Как начать:** `POST /api/v1/auth/login` с логином `client_good` и паролем `client_good123`, "
-        "скопируйте `access_token`, нажмите **Authorize** и вставьте токен. Все учётки — в README.\n\n"
-        "Каждый ответ с заявкой содержит `status_label`, `status_description`, `available_actions` и `timeline` — "
-        "фронту не нужно ничего вычислять самому."
+        "скопируйте `access_token`, нажмите **Authorize** и вставьте токен. Все учётки перечислены в README.\n\n"
+        "Каждый ответ с заявкой содержит `status_label`, `status_description`, `available_actions`, `progress` и `timeline`, "
+        "так что фронту не нужно ничего вычислять самому."
     ),
     lifespan=lifespan,
     docs_url=None,  # Swagger UI и ReDoc отдаём ниже с закреплёнными версиями
@@ -54,7 +54,7 @@ REDOC_VERSION = "2.1.5"
 def swagger_ui():
     return get_swagger_ui_html(
         openapi_url=app.openapi_url,
-        title=f"{app.title} — Swagger UI",
+        title=f"{app.title}, Swagger UI",
         swagger_js_url=f"https://cdn.jsdelivr.net/npm/swagger-ui-dist@{SWAGGER_UI_VERSION}/swagger-ui-bundle.js",
         swagger_css_url=f"https://cdn.jsdelivr.net/npm/swagger-ui-dist@{SWAGGER_UI_VERSION}/swagger-ui.css",
         swagger_ui_parameters={"persistAuthorization": True},
@@ -65,7 +65,7 @@ def swagger_ui():
 def redoc():
     return get_redoc_html(
         openapi_url=app.openapi_url,
-        title=f"{app.title} — ReDoc",
+        title=f"{app.title}, ReDoc",
         redoc_js_url=f"https://cdn.jsdelivr.net/npm/redoc@{REDOC_VERSION}/bundles/redoc.standalone.js",
     )
 

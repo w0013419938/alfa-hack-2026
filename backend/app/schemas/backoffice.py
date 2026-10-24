@@ -26,7 +26,7 @@ class EmployeeActionRequest(BaseModel):
     rate: Decimal | None = Field(default=None, gt=0, le=100, description="Ставка, % годовых")
     requested_fields: list[str] = Field(default_factory=list, description="Коды полей анкеты, которые нужно исправить")
     requested_documents: list[str] = Field(default_factory=list, description="Коды видов документов, которые нужно загрузить")
-    version: int | None = Field(default=None, description="Версия заявки из последнего ответа. Если передана и не совпадает — 409.")
+    version: int | None = Field(default=None, description="Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409.")
 
 
 class CheckOut(BaseModel):
