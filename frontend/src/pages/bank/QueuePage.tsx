@@ -128,6 +128,7 @@ export function QueuePage() {
                       onClick={() => navigate(`/bank/applications/${item.id}`)}
                       data-testid="queue-row"
                       data-status={item.status}
+                      data-number={item.number}
                     >
                       <Table.Td className="num" fw={600}>
                         {item.number}

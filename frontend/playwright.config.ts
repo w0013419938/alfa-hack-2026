@@ -12,7 +12,9 @@ export default defineConfig({
   fullyParallel: true,
   workers: 3,
   retries: 0,
-  reporter: [["list"], ["html", { open: "never", outputFolder: "test-results/report" }]],
+  // Скриншоты для документации снимаются отдельно: SCREENSHOTS=1 npx playwright test --grep @screenshots
+  grepInvert: process.env.SCREENSHOTS ? undefined : /@screenshots/,
+  reporter: [["list"]],
   use: {
     baseURL: process.env.BASE_URL ?? "http://localhost:3000",
     locale: "ru-RU",
