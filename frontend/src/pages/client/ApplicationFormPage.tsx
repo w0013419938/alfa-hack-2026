@@ -138,6 +138,13 @@ export function ApplicationFormPage() {
   }, [existing.data, loadedId]);
 
   const product = products.data?.find((item) => item.code === form.product_code);
+
+  // Если продукту подходит ровно одна цель, а цель не выбрана — подставляем её, чтобы не спрашивать очевидное
+  useEffect(() => {
+    if (product && !form.purpose_code && product.purposes.length === 1) {
+      setForm((current) => ({ ...current, purpose_code: product.purposes[0].code }));
+    }
+  }, [product, form.purpose_code]);
   const purposeOptions = (purposes.data ?? []).filter((item) => !product || product.purposes.some((purpose) => purpose.code === item.code));
   const selectedPurpose = purposes.data?.find((item) => item.code === form.purpose_code);
   const application = existing.data;

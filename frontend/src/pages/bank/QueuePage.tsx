@@ -14,6 +14,9 @@ import { useProducts } from "../client/ProductsPage";
 const PAGE_SIZE = 15;
 const GRADES = ["A", "B", "C", "D", "E"];
 
+// Бейджи в узкой таблице переносят текст, а не обрезают его многоточием
+const BADGE_NO_TRUNCATE = { root: { height: "auto", paddingBlock: 2 }, label: { whiteSpace: "normal" as const, overflow: "visible", textOverflow: "clip" } };
+
 export const GRADE_COLOR: Record<string, string> = { A: "lime", B: "lime", C: "yellow", D: "violet", E: "brand" };
 
 export function QueuePage() {
@@ -106,18 +109,18 @@ export function QueuePage() {
           {queue.isError && <ErrorState error={queue.error} onRetry={() => void queue.refetch()} />}
           {queue.data && queue.data.items.length === 0 && <EmptyState title="Заявок не найдено" text="Попробуйте убрать часть фильтров." />}
           {queue.data && queue.data.items.length > 0 && (
-            <Table.ScrollContainer minWidth={760}>
+            <Table.ScrollContainer minWidth={600}>
               <Table className="clean-table" verticalSpacing="sm" highlightOnHover={false} withRowBorders data-testid="queue-table">
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>№</Table.Th>
                     <Table.Th>Компания</Table.Th>
-                    <Table.Th>Продукт</Table.Th>
+                    <Table.Th visibleFrom="md">Продукт</Table.Th>
                     <Table.Th ta="right">Сумма</Table.Th>
-                    <Table.Th ta="right">Срок</Table.Th>
+                    <Table.Th ta="right" visibleFrom="lg">Срок</Table.Th>
                     <Table.Th>Статус</Table.Th>
                     <Table.Th>Грейд</Table.Th>
-                    <Table.Th>Обновлена</Table.Th>
+                    <Table.Th visibleFrom="lg">Обновлена</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -141,21 +144,21 @@ export function QueuePage() {
                           ИНН {item.company_inn}
                         </Text>
                       </Table.Td>
-                      <Table.Td>{item.product.name}</Table.Td>
+                      <Table.Td visibleFrom="md">{item.product.name}</Table.Td>
                       <Table.Td ta="right" className="num">
                         {money(item.amount, true)}
                       </Table.Td>
-                      <Table.Td ta="right" className="num">
+                      <Table.Td ta="right" className="num" visibleFrom="lg">
                         {months(item.term_months)}
                       </Table.Td>
                       <Table.Td>
-                        <Badge variant="light" color={item.status === "MANUAL_REVIEW" ? "brand" : "gray"}>
+                        <Badge variant="light" color={item.status === "MANUAL_REVIEW" ? "brand" : "gray"} styles={BADGE_NO_TRUNCATE}>
                           {item.status_label}
                         </Badge>
                       </Table.Td>
                       <Table.Td>
                         {item.grade ? (
-                          <Badge color={GRADE_COLOR[item.grade] ?? "gray"} variant="light">
+                          <Badge color={GRADE_COLOR[item.grade] ?? "gray"} variant="light" styles={BADGE_NO_TRUNCATE}>
                             {item.grade} · {item.score}
                           </Badge>
                         ) : (
@@ -164,7 +167,7 @@ export function QueuePage() {
                           </Text>
                         )}
                       </Table.Td>
-                      <Table.Td>
+                      <Table.Td visibleFrom="lg">
                         <Text size="sm" c={COLORS.textSecondary}>
                           {dateTime(item.updated_at)}
                         </Text>

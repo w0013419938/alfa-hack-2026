@@ -3,7 +3,7 @@
  * Пока заявка не в финальном статусе, она опрашивается каждые 3 секунды: статус, шкала этапов и история
  * обновляются на глазах, без перезагрузки страницы.
  */
-import { Anchor, Badge, Box, Card, Grid, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Alert, Anchor, Badge, Box, Card, Grid, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
@@ -36,6 +36,16 @@ function currentState(application: Application): { state: string; label: string 
   const step = application.progress.find((item) => item.state !== "done" && item.state !== "upcoming");
   if (step) return { state: step.state, label: step.state_label };
   return application.is_final ? { state: "done", label: "Готово" } : null;
+}
+
+/**
+ * Последнее пояснение банка, которое важно показать сразу под статусом: причина отказа или комментарий специалиста.
+ * Для остальных статусов пояснения уже есть в отдельных блоках (предложение, запрос уточнений).
+ */
+function latestBankMessage(application: Application): string | null {
+  if (application.status !== "REJECTED" && application.status !== "MANUAL_REVIEW") return null;
+  const last = application.timeline[application.timeline.length - 1];
+  return last?.status === application.status ? (last.comment ?? null) : null;
 }
 
 const STATE_COLOR: Record<string, string> = { current: "brand", action: "violet", stopped: "gray", done: "lime" };
@@ -110,6 +120,11 @@ export function ApplicationPage() {
           <Text size="lg" maw={760} data-testid="status-description">
             {application.status_description}
           </Text>
+          {latestBankMessage(application) && (
+            <Alert color={application.status === "REJECTED" ? "gray" : "violet"} radius="lg" title="Сообщение банка" maw={760} data-testid="bank-message">
+              {latestBankMessage(application)}
+            </Alert>
+          )}
           {!application.is_final && (
             <Text size="xs" c={COLORS.textSecondary}>
               Страница обновляется сама каждые 3 секунды

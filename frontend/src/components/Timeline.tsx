@@ -39,7 +39,7 @@ export function Timeline({ items }: { items: Item[] }) {
               <Text fw={600}>{item.title}</Text>
               {item.comment && <Text size="sm">{item.comment}</Text>}
               <Text size="xs" c={COLORS.textSecondary}>
-                {item.actor} · статус «{item.status_label}»
+                {item.actor}
               </Text>
             </Stack>
             <Text size="xs" c={COLORS.textSecondary} style={{ whiteSpace: "nowrap" }}>

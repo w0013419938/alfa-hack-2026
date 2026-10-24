@@ -75,6 +75,8 @@ export function DocumentsBlock({ application }: { application: Application }) {
     queryKey: ["documents", application.id, application.documents_count],
     queryFn: () => call(api.GET("/api/v1/applications/{application_id}/documents", { params: { path: { application_id: application.id } } })),
   });
+  // Если банк попросил конкретные документы, загрузка — в блоке «Что нужно от вас»; здесь — только для прочих файлов
+  const requestedDocuments = (application.info_request?.documents.length ?? 0) > 0;
   const canUpload = application.available_actions.some((action) => action.code === "upload_document" && action.enabled);
 
   return (
@@ -114,7 +116,7 @@ export function DocumentsBlock({ application }: { application: Application }) {
           </Group>
         ))}
         {canUpload && (
-          <Alert color="gray" radius="lg" variant="light" title="Загрузить документ">
+          <Alert color="gray" radius="lg" variant="light" title={requestedDocuments ? "Другие документы (необязательно)" : "Загрузить документ"}>
             <UploadForm application={application} />
           </Alert>
         )}
