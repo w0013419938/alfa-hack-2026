@@ -159,7 +159,7 @@ export function QueuePage() {
                       <Table.Td>
                         {item.grade ? (
                           <Badge color={GRADE_COLOR[item.grade] ?? "gray"} variant="light" styles={BADGE_NO_TRUNCATE}>
-                            {item.grade} · {item.score}
+                            {item.grade}, {item.score} б.
                           </Badge>
                         ) : (
                           <Text size="sm" c={COLORS.textSecondary}>

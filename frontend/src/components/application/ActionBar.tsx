@@ -76,7 +76,7 @@ export function ActionBar({ application }: { application: Application }) {
           !action.enabled &&
           action.disabled_reason && (
             <Text key={`${action.code}-reason`} size="sm" c="violet.7" mt="xs">
-              {action.label}: {action.disabled_reason}
+              {action.label}: {action.disabled_reason.charAt(0).toLowerCase() + action.disabled_reason.slice(1)}
             </Text>
           ),
       )}

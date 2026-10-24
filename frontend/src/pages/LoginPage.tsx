@@ -121,8 +121,8 @@ export function LoginPage() {
                           {account.scenario}
                         </Text>
                       </Stack>
-                      <Text size="xs" ff="monospace" c={COLORS.accent} style={{ whiteSpace: "nowrap" }}>
-                        {busy === account.login ? "входим…" : account.login}
+                      <Text size="xs" c={COLORS.textSecondary} style={{ whiteSpace: "nowrap" }}>
+                        {busy === account.login ? "Входим…" : account.login}
                       </Text>
                     </Group>
                   </UnstyledButton>

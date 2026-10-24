@@ -66,7 +66,8 @@ export const theme = createTheme({
     Select: { defaultProps: { radius: "md", size: "md" } },
     Textarea: { defaultProps: { radius: "md", size: "md" } },
     PasswordInput: { defaultProps: { radius: "md", size: "md" } },
-    Badge: { defaultProps: { radius: "md" } },
+    // Бейджи обычным регистром: капслок хуже читается и выглядит шаблонно
+    Badge: { defaultProps: { radius: "md" }, styles: { root: { textTransform: "none", fontWeight: 600 } } },
     Tooltip: { defaultProps: { multiline: true, w: 280, withArrow: true, events: { hover: true, focus: true, touch: true } } },
   },
 });
