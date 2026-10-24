@@ -34,6 +34,16 @@ h3 {
   background: #f4f5f7;
 }
 
+/* Карточки демо-учёток на входе: отклик на наведение — шаг тона, без тени */
+.demo-account {
+  background: #f4f5f7;
+  transition: background-color 150ms ease;
+}
+
+.demo-account:hover:not(:disabled) {
+  background: #e9eaee;
+}
+
 /* ---------- Фокус с клавиатуры ---------- */
 /* Видимое кольцо у всего, до чего можно дойти Tab: кнопки, ссылки, строки таблиц, термины с подсказкой */
 :focus-visible {
