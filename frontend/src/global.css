@@ -26,15 +26,26 @@ h3 {
   font-size: 13px;
 }
 
-.clean-table tr.row-highlight td {
-  background: rgba(239, 49, 36, 0.05);
-}
-
 .clean-table tr.row-clickable {
   cursor: pointer;
 }
 
 .clean-table tr.row-clickable:hover td {
+  background: #f4f5f7;
+}
+
+/* ---------- Фокус с клавиатуры ---------- */
+/* Видимое кольцо у всего, до чего можно дойти Tab: кнопки, ссылки, строки таблиц, термины с подсказкой */
+:focus-visible {
+  outline: 2px solid #ef3124;
+  outline-offset: 2px;
+}
+
+.clean-table tr.row-clickable:focus-visible {
+  outline-offset: -2px;
+}
+
+.clean-table tr.row-clickable:focus-visible td {
   background: #f4f5f7;
 }
 

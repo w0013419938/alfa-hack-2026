@@ -69,6 +69,7 @@ export const theme = createTheme({
     TextInput: { defaultProps: { radius: "md", size: "md" } },
     NumberInput: { defaultProps: { radius: "md", size: "md" } },
     Select: { defaultProps: { radius: "md", size: "md" } },
+    MultiSelect: { defaultProps: { radius: "md", size: "md" } },
     Textarea: { defaultProps: { radius: "md", size: "md" } },
     PasswordInput: { defaultProps: { radius: "md", size: "md" } },
     // Бейджи обычным регистром: капслок хуже читается и выглядит шаблонно
