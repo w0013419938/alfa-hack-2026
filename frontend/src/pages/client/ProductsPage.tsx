@@ -14,7 +14,6 @@ import { NumberedCard } from "../../components/NumberedCard";
 import { EmptyState, ErrorState, LoadingState } from "../../components/States";
 import { Term } from "../../components/Term";
 import { COLORS } from "../../theme";
-import { money } from "../../utils/format";
 
 type Product = Schemas["ProductOut"];
 
@@ -51,12 +50,6 @@ function ProductCard({ product, children, footer }: { product: Product; children
         </Text>
         <Group gap="xs">
           <Badge color="gray" variant="light">
-            {money(product.min_amount, true)} – {money(product.max_amount, true)}
-          </Badge>
-          <Badge color="gray" variant="light">
-            {product.min_term_months}–{product.max_term_months} мес.
-          </Badge>
-          <Badge color="gray" variant="light">
             решение ~{product.decision_days} дн.
           </Badge>
           {product.requires_collateral && (
@@ -79,6 +72,8 @@ function ProductCard({ product, children, footer }: { product: Product; children
 
 function Recommendation({ item, request }: { item: Schemas["RecommendationOut"]; request: Schemas["RecommendRequest"] }) {
   const navigate = useNavigate();
+  // Для подходящего продукта сразу показываем платёж по сумме и сроку из ответов; их можно подвигать
+  const [terms, setTerms] = useState({ amount: Number(request.amount), term: request.term_months });
   return (
     <Card style={item.suitable ? { outline: `2px solid ${COLORS.positive}` } : undefined} data-testid={`recommendation-${item.product.code}`}>
       <Stack gap="sm">
@@ -101,13 +96,21 @@ function Recommendation({ item, request }: { item: Schemas["RecommendationOut"];
             </List.Item>
           ))}
         </List>
+        {item.suitable && (
+          <Calculator
+            product={item.product}
+            initialAmount={Number(request.amount)}
+            initialTerm={request.term_months}
+            onChange={(amount, term) => setTerms({ amount, term })}
+          />
+        )}
         <Group justify="space-between" wrap="wrap">
           <Badge variant="light" size="lg">
             <Term id="rate">{item.product.rate_text}</Term>
           </Badge>
           {item.suitable && (
             <Button
-              onClick={() => navigate(applyLink(item.product, { amount: request.amount, term: request.term_months, purpose: request.purpose_code }))}
+              onClick={() => navigate(applyLink(item.product, { amount: terms.amount, term: terms.term, purpose: request.purpose_code }))}
               data-testid={`apply-recommended-${item.product.code}`}
             >
               Оформить заявку
