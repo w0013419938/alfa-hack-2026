@@ -1,7 +1,6 @@
 # Модель данных
 
-Модели SQLAlchemy — в [`backend/app/models/`](../backend/app/models/), миграции — в [`backend/alembic/versions/`](../backend/alembic/versions/).
-Все первичные ключи — UUID (кроме продукта: у него постоянный код). Деньги — `NUMERIC(16,2)`.
+Модели SQLAlchemy лежат в [`backend/app/models/`](../backend/app/models/), миграции в [`backend/alembic/versions/`](../backend/alembic/versions/). Первичные ключи везде UUID, кроме продукта: у него постоянный код. Деньги хранятся в `NUMERIC(16,2)`.
 
 ```mermaid
 erDiagram
@@ -27,7 +26,7 @@ erDiagram
         string industry "отрасль простыми словами"
         date registration_date
         string region
-        numeric annual_revenue "null — нет отчётности"
+        numeric annual_revenue "null если нет отчётности"
         int employees_count
     }
     USERS {
@@ -81,7 +80,7 @@ erDiagram
     APPLICATION_EVENTS {
         uuid id PK
         uuid application_id FK
-        string from_status "null — создание"
+        string from_status "null при создании"
         string to_status
         string action
         string actor_type "client / employee / system"
@@ -123,7 +122,7 @@ erDiagram
         numeric monthly_payment
         timestamp valid_until
         string status "active / accepted / declined / superseded"
-        uuid created_by_user_id FK "null — система"
+        uuid created_by_user_id FK "null если создала система"
         timestamp created_at
     }
     INFO_REQUESTS {
@@ -141,7 +140,7 @@ erDiagram
     DOCUMENTS {
         uuid id PK
         uuid application_id FK
-        uuid uploaded_by_user_id FK "null — сформирован системой"
+        uuid uploaded_by_user_id FK "null если сформирован системой"
         string kind "вид документа"
         string original_filename "очищенное имя"
         string stored_path "путь в UPLOAD_DIR"
@@ -153,11 +152,12 @@ erDiagram
 
 ## Пояснения
 
-- **`applications.version`** увеличивается при каждом изменении (SQLAlchemy `version_id_col`). Клиент может передать
-  `version` в `PATCH` и в действиях — если заявку уже изменили, получит 409.
-- **`application_events`** — одновременно аудит (кто, когда, из какого статуса в какой, с какими деталями) и таймлайн для клиента.
-  `comment` показывается клиенту, `payload` (коды причин решения, статусы проверок, условия предложения) — только сотруднику.
-- **Повторная обработка** (после `provide_info`) создаёт новые записи `external_checks` и `scoring_results`;
-  карточка сотрудника показывает последние. Новые предложения помечают старые как `superseded`.
-- **Продукты** синхронизируются из `config/products.yaml` при каждом старте; удалённый из конфига продукт становится `is_active = false`.
-- **Файлы документов** лежат в volume `uploads` (`UPLOAD_DIR/<id заявки>/<случайное имя>`), в БД — только метаданные.
+`applications.version` растёт при каждом изменении заявки (SQLAlchemy `version_id_col`). Клиент может передать `version` в `PATCH` и в действиях. Если заявку тем временем изменили, он получит 409.
+
+`application_events` одновременно служит аудитом (кто, когда, из какого статуса в какой и с какими подробностями) и историей заявки для клиента. Клиент видит `comment`, а `payload` с кодами причин решения, статусами проверок и условиями предложения видит только сотрудник.
+
+После `provide_info` заявка обрабатывается заново, и появляются новые записи `external_checks` и `scoring_results`. Карточка сотрудника показывает последние. Новое предложение помечает старое как `superseded`.
+
+Продукты обновляются из `config/products.yaml` при каждом старте. Продукт, удалённый из конфига, получает `is_active = false`.
+
+Файлы документов лежат в volume `uploads` по пути `UPLOAD_DIR/<id заявки>/<случайное имя>`, в базе хранятся только их метаданные.

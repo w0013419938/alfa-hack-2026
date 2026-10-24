@@ -224,7 +224,7 @@ export interface paths {
         put?: never;
         /**
          * Действие клиента: submit, cancel, provide_info, accept_offer, decline_offer, sign
-         * @description Единая точка для действий над заявкой. Какие действия доступны сейчас — смотрите в `available_actions`. Повтор уже выполненного действия (двойной клик) не ломает заявку: вернётся её текущее состояние.
+         * @description Единая точка для действий над заявкой. Какие действия доступны сейчас, видно в `available_actions`. Повтор уже выполненного действия (двойной клик) не ломает заявку: вернётся её текущее состояние.
          */
         post: operations["client_action_api_v1_applications__application_id__actions__action__post"];
         delete?: never;
@@ -245,7 +245,7 @@ export interface paths {
         put?: never;
         /**
          * Загрузить документ (PDF, JPG, PNG до 10 МБ)
-         * @description Загружать можно в статусах «Черновик» и «Нужны уточнения». Вид документа — код из `/dictionaries/document-kinds`.
+         * @description Загружать можно в статусах «Черновик» и «Нужны уточнения». Вид документа указывается кодом из `/dictionaries/document-kinds`.
          */
         post: operations["upload_document_api_v1_applications__application_id__documents_post"];
         delete?: never;
@@ -280,7 +280,7 @@ export interface paths {
         };
         /**
          * Кредитный договор (HTML)
-         * @description До подписания — проект договора по текущему предложению, после — подписанная версия.
+         * @description До подписания отдаёт проект договора по текущему предложению, после подписания подписанную версию.
          */
         get: operations["get_contract_api_v1_applications__application_id__contract_get"];
         put?: never;
@@ -336,7 +336,7 @@ export interface paths {
         put?: never;
         /**
          * Решение сотрудника: approve, counter_offer, request_info, reject
-         * @description Доступно, когда заявка в статусе MANUAL_REVIEW. Комментарий обязателен — его увидит клиент.
+         * @description Доступно, когда заявка в статусе MANUAL_REVIEW. Комментарий обязателен, его увидит клиент.
          */
         post: operations["employee_action_api_v1_backoffice_applications__application_id__actions__action__post"];
         delete?: never;
@@ -554,7 +554,7 @@ export interface components {
             current_loan_payments?: number | string | null;
             /**
              * Version
-             * @description Версия заявки из последнего ответа. Если передана и не совпадает — 409.
+             * @description Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409.
              */
             version?: number | null;
         };
@@ -768,7 +768,7 @@ export interface components {
             comment?: string | null;
             /**
              * Version
-             * @description Версия заявки из последнего ответа. Если передана и не совпадает — 409.
+             * @description Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409.
              */
             version?: number | null;
         };
@@ -917,7 +917,7 @@ export interface components {
             requested_documents?: string[];
             /**
              * Version
-             * @description Версия заявки из последнего ответа. Если передана и не совпадает — 409.
+             * @description Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409.
              */
             version?: number | null;
         };
@@ -1182,7 +1182,7 @@ export interface components {
             term_months: number;
             /**
              * Urgency
-             * @description Как быстро нужны деньги: asap — срочно, week — в течение недели, month — в течение месяца
+             * @description Как быстро нужны деньги: asap значит срочно, week в течение недели, month в течение месяца
              * @default week
              * @enum {string}
              */

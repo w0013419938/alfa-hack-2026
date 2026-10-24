@@ -151,7 +151,7 @@ def check_summary(check: ExternalCheck, company_status_labels: dict[str, str]) -
             f"Кредитный рейтинг бюро: {data.get('rating', '—')}",
             f"Действующих кредитов: {len(loans)}, платежи {format_money(payments)} ₽ в месяц",
             f"Текущая просрочка: {current_overdue} дн." if current_overdue else "Текущей просрочки нет",
-            f"Просрочек в истории: {history.get('count', 0)}, самая долгая — {history.get('max_days', 0)} дн.",
+            f"Просрочек в истории: {history.get('count', 0)}, самая долгая {history.get('max_days', 0)} дн.",
         ]
     return []
 
@@ -290,12 +290,12 @@ def check_offer_terms(application: Application, amount: Decimal, term_months: in
     product = application.product
     if not product.min_amount <= amount <= product.max_amount:
         raise AppError(
-            f"Сумма для продукта «{product.name}» — от {format_money(product.min_amount)} до {format_money(product.max_amount)} ₽.",
+            f"Сумма для продукта «{product.name}» от {format_money(product.min_amount)} до {format_money(product.max_amount)} ₽.",
             code="amount_out_of_range",
         )
     if not product.min_term_months <= term_months <= product.max_term_months:
         raise AppError(
-            f"Срок для продукта «{product.name}» — от {product.min_term_months} до {product.max_term_months} мес.",
+            f"Срок для продукта «{product.name}» от {product.min_term_months} до {product.max_term_months} мес.",
             code="term_out_of_range",
         )
     if rate < product.base_rate:
@@ -309,7 +309,7 @@ def build_employee_offer(db: Session, application: Application, action: str, bod
     amount = body.amount if body.amount is not None else application.amount
     term = body.term_months if body.term_months is not None else application.term_months
     if amount is None or term is None:
-        raise AppError("В заявке нет суммы или срока — укажите их в решении.", code="offer_terms_required")
+        raise AppError("В заявке нет суммы или срока. Укажите их в решении.", code="offer_terms_required")
     grade = grade_for_offer(latest_scoring(db, application.id))
     rate = body.rate if body.rate is not None else offer_rate(application.product.base_rate, grade, get_business_config().decision)
     check_offer_terms(application, Decimal(amount), term, Decimal(rate))

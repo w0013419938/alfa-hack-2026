@@ -23,7 +23,7 @@ export function ScoringBars({ scoring }: { scoring: Scoring }) {
           </Text>
         </Text>
         <Badge size="xl" variant="light" color="gray">
-          <Term id="grade">Грейд</Term> {scoring.grade} — {scoring.grade_label}
+          <Term id="grade">Грейд</Term> {scoring.grade}: {scoring.grade_label}
         </Badge>
       </Group>
       <Group gap="lg">

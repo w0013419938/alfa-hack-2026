@@ -1,19 +1,20 @@
 # API
 
-- Базовый URL: `http://localhost:8000/api/v1`
-- Swagger UI: http://localhost:8000/docs, ReDoc: http://localhost:8000/redoc
-- Схема OpenAPI: [`docs/openapi.json`](openapi.json) (обновить: `docker compose run --rm -v "$PWD/docs:/docs" backend python -m scripts.export_openapi /docs/openapi.json`)
-- Коллекции запросов: [`docs/requests/`](requests/)
+Базовый адрес API `http://localhost:8000/api/v1`. Через интерфейс тот же API доступен по `http://localhost:3000/api/v1`. Документация открывается в Swagger UI (http://localhost:8000/docs) и ReDoc (http://localhost:8000/redoc), схема лежит в [`docs/openapi.json`](openapi.json), коллекции запросов в [`docs/requests/`](requests/).
+
+Схему нужно перевыгрузить после изменений в API:
+
+```bash
+docker compose run --rm -v "$PWD/docs:/docs" backend python -m scripts.export_openapi /docs/openapi.json
+```
 
 ## Авторизация
 
-`POST /auth/login` с `{"login": "...", "password": "..."}` → `access_token` (JWT, живёт 60 минут).
-Дальше — заголовок `Authorization: Bearer <access_token>`. Роли: `client` (видит только свою компанию) и `employee` (бэкофис).
-5 неудачных попыток входа за минуту → `429`.
+`POST /auth/login` с телом `{"login": "...", "password": "..."}` возвращает `access_token`. Это JWT, он живёт 60 минут и передаётся в заголовке `Authorization: Bearer <access_token>`. Ролей две: `client` видит только свою компанию, `employee` работает в бэкофисе. После 5 неудачных попыток входа за минуту вход отвечает `429`.
 
 ## Формат ошибок
 
-Любая ошибка:
+Любая ошибка приходит в таком виде:
 
 ```json
 {"error": {"code": "transition_not_allowed", "message": "Действие «Принять предложение» сейчас недоступно: заявка в статусе «Черновик».", "details": {"status": "DRAFT", "action": "accept_offer"}}}
@@ -26,10 +27,10 @@
 | 403 | Не та роль | `forbidden` |
 | 404 | Не найдено (в том числе чужая заявка) | `not_found`, `unknown_action` |
 | 409 | Действие сейчас недоступно | `transition_not_allowed`, `precondition_failed`, `version_conflict`, `not_editable` |
-| 422 | Ошибка формата входных данных | `validation_error` — в `details` список `{field, message}` |
+| 422 | Ошибка формата входных данных | `validation_error`, в `details` список `{field, message}` |
 | 429 | Слишком много попыток входа | `too_many_requests` |
 
-`message` всегда на русском и его можно показывать пользователю как есть.
+Текст в `message` всегда на русском, его можно показывать пользователю как есть.
 
 ## Эндпоинты
 
@@ -59,7 +60,7 @@
 | GET | `/applications/{id}/documents` | Документы заявки |
 | POST | `/applications/{id}/documents` | Загрузка: multipart `kind` + `file` (PDF/JPG/PNG до 10 МБ) |
 | GET | `/applications/{id}/documents/{doc_id}/download` | Скачать документ |
-| GET | `/applications/{id}/contract` | Договор (HTML): проект или подписанный |
+| GET | `/applications/{id}/contract` | Договор в HTML: проект или подписанный |
 | GET | `/feed` | Персональная лента подсказок с `reason` |
 
 ### Сотрудник банка (`role = employee`)
@@ -76,14 +77,14 @@
 
 | Действие | Поля |
 |---|---|
-| `approve` | `comment`; по желанию `amount`, `term_months`, `rate` (иначе — из `suggested_offer`) |
+| `approve` | `comment`; по желанию `amount`, `term_months`, `rate` (если их нет, берутся из `suggested_offer`) |
 | `counter_offer` | `comment`, `amount`, `term_months`; по желанию `rate` |
 | `request_info` | `comment`; по желанию `requested_fields` (коды полей анкеты), `requested_documents` (коды видов документов) |
-| `reject` | `comment` — причину увидит клиент |
+| `reject` | `comment`, его клиент увидит как причину отказа |
 
 ## Заявка в ответе API
 
-Фронт ничего не вычисляет: всё нужное для экрана приходит в ответе. Пример (сокращённо):
+Всё, что нужно экрану заявки, приходит в ответе, и фронту ничего не нужно вычислять. Пример в сокращении:
 
 ```json
 {
@@ -102,6 +103,11 @@
     {"code": "decline_offer", "label": "Отказаться от предложения", "enabled": true, "disabled_reason": null, "requires_comment": false,
      "confirm_text": "Отказаться от предложения? Это действие нельзя отменить."}
   ],
+  "progress": [
+    {"code": "submitted", "label": "Подача заявки", "state": "done", "state_label": "Готово"},
+    {"code": "decision", "label": "Решение банка", "state": "action", "state_label": "Ждём вас"},
+    {"code": "signing", "label": "Подписание", "state": "upcoming", "state_label": "Впереди"}
+  ],
   "timeline": [
     {"at": "2026-10-23T11:32:12Z", "action": "create", "title": "Заявка создана", "status": "DRAFT", "status_label": "Черновик", "actor": "Вы", "comment": null},
     {"at": "2026-10-23T11:32:17Z", "action": "auto_approve", "title": "Банк одобрил заявку", "status": "OFFER_SENT", "status_label": "Есть предложение",
@@ -115,11 +121,13 @@
 }
 ```
 
-- `available_actions` — кнопки для текущего пользователя. `enabled: false` + `disabled_reason` — показать неактивной с подсказкой.
-  `confirm_text` — текст подтверждения перед действием. `edit` — показать форму анкеты (`PATCH`), `upload_document` — загрузку файлов.
-- `timeline` — история для экрана заявки; `comment` — пояснения банка (причина отказа, условия, что исправить).
-- `info_request` (в `NEEDS_INFO`) — что исправить (`fields`) и какие документы загрузить (`documents` с флагом `uploaded`).
-- `version` — передавайте в `PATCH` и действиях, чтобы не перезаписать чужие изменения.
+В `available_actions` лежат кнопки для текущего пользователя. Кнопку с `enabled: false` нужно показать неактивной и вывести рядом `disabled_reason`. Если есть `confirm_text`, перед действием показывается подтверждение. Коды `edit` и `upload_document` означают, что можно открыть форму анкеты (`PATCH`) и загрузку файлов.
+
+В `progress` семь этапов заявки по порядку. Состояние этапа: `done` (пройден), `current` (банк работает), `action` (ждём клиента), `stopped` (процесс остановился здесь) или `upcoming` (впереди). Какой статус к какому этапу относится, решает бэкенд.
+
+`timeline` содержит историю для экрана заявки. В `comment` банк пишет пояснения: причину отказа, условия, что исправить. Поле `info_request` заполнено в статусе `NEEDS_INFO`: в `fields` перечислено, что исправить, в `documents` какие документы загрузить и загружены ли они.
+
+`version` стоит передавать в `PATCH` и в действиях. Тогда чужие изменения не перезапишутся: при устаревшей версии придёт 409.
 
 ## Типовой сценарий запросов
 
@@ -130,11 +138,11 @@ GET  /calculator?product=...&amount=...&term=...    → предваритель
 POST /applications                                  → черновик (DRAFT)
 PATCH /applications/{id}                            → правки анкеты
 POST /applications/{id}/actions/submit              → SUBMITTED, дальше система
-GET  /applications/{id}  (опрос раз в 1–2 секунды)  → VALIDATION → CHECKS → SCORING → итог
+GET  /applications/{id}  (опрос раз в 3 секунды)  → VALIDATION → CHECKS → SCORING → итог
   OFFER_SENT    → POST .../actions/accept_offer → POST .../actions/sign → (система) ISSUED
   NEEDS_INFO    → PATCH / POST .../documents → POST .../actions/provide_info → снова система
   MANUAL_REVIEW → ждём решения сотрудника (POST /backoffice/applications/{id}/actions/...)
   REJECTED      → причина в timeline
 ```
 
-Опрос (`polling`) выбран для простоты; в продакшене статусы можно отдавать через WebSocket/SSE.
+Статус опрашивается, потому что так проще. В продакшене его можно отдавать через WebSocket или SSE.

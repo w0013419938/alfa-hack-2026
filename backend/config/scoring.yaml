@@ -42,10 +42,10 @@ factors:
     missing_points: 0
     missing_explanation: "Нет данных о дате регистрации"
     bins:
-      - {min: null, max: 12, points: 0, explanation: "Бизнес работает меньше года — опыта мало"}
+      - {min: null, max: 12, points: 0, explanation: "Бизнес работает меньше года, опыта пока мало"}
       - {min: 12, max: 36, points: 10, explanation: "Бизнес работает от 1 до 3 лет"}
       - {min: 36, max: 60, points: 15, explanation: "Бизнес работает от 3 до 5 лет"}
-      - {min: 60, max: null, points: 20, explanation: "Бизнес работает больше 5 лет — стабильная история"}
+      - {min: 60, max: null, points: 20, explanation: "Бизнес работает больше 5 лет, история стабильная"}
 
   - code: debt_load
     name: "Долговая нагрузка"
@@ -55,8 +55,8 @@ factors:
     bins:
       - {min: null, max: 0.3, points: 25, explanation: "Платежи по кредитам занимают меньше 30% выручки"}
       - {min: 0.3, max: 0.5, points: 15, explanation: "Платежи по кредитам занимают 30–50% выручки"}
-      - {min: 0.5, max: 0.7, points: 5, explanation: "Платежи по кредитам занимают 50–70% выручки — нагрузка высокая"}
-      - {min: 0.7, max: null, points: 0, explanation: "Платежи по кредитам занимают больше 70% выручки — нагрузка критическая"}
+      - {min: 0.5, max: 0.7, points: 5, explanation: "Платежи по кредитам занимают 50–70% выручки, нагрузка высокая"}
+      - {min: 0.7, max: null, points: 0, explanation: "Платежи по кредитам занимают больше 70% выручки, нагрузка критическая"}
 
   - code: overdue_history
     name: "Просрочки в кредитной истории"

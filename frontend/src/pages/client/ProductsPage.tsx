@@ -175,14 +175,14 @@ function Picker() {
         <Button size="lg" disabled={!ready} loading={recommend.isPending} onClick={() => recommend.mutate(request)} data-testid="recommend">
           Подобрать продукт
         </Button>
-        {!request.purpose_code && <Text c={COLORS.textSecondary}>Выберите цель — и мы подскажем, какой кредит подходит.</Text>}
+        {!request.purpose_code && <Text c={COLORS.textSecondary}>Выберите цель, и мы подскажем, какой кредит подходит.</Text>}
       </Group>
       {recommend.isError && <ErrorState error={recommend.error} />}
       {recommend.data && (
         <Stack gap="md">
           <Title order={2}>Что вам подойдёт</Title>
           {recommend.data.some((item) => item.suitable) ? null : (
-            <Text c={COLORS.textSecondary}>Под эти условия ни один продукт не подходит полностью — посмотрите, что можно изменить.</Text>
+            <Text c={COLORS.textSecondary}>Под эти условия ни один продукт не подходит полностью. Ниже видно, что можно изменить.</Text>
           )}
           <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
             {recommend.data.map((item) => (
@@ -215,7 +215,7 @@ export function ProductsPage() {
       <Stack gap={4}>
         <Title order={1}>Получить финансирование</Title>
         <Text c={COLORS.textSecondary} size="lg">
-          Ответьте на 4 вопроса — подскажем подходящий кредит. Или сразу выберите продукт из списка.
+          Ответьте на 4 вопроса, и мы подскажем подходящий кредит. Можно и сразу выбрать продукт из списка.
         </Text>
       </Stack>
       <Tabs defaultValue="picker" variant="pills" radius="md">

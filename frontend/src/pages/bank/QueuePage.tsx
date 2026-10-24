@@ -60,7 +60,7 @@ export function QueuePage() {
         <Stack gap={4}>
           <Title order={1}>Очередь заявок</Title>
           <Text c={COLORS.textSecondary} size="lg">
-            Заявки на ручном рассмотрении выделены — по ним нужно ваше решение.
+            Заявки на ручном рассмотрении выделены цветом: по ним нужно ваше решение.
           </Text>
         </Stack>
         <Button

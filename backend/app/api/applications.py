@@ -76,7 +76,7 @@ def update_application(
     response_model=ApplicationOut,
     summary="Действие клиента: submit, cancel, provide_info, accept_offer, decline_offer, sign",
     description=(
-        "Единая точка для действий над заявкой. Какие действия доступны сейчас — смотрите в `available_actions`. "
+        "Единая точка для действий над заявкой. Какие действия доступны сейчас, видно в `available_actions`. "
         "Повтор уже выполненного действия (двойной клик) не ломает заявку: вернётся её текущее состояние."
     ),
 )
@@ -104,7 +104,7 @@ def get_documents(application_id: uuid.UUID, user: User = Depends(get_current_cl
     response_model=DocumentOut,
     status_code=201,
     summary="Загрузить документ (PDF, JPG, PNG до 10 МБ)",
-    description="Загружать можно в статусах «Черновик» и «Нужны уточнения». Вид документа — код из `/dictionaries/document-kinds`.",
+    description="Загружать можно в статусах «Черновик» и «Нужны уточнения». Вид документа указывается кодом из `/dictionaries/document-kinds`.",
 )
 def upload_document(
     application_id: uuid.UUID,
@@ -134,7 +134,7 @@ def download_document(
     "/applications/{application_id}/contract",
     response_class=HTMLResponse,
     summary="Кредитный договор (HTML)",
-    description="До подписания — проект договора по текущему предложению, после — подписанная версия.",
+    description="До подписания отдаёт проект договора по текущему предложению, после подписания подписанную версию.",
 )
 def get_contract(application_id: uuid.UUID, user: User = Depends(get_current_client), db: Session = Depends(get_db)):
     application = service.get_client_application(db, user, application_id)

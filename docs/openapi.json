@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Умный кредитный кабинет предпринимателя — API",
-    "description": "Бэкенд прототипа цифрового кредитного конвейера для малого и микробизнеса.\n\n**Как начать:** `POST /api/v1/auth/login` с логином `client_good` и паролем `client_good123`, скопируйте `access_token`, нажмите **Authorize** и вставьте токен. Все учётки — в README.\n\nКаждый ответ с заявкой содержит `status_label`, `status_description`, `available_actions` и `timeline` — фронту не нужно ничего вычислять самому.",
+    "title": "Умный кредитный кабинет предпринимателя: API",
+    "description": "Бэкенд прототипа цифрового кредитного конвейера для малого и микробизнеса.\n\n**Как начать:** `POST /api/v1/auth/login` с логином `client_good` и паролем `client_good123`, скопируйте `access_token`, нажмите **Authorize** и вставьте токен. Все учётки перечислены в README.\n\nКаждый ответ с заявкой содержит `status_label`, `status_description`, `available_actions`, `progress` и `timeline`, так что фронту не нужно ничего вычислять самому.",
     "version": "0.1.0"
   },
   "paths": {
@@ -1210,7 +1210,7 @@
           "Клиент: заявки"
         ],
         "summary": "Действие клиента: submit, cancel, provide_info, accept_offer, decline_offer, sign",
-        "description": "Единая точка для действий над заявкой. Какие действия доступны сейчас — смотрите в `available_actions`. Повтор уже выполненного действия (двойной клик) не ломает заявку: вернётся её текущее состояние.",
+        "description": "Единая точка для действий над заявкой. Какие действия доступны сейчас, видно в `available_actions`. Повтор уже выполненного действия (двойной клик) не ломает заявку: вернётся её текущее состояние.",
         "operationId": "client_action_api_v1_applications__application_id__actions__action__post",
         "security": [
           {
@@ -1435,7 +1435,7 @@
           "Клиент: заявки"
         ],
         "summary": "Загрузить документ (PDF, JPG, PNG до 10 МБ)",
-        "description": "Загружать можно в статусах «Черновик» и «Нужны уточнения». Вид документа — код из `/dictionaries/document-kinds`.",
+        "description": "Загружать можно в статусах «Черновик» и «Нужны уточнения». Вид документа указывается кодом из `/dictionaries/document-kinds`.",
         "operationId": "upload_document_api_v1_applications__application_id__documents_post",
         "security": [
           {
@@ -1650,7 +1650,7 @@
           "Клиент: заявки"
         ],
         "summary": "Кредитный договор (HTML)",
-        "description": "До подписания — проект договора по текущему предложению, после — подписанная версия.",
+        "description": "До подписания отдаёт проект договора по текущему предложению, после подписания подписанную версию.",
         "operationId": "get_contract_api_v1_applications__application_id__contract_get",
         "security": [
           {
@@ -2009,7 +2009,7 @@
           "Сотрудник банка"
         ],
         "summary": "Решение сотрудника: approve, counter_offer, request_info, reject",
-        "description": "Доступно, когда заявка в статусе MANUAL_REVIEW. Комментарий обязателен — его увидит клиент.",
+        "description": "Доступно, когда заявка в статусе MANUAL_REVIEW. Комментарий обязателен, его увидит клиент.",
         "operationId": "employee_action_api_v1_backoffice_applications__application_id__actions__action__post",
         "security": [
           {
@@ -2975,7 +2975,7 @@
               }
             ],
             "title": "Version",
-            "description": "Версия заявки из последнего ответа. Если передана и не совпадает — 409."
+            "description": "Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409."
           }
         },
         "type": "object",
@@ -3646,7 +3646,7 @@
               }
             ],
             "title": "Version",
-            "description": "Версия заявки из последнего ответа. Если передана и не совпадает — 409."
+            "description": "Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409."
           }
         },
         "type": "object",
@@ -3980,7 +3980,7 @@
               }
             ],
             "title": "Version",
-            "description": "Версия заявки из последнего ответа. Если передана и не совпадает — 409."
+            "description": "Версия заявки из последнего ответа. Если она передана и не совпадает с текущей, придёт 409."
           }
         },
         "type": "object",
@@ -4650,7 +4650,7 @@
               "month"
             ],
             "title": "Urgency",
-            "description": "Как быстро нужны деньги: asap — срочно, week — в течение недели, month — в течение месяца",
+            "description": "Как быстро нужны деньги: asap значит срочно, week в течение недели, month в течение месяца",
             "default": "week"
           },
           "has_collateral": {

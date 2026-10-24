@@ -93,7 +93,7 @@ export function DecisionPanel({ application }: { application: BankApplication })
           <Stack gap="xs">
             {application.suggested_offer && (
               <Text size="xs" c={COLORS.textSecondary}>
-                По умолчанию — запрошенные условия и <Term id="rate">ставка</Term> по грейду {application.suggested_offer.grade_used}.
+                По умолчанию стоят запрошенные условия и <Term id="rate">ставка</Term> по грейду {application.suggested_offer.grade_used}.
               </Text>
             )}
             <NumberInput label="Сумма, ₽" value={terms.amount} onChange={(value) => setTerms({ ...terms, amount: Number(value) || 0 })} thousandSeparator=" " min={0}
@@ -147,7 +147,7 @@ export function DecisionPanel({ application }: { application: BankApplication })
         </Button>
         {commentMissing && (
           <Text size="xs" c={COLORS.textSecondary}>
-            Напишите комментарий — без него решение не отправить.
+            Без комментария решение не отправить.
           </Text>
         )}
       </Stack>

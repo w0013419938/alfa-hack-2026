@@ -70,10 +70,10 @@ function validateStep(step: number, form: Form, product: Schemas["ProductOut"] |
     if (!form.product_code) errors.product_code = "Выберите продукт";
     if (form.amount === "" || form.amount <= 0) errors.amount = "Укажите сумму";
     else if (product && (form.amount < product.min_amount || form.amount > product.max_amount))
-      errors.amount = `Для этого продукта сумма — от ${money(product.min_amount, true)} до ${money(product.max_amount, true)}`;
+      errors.amount = `Для этого продукта сумма от ${money(product.min_amount, true)} до ${money(product.max_amount, true)}`;
     if (form.term_months === "" || form.term_months <= 0) errors.term_months = "Укажите срок";
     else if (product && (form.term_months < product.min_term_months || form.term_months > product.max_term_months))
-      errors.term_months = `Для этого продукта срок — от ${product.min_term_months} до ${product.max_term_months} мес.`;
+      errors.term_months = `Для этого продукта срок от ${product.min_term_months} до ${product.max_term_months} мес.`;
     if (!form.purpose_code) errors.purpose_code = "Выберите цель кредита";
     if (purposeNeedsComment && !form.purpose_comment.trim()) errors.purpose_comment = "Опишите, на что нужны деньги";
     if (product?.requires_collateral && !form.collateral_description.trim()) errors.collateral_description = "Опишите, что вы готовы предложить в залог";
@@ -262,7 +262,7 @@ export function ApplicationFormPage() {
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               <Select
                 label="Продукт"
-                data={(products.data ?? []).map((item) => ({ value: item.code, label: `${item.name} — ${item.rate_text}` }))}
+                data={(products.data ?? []).map((item) => ({ value: item.code, label: `${item.name}, ${item.rate_text}` }))}
                 value={form.product_code || null}
                 onChange={(value) => set("product_code", value ?? "")}
                 error={errors.product_code}
@@ -327,14 +327,14 @@ export function ApplicationFormPage() {
           {step === 1 && company.data && (
             <Stack gap="sm">
               <Text c={COLORS.textSecondary}>
-                Эти данные мы уже знаем из профиля компании — вводить их не нужно. Если что-то неверно, обратитесь в банк.
+                Эти данные мы уже знаем из профиля компании, вводить их не нужно. Если что-то неверно, обратитесь в банк.
               </Text>
               <Box p="md" bg={COLORS.page} style={{ borderRadius: RADIUS.block }} data-testid="company-data">
                 <SummaryRow label="Компания" value={company.data.name} />
                 <SummaryRow label="Форма" value={company.data.company_type_label} />
                 <SummaryRow label={<Term id="inn">ИНН</Term>} value={company.data.inn} />
                 <SummaryRow label={<Term id="ogrn">ОГРН / ОГРНИП</Term>} value={company.data.ogrn} />
-                <SummaryRow label={<Term id="okved">ОКВЭД</Term>} value={`${company.data.okved} — ${company.data.industry}`} />
+                <SummaryRow label={<Term id="okved">ОКВЭД</Term>} value={`${company.data.okved}, ${company.data.industry.toLowerCase()}`} />
                 <SummaryRow label="Регион" value={company.data.region} />
                 <SummaryRow label="Дата регистрации" value={date(company.data.registration_date)} />
                 <SummaryRow label="Выручка за год по отчётности" value={company.data.annual_revenue === null ? "нет данных" : money(company.data.annual_revenue)} />
@@ -345,7 +345,7 @@ export function ApplicationFormPage() {
 
           {step === 2 && (
             <Stack gap="md">
-              <Text c={COLORS.textSecondary}>Укажите цифры за обычный месяц — без сезонных пиков. Банк сверит их с кредитной историей.</Text>
+              <Text c={COLORS.textSecondary}>Укажите цифры за обычный месяц, без сезонных пиков. Банк сверит их с кредитной историей.</Text>
               <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
                 <NumberInput
                   label={<Term id="revenue">Выручка в месяц, ₽</Term>}
@@ -381,7 +381,7 @@ export function ApplicationFormPage() {
 
           {step === 3 && (
             <Stack gap="md">
-              <Text c={COLORS.textSecondary}>Проверьте данные. После отправки банк проверит заявку — обычно это занимает меньше минуты.</Text>
+              <Text c={COLORS.textSecondary}>Проверьте данные. После отправки банк проверит заявку. Обычно это занимает меньше минуты.</Text>
               <Box p="md" bg={COLORS.page} style={{ borderRadius: RADIUS.block }}>
                 <SummaryRow label="Продукт" value={product?.name} />
                 <SummaryRow label="Цель" value={selectedPurpose?.label} />

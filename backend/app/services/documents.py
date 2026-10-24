@@ -95,7 +95,7 @@ def save_upload(db: Session, application: Application, user: User, kind: str, up
     max_bytes = settings.max_upload_mb * 1024 * 1024
     content = upload.file.read(max_bytes + 1)
     if len(content) > max_bytes:
-        raise AppError(f"Файл слишком большой. Максимальный размер — {settings.max_upload_mb} МБ.", code="file_too_large")
+        raise AppError(f"Файл слишком большой. Можно загрузить файл до {settings.max_upload_mb} МБ.", code="file_too_large")
     if not content:
         raise AppError("Файл пустой.", code="file_empty")
     signatures = FILE_SIGNATURES.get(extension, [])

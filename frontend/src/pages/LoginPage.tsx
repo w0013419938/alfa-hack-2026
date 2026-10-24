@@ -50,7 +50,7 @@ export function LoginPage() {
               Кредитный кабинет <span style={{ color: COLORS.accent }}>предпринимателя</span>
             </Title>
             <Text c={COLORS.textSecondary} size="lg">
-              Подберите кредит, подайте заявку и следите за решением банка — всё в одном месте.
+              Подберите кредит, подайте заявку и следите за решением банка в одном месте.
             </Text>
           </Stack>
 
@@ -97,7 +97,7 @@ export function LoginPage() {
               <Stack gap={4}>
                 <Title order={3}>Демо-доступ</Title>
                 <Text c={COLORS.textSecondary}>
-                  Вход в один клик. Каждая учётка показывает свой сценарий; пароль — логин и «123».
+                  Вход в один клик. Каждая учётка показывает свой сценарий. Пароль: логин и «123».
                 </Text>
               </Stack>
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">

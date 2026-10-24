@@ -122,7 +122,7 @@ export async function uploadDocument(applicationId: string, kind: string, file: 
     throw new ApiError(0, "network_error", "Нет связи с сервером. Попробуйте ещё раз.");
   }
   if (response.status === 413) {
-    throw new ApiError(413, "file_too_large", "Файл слишком большой. Максимальный размер — 10 МБ.");
+    throw new ApiError(413, "file_too_large", "Файл слишком большой. Можно загрузить файл до 10 МБ.");
   }
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {

@@ -54,7 +54,7 @@ def get_application(application_id: uuid.UUID, user: User = Depends(get_current_
     "/applications/{application_id}/actions/{action}",
     response_model=BackofficeApplicationOut,
     summary="Решение сотрудника: approve, counter_offer, request_info, reject",
-    description="Доступно, когда заявка в статусе MANUAL_REVIEW. Комментарий обязателен — его увидит клиент.",
+    description="Доступно, когда заявка в статусе MANUAL_REVIEW. Комментарий обязателен, его увидит клиент.",
 )
 def employee_action(
     application_id: uuid.UUID,

@@ -90,7 +90,7 @@ def update_draft(db: Session, user: User, application_id: uuid.UUID, data: Appli
     changes = data.model_dump(exclude_unset=True, exclude={"version"})
     check_product_and_purpose(db, changes.get("product_code"), changes.get("purpose_code"))
     if "product_code" in changes and changes["product_code"] is None:
-        raise AppError("Продукт нельзя убрать из заявки — выберите другой продукт.", code="unknown_product")
+        raise AppError("Продукт нельзя убрать из заявки. Выберите другой продукт.", code="unknown_product")
     for field, value in changes.items():
         setattr(application, field, value)
     application.updated_at = datetime.now(UTC)
