@@ -98,7 +98,7 @@ actions:
 
 # Шкала этапов заявки (поле progress в ответе API). Коды этапов не менять.
 progress_steps:
-  submitted: "Заявка подана"
+  submitted: "Подача заявки"
   validation: "Проверка данных"
   checks: "Госреестр и кредитная история"
   scoring: "Оценка заявки"

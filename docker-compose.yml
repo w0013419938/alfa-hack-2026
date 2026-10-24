@@ -77,18 +77,37 @@ services:
       retries: 30
       start_period: 20s
 
-  # Место под фронтенд (будет добавлен отдельной задачей)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #   restart: unless-stopped
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #   environment:
-  #     VITE_API_URL: http://localhost:8000/api/v1
-  #   ports:
-  #     - "5173:5173"
+  # Веб-интерфейс: nginx раздаёт собранный React и проксирует /api на backend (без CORS)
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # E2E-тесты интерфейса (Playwright). Не запускаются при обычном `up`:
+  #   docker compose --profile e2e run --rm e2e
+  e2e:
+    profiles: ["e2e"]
+    build:
+      context: ./frontend
+      dockerfile: e2e.Dockerfile
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      BASE_URL: http://frontend
+    volumes:
+      - ./frontend/test-results:/app/test-results
+      - ./docs/screenshots:/app/screenshots
 
 volumes:
   db_data:
