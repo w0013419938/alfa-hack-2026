@@ -6,7 +6,11 @@ import { expect, test } from "@playwright/test";
 
 import { applicationNumber, createAndSubmitStandardApplication, expectStatus, loginAs, newClientPage } from "./helpers";
 
-const DIR = "screenshots";
+// Папку и ширину можно поменять для дизайн-ревью: SHOT_DIR=shots SHOT_WIDTH=768
+const DIR = process.env.SHOT_DIR ?? "screenshots";
+const WIDTH = Number(process.env.SHOT_WIDTH ?? 1360);
+
+test.use({ viewport: { width: WIDTH, height: 900 } });
 
 test("@screenshots ключевые экраны", async ({ page, browser }) => {
   test.setTimeout(240_000);
