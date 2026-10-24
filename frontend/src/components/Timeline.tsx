@@ -30,7 +30,7 @@ export function Timeline({ items }: { items: Item[] }) {
       {newestFirst.map(({ item, index }) => (
         <Box
           key={`${item.at}-${index}`}
-          className={freshFrom !== null && index >= freshFrom ? "just-changed" : undefined}
+          className={freshFrom !== null && index >= freshFrom ? "event-new" : undefined}
           p="sm"
           style={{ borderRadius: RADIUS.control, borderLeft: `3px solid ${index === items.length - 1 ? COLORS.accent : COLORS.border}` }}
         >
