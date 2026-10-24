@@ -17,9 +17,6 @@ export function InfoRequestPanel({ application }: { application: Application }) 
       <Stack gap="md">
         <Group justify="space-between">
           <Title order={3}>Что нужно от вас</Title>
-          <Badge color="violet" variant="light">
-            Запрос от: {request.created_by}
-          </Badge>
         </Group>
         <Text>{request.comment}</Text>
 

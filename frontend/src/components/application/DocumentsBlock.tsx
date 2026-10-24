@@ -71,12 +71,12 @@ export function UploadForm({ application, fixedKind, compact }: { application: A
 }
 
 export function DocumentsBlock({ application }: { application: Application }) {
+  // Если банк попросил конкретные документы, загрузка — в блоке «Что нужно от вас»; здесь — только для прочих файлов
+  const requestedDocuments = (application.info_request?.documents.length ?? 0) > 0;
   const documents = useQuery({
     queryKey: ["documents", application.id, application.documents_count],
     queryFn: () => call(api.GET("/api/v1/applications/{application_id}/documents", { params: { path: { application_id: application.id } } })),
   });
-  // Если банк попросил конкретные документы, загрузка — в блоке «Что нужно от вас»; здесь — только для прочих файлов
-  const requestedDocuments = (application.info_request?.documents.length ?? 0) > 0;
   const canUpload = application.available_actions.some((action) => action.code === "upload_document" && action.enabled);
 
   return (
@@ -86,7 +86,11 @@ export function DocumentsBlock({ application }: { application: Application }) {
         {documents.isLoading && <LoadingState />}
         {documents.isError && <ErrorState error={documents.error} onRetry={() => void documents.refetch()} />}
         {documents.data && documents.data.length === 0 && (
-          <Text c={COLORS.textSecondary}>Документов пока нет.{canUpload ? " Если банк попросит документы, загрузите их здесь." : ""}</Text>
+          <Text c={COLORS.textSecondary}>
+            Документов пока нет.
+            {canUpload && !requestedDocuments && " Если банк попросит документы, загрузите их здесь."}
+            {requestedDocuments && " Документ, который просит банк, загрузите в блоке «Что нужно от вас» выше."}
+          </Text>
         )}
         {documents.data?.map((document) => (
           <Group key={document.id} justify="space-between" wrap="nowrap">
@@ -97,7 +101,7 @@ export function DocumentsBlock({ application }: { application: Application }) {
               <Stack gap={0}>
                 <Text fw={500}>{document.kind_label}</Text>
                 <Text size="xs" c={COLORS.textSecondary}>
-                  {document.filename} · {document.uploaded_by} · {dateTime(document.created_at)}
+                  {document.filename}, загрузил: {document.uploaded_by.toLowerCase()}, {dateTime(document.created_at)}
                 </Text>
               </Stack>
             </Group>

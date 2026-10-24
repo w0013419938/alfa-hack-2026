@@ -54,7 +54,7 @@ function Checks({ application }: { application: BankApplication }) {
             ))}
           </List>
           <Text size="xs" c={COLORS.textSecondary} mt="xs">
-            Попыток: {check.attempts} · {check.duration_ms} мс · {dateTime(check.created_at)}
+            Попыток: {check.attempts}, ответ за {check.duration_ms} мс, {dateTime(check.created_at)}
           </Text>
         </Box>
       ))}
@@ -86,11 +86,11 @@ export function BankApplicationPage() {
         <Stack gap="sm">
           <Group justify="space-between" wrap="wrap">
             <Text c={COLORS.textSecondary}>
-              Заявка № {application.number} · {application.company.name} · {application.product.name}
+              Заявка № {application.number}, {application.company.name}, {application.product.name.toLowerCase()}
             </Text>
             {application.scoring && (
               <Badge size="lg" variant="light" color="gray">
-                <Term id="grade">Грейд</Term> {application.scoring.grade} · {application.scoring.total_score} баллов
+                <Term id="grade">Грейд</Term> {application.scoring.grade}, {application.scoring.total_score} баллов
               </Badge>
             )}
           </Group>
@@ -169,7 +169,7 @@ export function BankApplicationPage() {
                   <Field label="Название" value={application.company.name} />
                   <Field label={<Term id="inn">ИНН</Term>} value={application.company.inn} />
                   <Field label={<Term id="ogrn">ОГРН</Term>} value={application.company.ogrn} />
-                  <Field label={<Term id="okved">ОКВЭД</Term>} value={`${application.company.okved} · ${application.company.industry}`} />
+                  <Field label={<Term id="okved">ОКВЭД</Term>} value={`${application.company.okved}, ${application.company.industry.toLowerCase()}`} />
                   <Field label="Регион" value={application.company.region} />
                   <Field label="Регистрация" value={date(application.company.registration_date)} />
                   <Field label="Выручка за год" value={application.company.annual_revenue === null ? "нет отчётности" : money(application.company.annual_revenue)} />
@@ -185,7 +185,7 @@ export function BankApplicationPage() {
                   {application.documents.map((document) => (
                     <Group key={document.id} justify="space-between">
                       <Text size="sm">
-                        <b>{document.kind_label}</b> · {document.filename} · {document.uploaded_by}
+                        <b>{document.kind_label}</b>: {document.filename}, загрузил: {document.uploaded_by.toLowerCase()}
                       </Text>
                       <Button
                         variant="subtle"
@@ -215,7 +215,7 @@ export function BankApplicationPage() {
                             </Text>
                             <Text size="xs" c={COLORS.textSecondary}>
                               {event.actor}
-                              {event.actor_name ? ` · ${event.actor_name}` : ""} · {event.from_status ?? "—"} → {event.to_status}
+                              {event.actor_name ? `, ${event.actor_name}` : ""}
                             </Text>
                           </Stack>
                           <Text size="xs" c={COLORS.textSecondary} style={{ whiteSpace: "nowrap" }}>

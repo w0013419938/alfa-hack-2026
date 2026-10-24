@@ -14,8 +14,12 @@ const STATE_COLOR: Record<string, string> = { current: "brand", action: "violet"
 
 /** Следующий шаг для клиента: подписи доступных действий из API, иначе — пояснение статуса */
 function nextStep(application: Application): { text: string; isAction: boolean } {
-  const actions = application.available_actions.filter((action) => action.enabled && action.code !== "upload_document" && action.code !== "cancel");
-  if (actions.length > 0) return { text: actions.map((action) => action.label).join(" или "), isAction: true };
+  // «Редактировать», «Загрузить документ» и «Отозвать» — не следующий шаг, а возможности; показываем главное действие
+  const actions = application.available_actions.filter((action) => action.enabled && !["edit", "upload_document", "cancel"].includes(action.code));
+  if (actions.length > 0) {
+    const labels = actions.map((action, index) => (index === 0 ? action.label : action.label.charAt(0).toLowerCase() + action.label.slice(1)));
+    return { text: labels.join(" или "), isAction: true };
+  }
   return { text: application.status_description, isAction: false };
 }
 
@@ -34,7 +38,7 @@ function ApplicationRow({ application }: { application: Application }) {
       <Stack gap={8}>
         <Group justify="space-between" wrap="wrap" gap="xs">
           <Text fw={600}>
-            № {application.number} · {application.product.name}
+            {application.product.name}, заявка № {application.number}
           </Text>
           <Badge
             color={step ? (STATE_COLOR[step.state] ?? "gray") : application.status === "ISSUED" ? "lime" : "gray"}
@@ -45,7 +49,7 @@ function ApplicationRow({ application }: { application: Application }) {
           </Badge>
         </Group>
         <Text size="sm" c={COLORS.textSecondary} className="num">
-          {money(application.amount)} · {months(application.term_months)} · обновлена {dateTime(application.updated_at)}
+          {money(application.amount)} на {months(application.term_months)}, обновлена {dateTime(application.updated_at)}
         </Text>
         <Text size="sm">
           <Text span fw={600} c={next.isAction ? COLORS.attention : COLORS.textSecondary}>

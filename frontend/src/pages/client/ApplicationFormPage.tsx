@@ -233,7 +233,7 @@ export function ApplicationFormPage() {
       <Stack gap={4}>
         <Title order={1}>{isNeedsInfo ? "Уточнение анкеты" : "Заявка на кредит"}</Title>
         <Text c={COLORS.textSecondary} size="lg">
-          {application ? `Заявка № ${application.number} · черновик сохраняется автоматически при переходе между шагами` : "Четыре коротких шага. Черновик сохраняется, можно вернуться позже."}
+          {application ? `Заявка № ${application.number}. Черновик сохраняется сам, когда вы переходите к следующему шагу` : "Четыре коротких шага. Черновик сохраняется, можно вернуться позже."}
         </Text>
       </Stack>
 

@@ -106,7 +106,7 @@ export function ApplicationPage() {
         <Stack gap="md">
           <Group justify="space-between" align="flex-start" wrap="wrap">
             <Text c={COLORS.textSecondary}>
-              Заявка № {application.number} · {application.product.name} · {money(application.amount)}
+              Заявка № {application.number}: {application.product.name.toLowerCase()} на {money(application.amount)}
             </Text>
             {state && (
               <Badge size="lg" color={STATE_COLOR[state.state] ?? "gray"} variant="light" c={state.state === "done" ? COLORS.positiveText : undefined} data-testid="state-badge">
