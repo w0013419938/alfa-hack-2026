@@ -8,3 +8,8 @@ __pycache__/
 frontend/node_modules/
 frontend/dist/
 frontend/test-results/
+
+# Рабочие файлы дизайн-скилов, в репозиторий не попадают
+.taste-skill/
+.claude/skills/
+skills-install.tgz
