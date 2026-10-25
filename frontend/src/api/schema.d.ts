@@ -388,7 +388,7 @@ export interface paths {
         };
         /**
          * Персональная лента подсказок
-         * @description Подборка по отрасли (ОКВЭД), типу компании, статусу и продукту текущей заявки. У каждой подсказки есть `reason` — почему она показана.
+         * @description Подборка по отрасли (ОКВЭД), типу компании, статусу и продукту текущей заявки. У каждой подсказки есть `reason` с объяснением, почему она показана.
          */
         get: operations["get_feed_api_v1_feed_get"];
         put?: never;
@@ -726,7 +726,7 @@ export interface components {
             payment_type_options: components["schemas"]["PaymentTypeOption"][];
             /**
              * Monthly Payment
-             * @description Аннуитетный платёж; при дифференцированном — первый, самый большой платёж
+             * @description Аннуитетный платёж; при дифференцированном первый, самый большой платёж
              */
             monthly_payment: number;
             /**
@@ -910,11 +910,11 @@ export interface components {
         };
         /**
          * EmployeeActionRequest
-         * @description Тело действия сотрудника. Какие поля нужны — зависит от действия:
+         * @description Тело действия сотрудника. Какие поля нужны, зависит от действия:
          *
-         *     - approve: comment; amount, term_months, rate — по желанию (если не указаны, берутся из suggested_offer);
-         *     - counter_offer: comment, amount, term_months; rate — по желанию;
-         *     - request_info: comment; requested_fields и/или requested_documents — по желанию;
+         *     - approve: comment; amount, term_months, rate по желанию (если не указаны, берутся из suggested_offer);
+         *     - counter_offer: comment, amount, term_months; rate по желанию;
+         *     - request_info: comment; requested_fields и/или requested_documents по желанию;
          *     - reject: comment (причину увидит клиент).
          */
         EmployeeActionRequest: {
@@ -1933,7 +1933,7 @@ export interface operations {
                 amount: number | string;
                 /** @description Срок, мес. */
                 term: number;
-                /** @description annuity — одинаковый платёж каждый месяц, differentiated — платёж уменьшается со временем */
+                /** @description annuity (одинаковый платёж каждый месяц) или differentiated (платёж уменьшается со временем) */
                 payment_type?: "annuity" | "differentiated";
             };
             header?: never;
