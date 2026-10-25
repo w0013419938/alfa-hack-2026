@@ -6,7 +6,7 @@
  *   карточки со скруглением 32px, плашки 16–24px, заголовки с межбуквенным интервалом −2%.
  * Фиолетовый в макете есть только на 3D-картинках, поэтому взят из ТЗ (#9B5CFF).
  */
-import { createTheme, type MantineColorsTuple } from "@mantine/core";
+import { createTheme, type CSSVariablesResolver, type MantineColorsTuple } from "@mantine/core";
 
 // Базовые цвета — их используют компоненты напрямую (например, фон страницы и вторичный текст)
 export const COLORS = {
@@ -44,6 +44,17 @@ const violet: MantineColorsTuple = [
   "#F4ECFF", "#E5D6FF", "#C8ABFF", "#AA7CFF", "#9B5CFF", "#8A45FA", "#7F38F8", "#6C2ADD", "#6023C6", "#521BAE",
 ];
 
+// Стандартные серый (подписи под полями, текст уведомлений) и красный (ошибки у полей) в Mantine
+// дают на белом только 3.3:1. Заменяем их своими цветами с контрастом не ниже 4.5:1 (WCAG AA)
+export const cssVariablesResolver: CSSVariablesResolver = () => ({
+  variables: {},
+  light: {
+    "--mantine-color-dimmed": COLORS.textSecondary,
+    "--mantine-color-error": COLORS.accentText,
+  },
+  dark: {},
+});
+
 export const theme = createTheme({
   primaryColor: "brand",
   // Заливка кнопок — оттенок 7 (#D52418): белый текст на нём даёт контраст около 5:1 (WCAG AA),
@@ -77,6 +88,8 @@ export const theme = createTheme({
     PasswordInput: { defaultProps: { radius: "md", size: "md" } },
     // Бейджи обычным регистром: капслок хуже читается и выглядит шаблонно
     Badge: { defaultProps: { radius: "md" }, styles: { root: { textTransform: "none", fontWeight: 600 } } },
+    // Текст уведомления по умолчанию серый gray-6 (3.3:1), берём вторичный текст темы
+    Notification: { styles: { description: { color: COLORS.textSecondary } } },
     Tooltip: { defaultProps: { multiline: true, w: 280, withArrow: true, events: { hover: true, focus: true, touch: true } } },
   },
 });
