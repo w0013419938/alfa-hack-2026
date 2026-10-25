@@ -1,0 +1,195 @@
+# =====================================================================
+# Конфигурация кредитного конвейера: продукты, скоринг, логика решения
+# Участник 2 (продукты и скоринг). Все числа синтетические (демо-данные).
+# Скоринг (оценка риска) и кредитное решение разделены на два слоя.
+# =====================================================================
+
+version: "1.0"
+currency: RUB
+
+# ---------------------------------------------------------------------
+# 1. Продукты
+# ---------------------------------------------------------------------
+products:
+  working_capital:
+    name: Оборотный кредит
+    amount: { min: 100000, max: 3000000 }
+    term_months: { min: 3, max: 24 }
+    base_rate_percent: 21        # от 21% годовых
+    repayment: annuity
+    collateral: none             # без залога
+    notes: Без залога, аннуитетные платежи
+    decision_profile: standard
+
+  equipment:
+    name: Кредит на оборудование
+    amount: { min: 500000, max: 15000000 }
+    term_months: { min: 12, max: 60 }
+    base_rate_percent: 18        # от 18% годовых
+    repayment: annuity
+    collateral: purchased_equipment
+    down_payment_percent_min: 20
+    notes: Первоначальный взнос от 20%, залог приобретаемого оборудования
+    decision_profile: equipment  # более строгие пороги (длинный срок, выше риск)
+
+  overdraft:
+    name: Овердрафт
+    amount: { min: 50000, max: 2000000 }   # размер лимита
+    term_months: { min: 12, max: 12 }      # срок действия лимита
+    base_rate_percent: 24        # от 24% годовых
+    repayment: limit_revolving
+    collateral: none
+    notes: Проценты начисляются только на использованную сумму
+    decision_profile: standard
+
+# ---------------------------------------------------------------------
+# 2. Скоринг: 100 баллов, чем выше балл, тем надёжнее заёмщик
+# ---------------------------------------------------------------------
+scoring:
+  max_score: 100
+  factors:
+    credit_history:
+      name: Кредитная история (БКИ)
+      weight: 25
+      scale:
+        - { condition: "нет просрочек", points: 25 }
+        - { condition: "просрочки до 30 дней в прошлом", points: 15 }
+        - { condition: "были просрочки 30–90 дней", points: 5 }
+        - { condition: "нет кредитной истории", points: 12 }
+
+    debt_load_dscr:
+      name: Долговая нагрузка (DSCR с учётом нового платежа)
+      weight: 20
+      scale:
+        - { condition: "DSCR >= 1.5", points: 20 }
+        - { condition: "1.25 <= DSCR < 1.5", points: 14 }
+        - { condition: "1.0 <= DSCR < 1.25", points: 6 }
+        - { condition: "DSCR < 1.0", points: 0 }
+
+    revenue_stability:
+      name: Стабильность выручки (оборот по счёту за 12 мес)
+      weight: 15
+      scale:
+        - { condition: "рост или стабильно", points: 15 }
+        - { condition: "колебания до 30%", points: 9 }
+        - { condition: "падение более 30%", points: 2 }
+
+    profitability:
+      name: Рентабельность
+      weight: 10
+      scale:
+        - { condition: "> 15%", points: 10 }
+        - { condition: "5–15%", points: 6 }
+        - { condition: "0–5%", points: 3 }
+        - { condition: "убыток", points: 0 }
+
+    business_age:
+      name: Возраст бизнеса
+      weight: 10
+      scale:
+        - { condition: "> 24 мес", points: 10 }
+        - { condition: "12–24 мес", points: 6 }
+        - { condition: "6–12 мес", points: 3 }
+        - { condition: "< 6 мес", points: 0 }
+
+    legal_tax_status:
+      name: Правовой и налоговый статус (ЕГРЮЛ/ЕГРИП, «Прозрачный бизнес»)
+      weight: 10
+      scale:
+        - { condition: "чисто", points: 10 }
+        - { condition: "незначительная задолженность", points: 4 }
+        - { condition: "иначе", points: 0 }
+
+    request_ratio:
+      name: Параметры заявки (сумма / годовая выручка)
+      weight: 10
+      scale:
+        - { condition: "< 10%", points: 10 }
+        - { condition: "10–25%", points: 6 }
+        - { condition: "25–40%", points: 2 }
+        - { condition: "> 40%", points: 0 }
+
+# ---------------------------------------------------------------------
+# 3. Логика кредитного решения
+# ---------------------------------------------------------------------
+decision_logic:
+
+  # Шаг 1. Полнота данных
+  step_1_completeness:
+    required_data: [revenue, financial_statements, bki_response]
+    if_missing:
+      outcome: REQUEST_DATA
+      application_status: AWAITING_DATA
+      note: Клиенту показывается конкретный список недостающего
+
+  # Шаг 2. Стоп-факторы (отказ независимо от балла)
+  step_2_stop_factors:
+    outcome: DECLINE
+    note: Клиенту показывается понятная причина отказа
+    factors:
+      - company_liquidation_or_bankruptcy   # ликвидация / процедура банкротства
+      - active_overdue_over_90_days         # действующая просрочка свыше 90 дней
+      - business_age_under_3_months         # возраст бизнеса менее 3 мес
+      - director_disqualified               # дисквалификация руководителя
+
+  # Шаг 3. Решение по баллу с учётом продукта
+  step_3_thresholds:
+    standard:                       # оборотный кредит и овердрафт
+      - { score_min: 75, score_max: 100, outcome: APPROVE }
+      - { score_min: 60, score_max: 74,  outcome: CHANGE_TERMS }
+      - { score_min: 45, score_max: 59,  outcome: REQUEST_DATA_OR_OTHER_PRODUCT }
+      - { score_min: 0,  score_max: 44,  outcome: DECLINE }
+    equipment:                      # длинный срок, выше риск
+      - { score_min: 80, score_max: 100, outcome: APPROVE }
+      - { score_min: 65, score_max: 79,  outcome: CHANGE_TERMS }
+      - { score_min: 50, score_max: 64,  outcome: REQUEST_DATA_OR_OTHER_PRODUCT }
+      - { score_min: 0,  score_max: 49,  outcome: DECLINE }
+
+  # Шаг 4. Ставка = базовая ставка продукта + надбавка за риск
+  step_4_rate_premium:
+    - { score_min: 85, score_max: 100, premium_pp: 0 }
+    - { score_min: 75, score_max: 84,  premium_pp: 2 }
+    - { score_min: 60, score_max: 74,  premium_pp: 4 }
+    # ниже 60 баллов надбавка не определена: исход REQUEST_DATA / DECLINE
+
+  # Шаг 5. Изменение условий (встречное предложение)
+  step_5_change_terms:
+    target: "максимальная сумма, при которой DSCR >= 1.25"
+    dscr_target_min: 1.25
+    if_max_amount_below_product_min: DECLINE
+    alternatives:
+      - increase_term            # увеличить срок, чтобы снизить платёж
+      - switch_product           # например, оборудование -> оборотный кредит
+
+  # Шаг 6. Расчёт платежа (аннуитет)
+  step_6_payment:
+    formula: "P = S * r / (1 - (1 + r) ** (-n))"
+    variables:
+      S: сумма кредита
+      r: "ставка / 12 / 100 (месячная ставка)"
+      n: срок в месяцах
+    example:
+      amount: 1000000
+      term_months: 12
+      rate_percent: 22
+      monthly_payment_approx: 93600
+
+# ---------------------------------------------------------------------
+# 4. Исходы решения и статусы заявки
+# ---------------------------------------------------------------------
+outcomes:
+  APPROVE:
+    description: Одобрено
+    application_status: OFFER_PROPOSED        # Предложение условий
+  CHANGE_TERMS:
+    description: Изменены условия
+    application_status: COUNTER_OFFER         # Встречное предложение
+  REQUEST_DATA:
+    description: Запрос данных
+    application_status: AWAITING_DATA         # Ожидает данных
+  REQUEST_DATA_OR_OTHER_PRODUCT:
+    description: Запросить данные или предложить другой продукт
+    application_status: AWAITING_DATA
+  DECLINE:
+    description: Отказ
+    application_status: DECLINED              # Отклонена (с причиной)

@@ -94,7 +94,7 @@ docker compose run --rm -v "$PWD/docs:/docs" backend python -m scripts.export_op
   "status_label": "Есть предложение",
   "status_description": "Банк готов выдать кредит. Посмотрите условия и решите, принимаете ли вы их.",
   "is_final": false,
-  "product": {"code": "working_capital", "name": "Кредит на оборотные средства"},
+  "product": {"code": "working_capital", "name": "Оборотный кредит"},
   "amount": 1500000.0, "term_months": 24, "purpose_code": "working_capital", "purpose_label": "Пополнение оборотных средств",
   "monthly_revenue": 800000.0, "monthly_expenses": 550000.0, "current_loan_payments": 0.0,
   "version": 7,
@@ -111,11 +111,11 @@ docker compose run --rm -v "$PWD/docs:/docs" backend python -m scripts.export_op
   "timeline": [
     {"at": "2026-10-23T11:32:12Z", "action": "create", "title": "Заявка создана", "status": "DRAFT", "status_label": "Черновик", "actor": "Вы", "comment": null},
     {"at": "2026-10-23T11:32:17Z", "action": "auto_approve", "title": "Банк одобрил заявку", "status": "OFFER_SENT", "status_label": "Есть предложение",
-     "actor": "Система", "comment": "Условия: 1 500 000 ₽ на 24 месяца под 17,5% годовых."}
+     "actor": "Система", "comment": "Условия: 1 500 000 ₽ на 24 месяца под 21% годовых."}
   ],
   "info_request": null,
   "offer": {"offer_type": "as_requested", "offer_type_label": "На запрошенных условиях", "amount": 1500000.0, "term_months": 24,
-            "rate": 17.5, "monthly_payment": 74524.27, "total_payment": 1788582.48, "overpayment": 288582.48,
+            "rate": 21.0, "monthly_payment": 77078.48, "total_payment": 1849883.52, "overpayment": 349883.52,
             "valid_until": "2026-11-22T11:32:17Z", "status": "active", "status_label": "Действует"},
   "documents_count": 0
 }
