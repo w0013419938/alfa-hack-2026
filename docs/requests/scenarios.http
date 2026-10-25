@@ -54,7 +54,8 @@ Authorization: Bearer {{goodLogin.response.body.access_token}}
 GET {{base}}/applications/{{goodApp.response.body.id}}
 Authorization: Bearer {{goodLogin.response.body.access_token}}
 
-### ===== 2. client_medium: встречное предложение =====
+### ===== 2. client_medium: ручное рассмотрение =====
+# Встречное предложение делает сотрудник: действие counter_offer, как approve в разделе 3
 
 # @name mediumLogin
 POST {{base}}/auth/login
@@ -75,7 +76,7 @@ Content-Type: application/json
 POST {{base}}/applications/{{mediumApp.response.body.id}}/actions/submit
 Authorization: Bearer {{mediumLogin.response.body.access_token}}
 
-### Через 5–10 секунд: OFFER_SENT, offer.offer_type = counter_offer
+### Через 5–10 секунд: MANUAL_REVIEW, грейд D (57 баллов)
 GET {{base}}/applications/{{mediumApp.response.body.id}}
 Authorization: Bearer {{mediumLogin.response.body.access_token}}
 

@@ -16,20 +16,22 @@
 # - Если значения нет (например, БКИ не ответило), фактор получает missing_points.
 # - Итоговый балл = сумма баллов факторов. Грейд — первый в списке grades, у которого min_score <= балл.
 
-version: "scoring-draft-1"
+version: "scoring-participant2-1"
+
+# Пороги грейдов взяты из docs/reference/participant2-config.yaml (участник 2): 85, 75, 60, 45.
 
 grades:
   - grade: A
-    min_score: 80
+    min_score: 85
     label: "Низкий риск"
   - grade: B
-    min_score: 65
+    min_score: 75
     label: "Умеренный риск"
   - grade: C
-    min_score: 50
+    min_score: 60
     label: "Средний риск"
   - grade: D
-    min_score: 35
+    min_score: 45
     label: "Повышенный риск"
   - grade: E
     min_score: 0
