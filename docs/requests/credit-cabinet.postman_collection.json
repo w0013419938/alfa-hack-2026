@@ -536,7 +536,7 @@
       ]
     },
     {
-      "name": "2. client_medium — встречное предложение",
+      "name": "2. client_medium — ручное рассмотрение",
       "item": [
         {
           "name": "Вход: client_medium",
@@ -660,7 +660,7 @@
           ]
         },
         {
-          "name": "Через 8 с: встречное предложение",
+          "name": "Через 8 с: заявка у специалиста",
           "request": {
             "method": "GET",
             "header": [
@@ -703,15 +703,14 @@
                   "  pm.expect(body).to.have.property('available_actions');",
                   "  pm.expect(body).to.have.property('timeline');",
                   "});",
-                  "pm.test('Статус OFFER_SENT', () => pm.expect(body.status).to.eql('OFFER_SENT'));",
-                  "pm.test('Встречное предложение', () => pm.expect(body.offer.offer_type).to.eql('counter_offer'));"
+                  "pm.test('Статус MANUAL_REVIEW', () => pm.expect(body.status).to.eql('MANUAL_REVIEW'));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Отказаться от предложения",
+          "name": "Отозвать заявку",
           "request": {
             "method": "POST",
             "header": [
@@ -725,7 +724,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/applications/{{app_medium}}/actions/decline_offer",
+              "raw": "{{baseUrl}}/applications/{{app_medium}}/actions/cancel",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -733,12 +732,12 @@
                 "applications",
                 "{{app_medium}}",
                 "actions",
-                "decline_offer"
+                "cancel"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comment\": \"Нужна вся сумма\"\n}"
+              "raw": "{\n  \"comment\": \"Подам заявку на меньшую сумму\"\n}"
             }
           },
           "event": [
@@ -754,7 +753,7 @@
                   "  pm.expect(body).to.have.property('available_actions');",
                   "  pm.expect(body).to.have.property('timeline');",
                   "});",
-                  "pm.test('Статус CLIENT_DECLINED', () => pm.expect(body.status).to.eql('CLIENT_DECLINED'));"
+                  "pm.test('Статус CANCELLED', () => pm.expect(body.status).to.eql('CANCELLED'));"
                 ]
               }
             }

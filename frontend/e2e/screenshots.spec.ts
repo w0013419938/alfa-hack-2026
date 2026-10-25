@@ -42,8 +42,19 @@ test("@screenshots ключевые экраны", async ({ page, browser }) => 
   await page.waitForTimeout(4000);
   await page.screenshot({ path: `${DIR}/06-application-needs-info.png`, fullPage: true });
 
+  // Встречное предложение делает специалист: с порогами участника 2 client_medium уходит на ручное рассмотрение
   const medium = await newClientPage(browser, "client_medium");
   await createAndSubmitStandardApplication(medium);
+  await expectStatus(medium, "MANUAL_REVIEW");
+  const mediumNumber = await applicationNumber(medium);
+
+  const employee = await newClientPage(browser, "employee");
+  await employee.locator(`[data-testid="queue-row"][data-number="${mediumNumber}"]`).click();
+  await employee.getByTestId("decision-actions").getByText("Сделать встречное предложение").click();
+  await employee.getByLabel("Сумма, ₽").fill("1050000");
+  await employee.getByTestId("decision-comment").fill("Можем выдать меньшую сумму: платежи по кредитам уже занимают большую часть выручки.");
+  await employee.getByTestId("decision-submit").click();
+  await expectStatus(employee, "OFFER_SENT");
   await expectStatus(medium, "OFFER_SENT");
   await medium.waitForTimeout(4000);
   await medium.screenshot({ path: `${DIR}/07-application-counter-offer.png`, fullPage: true });
@@ -53,7 +64,7 @@ test("@screenshots ключевые экраны", async ({ page, browser }) => 
   await expectStatus(border, "MANUAL_REVIEW");
   const number = await applicationNumber(border);
 
-  const employee = await newClientPage(browser, "employee");
+  await employee.goto("/bank");
   await employee.screenshot({ path: `${DIR}/08-bank-queue.png`, fullPage: true });
   await employee.locator(`[data-testid="queue-row"][data-number="${number}"]`).click();
   await expect(employee.getByTestId("scoring")).toBeVisible();

@@ -4,7 +4,7 @@
  */
 export const DEMO_ACCOUNTS = [
   { login: "client_good", title: "Сильный заёмщик", scenario: "Банк одобрит кредит как просили, дальше подписание и выдача" },
-  { login: "client_medium", title: "Высокая нагрузка", scenario: "Банк предложит меньшую сумму и объяснит почему" },
+  { login: "client_medium", title: "Высокая нагрузка", scenario: "Нагрузка высокая, решение примет кредитный специалист" },
   { login: "client_border", title: "Пограничный случай", scenario: "Решение примет кредитный специалист" },
   { login: "client_bad", title: "Проблемная компания", scenario: "Отказ, причина видна сразу" },
   { login: "client_info", title: "Нет отчётности", scenario: "Банк попросит выписку по счёту, после неё даст предложение" },
