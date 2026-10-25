@@ -63,12 +63,32 @@ class RecommendationOut(BaseModel):
     warnings: list[str]
 
 
+class PaymentTypeOption(BaseModel):
+    code: str = Field(description="annuity или differentiated", examples=["annuity"])
+    label: str = Field(examples=["Одинаковый каждый месяц"])
+
+
+class ScheduleRow(BaseModel):
+    month: int
+    payment: Money
+    principal: Money = Field(description="Часть платежа, которая гасит сам кредит")
+    interest: Money = Field(description="Часть платежа, которая идёт на проценты")
+    balance: Money = Field(description="Сколько останется должен после платежа")
+
+
 class CalculatorOut(BaseModel):
     product: ProductShort
     amount: Money
     term_months: int
     rate: Money
-    monthly_payment: Money
+    payment_type: str = Field(description="annuity (одинаковый каждый месяц) или differentiated (уменьшается со временем)")
+    payment_type_options: list[PaymentTypeOption]
+    monthly_payment: Money = Field(description="Аннуитетный платёж; при дифференцированном — первый, самый большой платёж")
+    payment_label: str = Field(description="Подпись к главной цифре: «Платёж в месяц» или «Первый платёж»", examples=["Платёж в месяц"])
+    payment_caption: str = Field(description="Пояснение под главной цифрой")
+    first_payment: Money
+    last_payment: Money
     total_payment: Money
     overpayment: Money
     note: str
+    schedule: list[ScheduleRow]

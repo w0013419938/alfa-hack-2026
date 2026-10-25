@@ -71,3 +71,11 @@ def test_exactly_one_current_like_step():
     for status in ["DRAFT", "SUBMITTED", "CHECKS", "MANUAL_REVIEW", "OFFER_SENT", "REJECTED"]:
         values = list(states(status).values())
         assert sum(value in ("current", "action", "stopped") for value in values) == 1
+
+
+def test_stopped_step_label_says_what_happened():
+    from app.core.business_config import get_business_config
+
+    labels = get_business_config().labels
+    assert labels.progress_stopped_labels["REJECTED"] == "Отказ"
+    assert labels.progress_stopped_labels["CLIENT_DECLINED"] != labels.progress_states["stopped"]

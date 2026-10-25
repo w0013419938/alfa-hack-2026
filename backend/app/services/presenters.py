@@ -61,10 +61,13 @@ def load_events(db: Session, application: Application) -> list[ApplicationEvent]
 def build_progress_steps(application: Application, events: list[ApplicationEvent]) -> list[ProgressStep]:
     labels = get_business_config().labels
     event_infos = [EventInfo(action=event.action, from_status=event.from_status, to_status=event.to_status) for event in events]
-    return [
-        ProgressStep(code=code, label=labels.progress_steps[code], state=state, state_label=labels.progress_states[state])
-        for code, state in build_progress(application.status, event_infos)
-    ]
+    steps = []
+    for code, state in build_progress(application.status, event_infos):
+        state_label = labels.progress_states[state]
+        if state == "stopped":
+            state_label = labels.progress_stopped_labels.get(application.status, state_label)
+        steps.append(ProgressStep(code=code, label=labels.progress_steps[code], state=state, state_label=state_label))
+    return steps
 
 
 def build_timeline(db: Session, application: Application, viewer: Actor, events: list[ApplicationEvent] | None = None) -> list[TimelineItem]:

@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 
 from app.core.business_config import DictionariesFile, ProductConfig, RecommendationConfig
-from app.domain.formatting import format_money
+from app.domain.formatting import days_text, format_money, months_genitive, months_text
 
 
 @dataclass
@@ -68,13 +68,19 @@ def recommend_products(
         amount_ok = product.min_amount <= request.amount <= product.max_amount
         check(amount_ok, "amount", texts["amount_ok"].format(**amount_values), texts["amount_bad"].format(**amount_values))
 
-        term_values = {"term": request.term_months, "min_term": product.min_term_months, "max_term": product.max_term_months}
+        term_values = {
+            "term": request.term_months,
+            "term_text": months_text(request.term_months),
+            "min_term": product.min_term_months,
+            "max_term": product.max_term_months,
+            "max_term_text": months_genitive(product.max_term_months),
+        }
         term_ok = product.min_term_months <= request.term_months <= product.max_term_months
         check(term_ok, "term", texts["term_ok"].format(**term_values), texts["term_bad"].format(**term_values))
 
         # Скорость — не критична: продукт подходит, просто решение дольше
         speed_ok = product.decision_days <= days_client_can_wait
-        check(speed_ok, "speed", texts["speed_ok"].format(days=product.decision_days), texts["speed_bad"].format(days=product.decision_days), critical=False)
+        check(speed_ok, "speed", texts["speed_ok"].format(days=product.decision_days, days_text=days_text(product.decision_days)), texts["speed_bad"].format(days=product.decision_days, days_text=days_text(product.decision_days)), critical=False)
 
         if not product.requires_collateral:
             check(True, "collateral", texts["collateral_ok"], "")

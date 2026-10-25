@@ -7,6 +7,7 @@ import pytest
 
 from app.core.business_config import get_business_config
 from app.domain import decision as d
+from app.domain.formatting import months_genitive
 from app.domain.payments import annuity_payment
 from app.domain.scoring import FactorValues, ScoringFacts
 
@@ -208,3 +209,20 @@ def test_after_employee_info_request_decision_returns_to_employee():
 def test_stop_factor_still_rejects_after_employee_info_request():
     data = with_facts(make_input(employee_requested_info=True), company_status=RULES.stop_factors.forbidden_company_statuses[0])
     assert decide(data).outcome == d.REJECT
+
+
+def test_reject_reasons_are_separate_sentences_in_plain_words():
+    data = with_facts(make_input(), company_status="liquidating", current_overdue_days=65)
+    result = decide(data)
+    inline = result.reasons_text(first_lowercase=True)
+    assert inline.startswith("по открытым реестрам компания находится в процессе ликвидации. В кредитной истории есть просрочка 65 дней")
+    assert inline.endswith("она не погашена.")
+    assert "дн." not in inline and "госреестр" not in inline.lower()
+    # Для списка причин первая буква заглавная
+    assert result.reasons_text().startswith("По открытым реестрам")
+
+
+def test_young_business_reason_uses_months_in_genitive():
+    young = FactorValues(business_age_months=RULES.stop_factors.min_business_age_months - 1, debt_to_income=0.1)
+    texts = [reason.text for reason in decide(with_facts(make_input(), values=young)).reasons]
+    assert any(f"меньше {months_genitive(RULES.stop_factors.min_business_age_months)}" in text for text in texts)

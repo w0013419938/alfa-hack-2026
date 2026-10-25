@@ -24,7 +24,7 @@ from app.core.db import SessionLocal
 from app.core.errors import ConflictError
 from app.core.settings import get_settings
 from app.domain import decision as decisions
-from app.domain.formatting import format_money, format_percent
+from app.domain.formatting import format_money, format_percent, months_text
 from app.domain.scoring import calculate_score, collect_facts
 from app.domain.state_machine import apply_transition, find_transition, get_current_offer
 from app.domain.statuses import AUTOMATIC_STATUSES, Actor, ApplicationStatus
@@ -245,6 +245,7 @@ def offer_comment(template: str, terms: decisions.OfferTerms, reasons: str = "")
             reasons=reasons,
             amount=format_money(terms.amount),
             term=terms.term_months,
+            term_text=months_text(terms.term_months),
             rate=format_percent(terms.rate),
         )
     )
@@ -253,6 +254,7 @@ def offer_comment(template: str, terms: decisions.OfferTerms, reasons: str = "")
 def apply_decision(db: Session, application: Application, decision: decisions.Decision, payload: dict) -> None:
     comments = get_business_config().labels.system_comments
     reasons = decision.reasons_text()
+    reasons_inline = decision.reasons_text(first_lowercase=True)
 
     if decision.outcome == decisions.APPROVE:
         apply_transition(db, application.id, "auto_approve", Actor.SYSTEM, comment=offer_comment(comments["auto_approve"], decision.offer), payload=payload)
@@ -262,7 +264,7 @@ def apply_decision(db: Session, application: Application, decision: decisions.De
         apply_transition(db, application.id, "auto_counter_offer", Actor.SYSTEM, comment=comment, payload=payload)
         create_offer(db, application, decision.offer)
     elif decision.outcome == decisions.REJECT:
-        comment = capitalize(comments["auto_reject"].format(reasons=reasons))
+        comment = capitalize(comments["auto_reject"].format(reasons=reasons, reasons_inline=reasons_inline))
         apply_transition(db, application.id, "auto_reject", Actor.SYSTEM, comment=comment, payload=payload)
     elif decision.outcome == decisions.NEEDS_INFO:
         apply_transition(db, application.id, "auto_request_info", Actor.SYSTEM, comment=decision.info_comment, payload=payload)

@@ -290,12 +290,12 @@ def check_offer_terms(application: Application, amount: Decimal, term_months: in
     product = application.product
     if not product.min_amount <= amount <= product.max_amount:
         raise AppError(
-            f"Сумма для продукта «{product.name}» от {format_money(product.min_amount)} до {format_money(product.max_amount)} ₽.",
+            f"Для продукта «{product.name}» доступна сумма от {format_money(product.min_amount)} до {format_money(product.max_amount)} ₽.",
             code="amount_out_of_range",
         )
     if not product.min_term_months <= term_months <= product.max_term_months:
         raise AppError(
-            f"Срок для продукта «{product.name}» от {product.min_term_months} до {product.max_term_months} мес.",
+            f"Для продукта «{product.name}» доступен срок от {product.min_term_months} до {product.max_term_months} месяцев.",
             code="term_out_of_range",
         )
     if rate < product.base_rate:
