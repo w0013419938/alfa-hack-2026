@@ -14,6 +14,7 @@ import { NumberedCard } from "../../components/NumberedCard";
 import { EmptyState, ErrorState, RowsSkeleton } from "../../components/States";
 import { Term } from "../../components/Term";
 import { COLORS } from "../../theme";
+import { days } from "../../utils/format";
 
 type Product = Schemas["ProductOut"];
 
@@ -50,7 +51,7 @@ function ProductCard({ product, children, footer }: { product: Product; children
         </Text>
         <Group gap="xs">
           <Badge color="gray" variant="light">
-            решение ~{product.decision_days} дн.
+            решение ~{days(product.decision_days)}
           </Badge>
           {product.requires_collateral && (
             <Badge color="violet" variant="light">
@@ -185,7 +186,7 @@ function Picker() {
         <Stack gap="md">
           <Title order={2}>Что вам подойдёт</Title>
           {recommend.data.some((item) => item.suitable) ? null : (
-            <Text c={COLORS.textSecondary}>Под эти условия ни один продукт не подходит полностью. Ниже видно, что можно изменить.</Text>
+            <Text c={COLORS.textSecondary}>Сейчас мы не можем предложить кредит с такими параметрами. Попробуйте изменить сумму или срок: ниже видно, что не подошло.</Text>
           )}
           {/* Карточки разной высоты (у подходящей есть калькулятор) не растягиваются друг под друга */}
           <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg" style={{ alignItems: "start" }}>

@@ -198,8 +198,8 @@ export function HomePage() {
                   <Title order={3}>{current ? "Другие заявки" : "Мои заявки"}</Title>
                   {items.length === 0 && (
                     <EmptyState
-                      title="У вас пока нет заявок"
-                      text="Подберём кредит под вашу задачу за пару минут и покажем примерный платёж."
+                      title="Заявок пока нет"
+                      text="Выберите продукт и посчитайте платёж, это займёт минуту."
                       action={
                         <Button component={Link} to="/client/products">
                           Получить финансирование
@@ -207,7 +207,7 @@ export function HomePage() {
                       }
                     />
                   )}
-                  {items.length > 0 && others.length === 0 && <Text c={COLORS.textSecondary}>Других заявок нет.</Text>}
+                  {items.length > 0 && others.length === 0 && <Text c={COLORS.textSecondary}>Других заявок нет. Когда понадобится ещё один кредит, нажмите «Получить финансирование».</Text>}
                   {others.map((application) => (
                     <ApplicationRow key={application.id} application={application} />
                   ))}

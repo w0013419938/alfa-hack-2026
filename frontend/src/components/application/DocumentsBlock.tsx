@@ -87,8 +87,8 @@ export function DocumentsBlock({ application }: { application: Application }) {
         {documents.isError && <ErrorState error={documents.error} onRetry={() => void documents.refetch()} />}
         {documents.data && documents.data.length === 0 && (
           <Text c={COLORS.textSecondary}>
-            Документов пока нет.
-            {canUpload && !requestedDocuments && " Если банк попросит документы, загрузите их здесь."}
+            Документы пока не загружены.
+            {canUpload && !requestedDocuments && " Банк может попросить выписку по расчётному счёту за 6 месяцев: её можно загрузить здесь."}
             {requestedDocuments && " Документ, который просит банк, загрузите в блоке «Что нужно от вас» выше."}
           </Text>
         )}

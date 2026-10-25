@@ -717,14 +717,41 @@ export interface components {
             term_months: number;
             /** Rate */
             rate: number;
-            /** Monthly Payment */
+            /**
+             * Payment Type
+             * @description annuity (одинаковый каждый месяц) или differentiated (уменьшается со временем)
+             */
+            payment_type: string;
+            /** Payment Type Options */
+            payment_type_options: components["schemas"]["PaymentTypeOption"][];
+            /**
+             * Monthly Payment
+             * @description Аннуитетный платёж; при дифференцированном — первый, самый большой платёж
+             */
             monthly_payment: number;
+            /**
+             * Payment Label
+             * @description Подпись к главной цифре: «Платёж в месяц» или «Первый платёж»
+             * @example Платёж в месяц
+             */
+            payment_label: string;
+            /**
+             * Payment Caption
+             * @description Пояснение под главной цифрой
+             */
+            payment_caption: string;
+            /** First Payment */
+            first_payment: number;
+            /** Last Payment */
+            last_payment: number;
             /** Total Payment */
             total_payment: number;
             /** Overpayment */
             overpayment: number;
             /** Note */
             note: string;
+            /** Schedule */
+            schedule: components["schemas"]["ScheduleRow"][];
         };
         /** CheckOut */
         CheckOut: {
@@ -1102,6 +1129,20 @@ export interface components {
             /** Page Size */
             page_size: number;
         };
+        /** PaymentTypeOption */
+        PaymentTypeOption: {
+            /**
+             * Code
+             * @description annuity или differentiated
+             * @example annuity
+             */
+            code: string;
+            /**
+             * Label
+             * @example Одинаковый каждый месяц
+             */
+            label: string;
+        };
         /** ProductOut */
         ProductOut: {
             /** Code */
@@ -1225,6 +1266,28 @@ export interface components {
             label: string;
             /** Message */
             message?: string | null;
+        };
+        /** ScheduleRow */
+        ScheduleRow: {
+            /** Month */
+            month: number;
+            /** Payment */
+            payment: number;
+            /**
+             * Principal
+             * @description Часть платежа, которая гасит сам кредит
+             */
+            principal: number;
+            /**
+             * Interest
+             * @description Часть платежа, которая идёт на проценты
+             */
+            interest: number;
+            /**
+             * Balance
+             * @description Сколько останется должен после платежа
+             */
+            balance: number;
         };
         /** ScoringOut */
         ScoringOut: {
@@ -1870,6 +1933,8 @@ export interface operations {
                 amount: number | string;
                 /** @description Срок, мес. */
                 term: number;
+                /** @description annuity — одинаковый платёж каждый месяц, differentiated — платёж уменьшается со временем */
+                payment_type?: "annuity" | "differentiated";
             };
             header?: never;
             path?: never;

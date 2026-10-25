@@ -1,12 +1,12 @@
-/** Калькулятор на карточке продукта: сумма и срок → примерный платёж из GET /calculator (считает бэкенд). */
-import { Box, Group, NumberInput, SimpleGrid, Slider, Stack, Text } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
+/** Калькулятор на карточке продукта: сумма, срок и вид платежа → примерный платёж и график из GET /calculator (считает бэкенд). */
+import { Box, Button, Group, Modal, NumberInput, SegmentedControl, SimpleGrid, Slider, Stack, Table, Text } from "@mantine/core";
+import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, call, errorText, type Schemas } from "../api/client";
 import { COLORS, RADIUS } from "../theme";
-import { money } from "../utils/format";
+import { money, months } from "../utils/format";
 import { MoneyFigure } from "./MoneyFigure";
 import { Term } from "./Term";
 
@@ -33,12 +33,18 @@ export function Calculator({
 }) {
   const [amount, setAmount] = useState<number>(initialAmount ?? defaultAmount(product));
   const [term, setTerm] = useState<number>(initialTerm ?? defaultTerm(product));
+  const [paymentType, setPaymentType] = useState<"annuity" | "differentiated">("annuity");
+  const [scheduleOpen, schedule] = useDisclosure(false);
   const [debounced] = useDebouncedValue({ amount, term }, 300);
 
   const result = useQuery({
-    queryKey: ["calculator", product.code, debounced.amount, debounced.term],
+    queryKey: ["calculator", product.code, debounced.amount, debounced.term, paymentType],
     queryFn: () =>
-      call(api.GET("/api/v1/calculator", { params: { query: { product: product.code, amount: debounced.amount, term: debounced.term } } })),
+      call(
+        api.GET("/api/v1/calculator", {
+          params: { query: { product: product.code, amount: debounced.amount, term: debounced.term, payment_type: paymentType } },
+        }),
+      ),
     enabled: debounced.amount > 0 && debounced.term > 0,
     retry: false,
     placeholderData: (previous) => previous,
@@ -56,7 +62,20 @@ export function Calculator({
   return (
     <Box p="md" bg={COLORS.page} style={{ borderRadius: RADIUS.block }} data-testid={`calculator-${product.code}`}>
       <Stack gap="md">
-        <Text fw={600}>Калькулятор платежа</Text>
+        <Group justify="space-between" align="center" gap="sm">
+          <Text fw={600}>Калькулятор платежа</Text>
+          {result.data && (
+            // Подписи и список видов платежа приходят из API: фронт ничего не придумывает сам
+            <SegmentedControl
+              size="sm"
+              value={paymentType}
+              onChange={(value) => setPaymentType(value as "annuity" | "differentiated")}
+              data={result.data.payment_type_options.map((item) => ({ value: item.code, label: item.label }))}
+              aria-label="Вид платежа"
+              data-testid="calc-payment-type"
+            />
+          )}
+        </Group>
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
           <Stack gap={6}>
             <NumberInput
@@ -89,7 +108,7 @@ export function Calculator({
           </Stack>
           <Stack gap={6}>
             <NumberInput
-              label={<Term id="term">Срок, мес.</Term>}
+              label={<Term id="term">Срок, месяцев</Term>}
               value={term}
               onChange={(value) => update(amount, Number(value) || 0)}
               min={1}
@@ -101,16 +120,16 @@ export function Calculator({
               min={product.min_term_months}
               max={product.max_term_months}
               step={1}
-              label={(value) => `${value} мес.`}
+              label={(value) => months(value)}
               aria-label="Срок кредита в месяцах"
               size="md"
             />
             <Group justify="space-between">
               <Text size="xs" c={COLORS.textSecondary} className="num">
-                {product.min_term_months} мес.
+                {months(product.min_term_months)}
               </Text>
               <Text size="xs" c={COLORS.textSecondary} className="num">
-                {product.max_term_months} мес.
+                {months(product.max_term_months)}
               </Text>
             </Group>
           </Stack>
@@ -132,13 +151,16 @@ export function Calculator({
           >
             <Stack gap={2}>
               <Text size="sm" c={COLORS.textSecondary}>
-                <Term id="monthly_payment">Платёж в месяц</Term>, примерно
+                <Term id="monthly_payment">{result.data.payment_label}</Term>
               </Text>
               <MoneyFigure value={result.data.monthly_payment} fontSize={34} data-testid="calc-payment" />
+              <Text size="xs" c={COLORS.textSecondary}>
+                {result.data.payment_caption}
+              </Text>
             </Stack>
             <Stack gap={2} align="flex-end">
               <Text size="sm" c={COLORS.textSecondary} className="num" ta="right">
-                Всего вернуть {money(result.data.total_payment)}
+                <Term id="total_cost">Всего вы вернёте</Term> {money(result.data.total_payment)}
               </Text>
               <Text size="sm" c={COLORS.textSecondary} className="num" ta="right">
                 <Term id="overpayment">Переплата</Term> {money(result.data.overpayment)}
@@ -147,9 +169,53 @@ export function Calculator({
             <Text size="xs" c={COLORS.textSecondary} w="100%">
               {result.data.note}
             </Text>
+            <Button variant="default" onClick={schedule.open} data-testid="calc-schedule-open">
+              График платежей
+            </Button>
           </Group>
         )}
       </Stack>
+      <Modal opened={scheduleOpen} onClose={schedule.close} title={`График платежей: ${product.name}`} size="xl" fullScreen={false} centered>
+        {result.data && (
+          <Stack gap="sm">
+            <Text size="sm" c={COLORS.textSecondary}>
+              {money(result.data.amount)} на {months(result.data.term_months)}. {result.data.note}
+            </Text>
+            <Table.ScrollContainer minWidth={520} mah={420} type="native">
+              <Table stickyHeader highlightOnHover data-testid="calc-schedule">
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Месяц</Table.Th>
+                    <Table.Th ta="right">Платёж</Table.Th>
+                    <Table.Th ta="right">Основной долг</Table.Th>
+                    <Table.Th ta="right">Проценты</Table.Th>
+                    <Table.Th ta="right">Остаток долга</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {result.data.schedule.map((row) => (
+                    <Table.Tr key={row.month}>
+                      <Table.Td className="num">{row.month}</Table.Td>
+                      <Table.Td ta="right" className="num">
+                        {money(row.payment)}
+                      </Table.Td>
+                      <Table.Td ta="right" className="num">
+                        {money(row.principal)}
+                      </Table.Td>
+                      <Table.Td ta="right" className="num">
+                        {money(row.interest)}
+                      </Table.Td>
+                      <Table.Td ta="right" className="num">
+                        {money(row.balance)}
+                      </Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
+          </Stack>
+        )}
+      </Modal>
     </Box>
   );
 }

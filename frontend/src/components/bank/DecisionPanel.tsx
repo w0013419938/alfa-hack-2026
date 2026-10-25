@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { api, call, errorText, type Schemas } from "../../api/client";
 import { useProducts } from "../../pages/client/ProductsPage";
 import { COLORS } from "../../theme";
+import { monthsUpTo } from "../../utils/format";
 import { useDocumentKinds } from "../application/DocumentsBlock";
 import { Term } from "../Term";
 
@@ -98,8 +99,8 @@ export function DecisionPanel({ application }: { application: BankApplication })
             )}
             <NumberInput label="Сумма, ₽" value={terms.amount} onChange={(value) => setTerms({ ...terms, amount: Number(value) || 0 })} thousandSeparator=" " min={0}
               description={productInfo ? `лимит продукта: ${productInfo.min_amount.toLocaleString("ru-RU")} – ${productInfo.max_amount.toLocaleString("ru-RU")} ₽` : undefined} />
-            <NumberInput label="Срок, мес." value={terms.term_months} onChange={(value) => setTerms({ ...terms, term_months: Number(value) || 0 })} min={1}
-              description={productInfo ? `от ${productInfo.min_term_months} до ${productInfo.max_term_months} мес.` : undefined} />
+            <NumberInput label="Срок, месяцев" value={terms.term_months} onChange={(value) => setTerms({ ...terms, term_months: Number(value) || 0 })} min={1}
+              description={productInfo ? `от ${productInfo.min_term_months} до ${monthsUpTo(productInfo.max_term_months)}` : undefined} />
             <NumberInput label={<Term id="rate">Ставка, % годовых</Term>} value={terms.rate} onChange={(value) => setTerms({ ...terms, rate: Number(value) || 0 })} decimalScale={2} step={0.5} min={0} />
           </Stack>
         )}
@@ -126,7 +127,7 @@ export function DecisionPanel({ application }: { application: BankApplication })
 
         <Textarea
           label={current?.requires_comment ? "Комментарий для клиента (обязательно)" : "Комментарий для клиента"}
-          description="Клиент увидит его в истории заявки"
+          description="Напишите причину простыми словами: клиент увидит её в истории заявки"
           value={comment}
           onChange={(event) => setComment(event.currentTarget.value)}
           autosize

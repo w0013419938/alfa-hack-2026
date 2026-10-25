@@ -20,9 +20,9 @@ export function LoadingState({ text = "Загружаем…" }: { text?: string
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   return (
-    <Alert color="brand" radius="lg" icon={<IconAlertTriangle />} title="Не получилось загрузить данные">
+    <Alert color="brand" radius="lg" icon={<IconAlertTriangle />} title="Что-то пошло не так">
       <Stack gap="sm" align="flex-start">
-        <Text size="sm">{errorText(error)}</Text>
+        <Text size="sm">{errorText(error)} Попробуйте ещё раз через минуту.</Text>
         {onRetry && (
           <Button variant="light" size="xs" onClick={onRetry}>
             Попробовать ещё раз
