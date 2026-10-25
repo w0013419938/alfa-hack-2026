@@ -102,9 +102,9 @@ def is_repeat_of_last_action(db: Session, application_id: uuid.UUID, action: str
     """Повтор того же действия тем же пользователем (двойной клик, повтор запроса после обрыва связи).
 
     Считаем запрос повтором, только если:
-    - последнее действие человека по заявке — это же действие этого же пользователя;
+    - последнее действие человека по заявке это же действие этого же пользователя;
     - заявка всё ещё в статусе, куда её привело это действие, или в автоматической обработке после него.
-    Если процесс уже дошёл до нового решения (например, NEEDS_INFO или OFFER_SENT), повтор — это новая попытка,
+    Если процесс уже дошёл до нового решения (например, NEEDS_INFO или OFFER_SENT), повтор считается новой попыткой,
     и она получает обычный 409.
     """
     last_human_event = db.scalar(
@@ -142,7 +142,7 @@ def perform_client_action(
         db.rollback()
         # Идемпотентность: повтор уже выполненного действия возвращает текущее состояние, а не ошибку
         if error.code == "transition_not_allowed" and is_repeat_of_last_action(db, application_id, action, user.id):
-            logger.info("Повтор действия — возвращаем текущее состояние", extra={"application_id": str(application_id), "action": action})
+            logger.info("Повтор действия, возвращаем текущее состояние", extra={"application_id": str(application_id), "action": action})
             return db.get(Application, application_id, populate_existing=True)
         raise
 

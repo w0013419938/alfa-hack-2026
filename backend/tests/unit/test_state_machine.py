@@ -59,7 +59,7 @@ def test_table_has_no_extra_transitions():
     [
         (S.DRAFT, "accept_offer"),  # нельзя принять предложение, которого нет
         (S.DRAFT, "approve"),  # сотрудник не одобряет черновик
-        (S.SUBMITTED, "submit"),  # повторная отправка — не переход
+        (S.SUBMITTED, "submit"),  # повторная отправка не переход
         (S.OFFER_SENT, "sign"),  # сначала нужно принять предложение
         (S.SCORING, "cancel"),  # пока идёт автообработка, отзывать нельзя
         (S.REJECTED, "submit"),
@@ -83,7 +83,7 @@ def test_employee_actions_require_comment():
 
 
 def test_actions_are_unique_per_status():
-    """Для пары (статус, действие) должен быть ровно один переход — иначе машина неоднозначна."""
+    """Для пары (статус, действие) должен быть ровно один переход, иначе машина неоднозначна."""
     seen = set()
     for transition in TRANSITIONS:
         for status in transition.from_statuses:

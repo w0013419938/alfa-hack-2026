@@ -71,7 +71,7 @@ export function UploadForm({ application, fixedKind, compact }: { application: A
 }
 
 export function DocumentsBlock({ application }: { application: Application }) {
-  // Если банк попросил конкретные документы, загрузка — в блоке «Что нужно от вас»; здесь — только для прочих файлов
+  // Если банк попросил конкретные документы, загрузка идёт в блоке «Что нужно от вас», а здесь только для прочих файлов
   const requestedDocuments = (application.info_request?.documents.length ?? 0) > 0;
   const documents = useQuery({
     queryKey: ["documents", application.id, application.documents_count],

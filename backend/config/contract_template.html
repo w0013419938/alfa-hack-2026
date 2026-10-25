@@ -3,7 +3,7 @@
   Шаблон кредитного договора (имитация, без юридической силы).
   TODO(участник 1): заменить текст на финальный макет договора.
   Подстановки: $number, $date, $company_name, $company_inn, $company_ogrn, $signer_name,
-  $product_name, $amount, $term_months, $rate, $monthly_payment, $total_payment, $overpayment, $signed_text
+  $product_name, $amount, $term_months, $term_text, $rate, $monthly_payment, $total_payment, $overpayment, $signed_text
 -->
 <html lang="ru">
 <head>
@@ -22,12 +22,12 @@
 <p class="note">ДЕМО-ДОКУМЕНТ. Сформирован прототипом для хакатона, юридической силы не имеет.</p>
 <h1>Кредитный договор № $number</h1>
 <p>Дата: $date</p>
-<p>АО «Демо-Банк» (далее — Банк) и $company_name, ИНН $company_inn, ОГРН/ОГРНИП $company_ogrn
-(далее — Заёмщик), в лице $signer_name, заключили договор о нижеследующем.</p>
+<p>АО «Демо-Банк» (далее Банк) и $company_name, ИНН $company_inn, ОГРН/ОГРНИП $company_ogrn
+(далее Заёмщик), в лице $signer_name, заключили договор о нижеследующем.</p>
 <table>
   <tr><td>Продукт</td><td>$product_name</td></tr>
   <tr><td>Сумма кредита</td><td>$amount ₽</td></tr>
-  <tr><td>Срок</td><td>$term_months мес.</td></tr>
+  <tr><td>Срок</td><td>$term_text</td></tr>
   <tr><td>Процентная ставка</td><td>$rate% годовых</td></tr>
   <tr><td>Ежемесячный платёж (аннуитет)</td><td>$monthly_payment ₽</td></tr>
   <tr><td>Всего к возврату</td><td>$total_payment ₽</td></tr>

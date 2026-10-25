@@ -15,7 +15,7 @@ class Application(Base):
     """Заявка на кредит.
 
     Статус меняется ТОЛЬКО через app/domain/state_machine.py.
-    Поле version — для оптимистичной блокировки: SQLAlchemy сам увеличивает его при каждом UPDATE
+    Поле version нужно для оптимистичной блокировки: SQLAlchemy сам увеличивает его при каждом UPDATE
     и выдаёт ошибку, если строку уже успели изменить в другом месте.
     """
 
@@ -62,13 +62,13 @@ class ApplicationEvent(Base):
 
     id: Mapped[uuid.UUID] = uuid_pk()
     application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("applications.id"), nullable=False, index=True)
-    from_status: Mapped[str | None] = mapped_column(String(32), nullable=True)  # None — заявка только создана
+    from_status: Mapped[str | None] = mapped_column(String(32), nullable=True)  # None, если заявка только создана
     to_status: Mapped[str] = mapped_column(String(32), nullable=False)
     action: Mapped[str] = mapped_column(String(32), nullable=False)
     actor_type: Mapped[str] = mapped_column(String(16), nullable=False)  # client / employee / system
     actor_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     # Комментарий виден клиенту в таймлайне
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
-    # Технические подробности (причины решения, ошибки интеграций) — видит только сотрудник
+    # Технические подробности (причины решения, ошибки интеграций), видит только сотрудник
     payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     created_at: Mapped[datetime] = created_at_column()

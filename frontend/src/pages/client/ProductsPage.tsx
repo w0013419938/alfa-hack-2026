@@ -1,6 +1,6 @@
 /**
  * «Получить финансирование»: подбор продукта по нескольким простым вопросам (POST /products/recommend)
- * или выбор из списка. На каждой карточке продукта — калькулятор платежа.
+ * или выбор из списка. На каждой карточке продукта есть калькулятор платежа.
  */
 import { Badge, Button, Card, Group, List, NumberInput, SegmentedControl, Select, SimpleGrid, Stack, Switch, Tabs, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons-react";

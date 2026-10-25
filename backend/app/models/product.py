@@ -7,7 +7,7 @@ from app.models.base import Base
 
 
 class Product(Base):
-    """Кредитный продукт. Источник истины — config/products.yaml, таблица обновляется при каждом старте."""
+    """Кредитный продукт. Источник истины: config/products.yaml, таблица обновляется при каждом старте."""
 
     __tablename__ = "products"
 

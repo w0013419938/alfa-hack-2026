@@ -6,9 +6,9 @@
   3. Внешний сервис не ответил → ручное рассмотрение.
   4. Не хватает данных → запрос уточнений.
   5. Решение по грейду: одобрить / встречное предложение / ручное рассмотрение / отказ.
-  6. Если нагрузка выше допустимой — встречное предложение с меньшей суммой или большим сроком.
-Ставка = базовая ставка продукта + надбавка по грейду; платёж — аннуитетный.
-Функции чистые (без БД) — их легко проверить юнит-тестами.
+  6. Если нагрузка выше допустимой: встречное предложение с меньшей суммой или большим сроком.
+Ставка = базовая ставка продукта + надбавка по грейду; платёж аннуитетный.
+Функции чистые (без БД), поэтому их легко проверить юнит-тестами.
 """
 
 from dataclasses import dataclass, field
@@ -74,7 +74,7 @@ class DecisionInput:
     failed_checks: list[str]  # названия сервисов, которые не ответили
     company_has_reported_revenue: bool
     uploaded_document_kinds: set[str]
-    # Сотрудник уже запрашивал уточнения по этой заявке — значит, окончательное решение за ним
+    # Сотрудник уже запрашивал уточнения по этой заявке, значит окончательное решение за ним
     employee_requested_info: bool = False
 
 
@@ -90,7 +90,7 @@ def find_counter_offer(data: DecisionInput, rate: Decimal, amount_share: Decimal
     """Подбирает сумму и срок, при которых долговая нагрузка не выше допустимой.
 
     Сначала пробуем сохранить сумму (запрошенная × amount_share), увеличивая срок с шагом term_step_months.
-    Если не получается даже на максимальном сроке — уменьшаем сумму до максимально доступной.
+    Если не получается даже на максимальном сроке, уменьшаем сумму до максимально доступной.
     """
     settings = config.counter_offer
     target = round_down(data.amount * amount_share, settings.amount_round_to)
@@ -147,12 +147,12 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
     if stop_reasons:
         return Decision(outcome=REJECT, reasons=stop_reasons)
 
-    # 2. Заявка уже была у специалиста и он запросил уточнения — после ответа клиента решает снова он,
+    # 2. Заявка уже была у специалиста и он запросил уточнения: после ответа клиента решает снова он,
     #    иначе клиент мог бы «поправить» анкету и обойти ручное рассмотрение
     if data.employee_requested_info:
         return Decision(outcome=MANUAL_REVIEW, reasons=[reason("returned_to_employee")])
 
-    # 3. Внешний сервис не ответил — без полной картины решение принимает человек
+    # 3. Внешний сервис не ответил: без полной картины решение принимает человек
     if data.failed_checks:
         return Decision(outcome=config.integration_error_decision, reasons=[reason("integration_error", sources=", ".join(data.failed_checks))])
 

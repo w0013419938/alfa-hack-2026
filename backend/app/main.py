@@ -22,7 +22,7 @@ setup_logging(settings.log_level)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    get_business_config()  # если конфиги команды сломаны — падаем сразу с понятной ошибкой
+    get_business_config()  # если конфиги команды сломаны, падаем сразу с понятной ошибкой
     resume_unfinished_applications(dispatcher)  # добираем заявки, прерванные перезапуском
     stop_watchdog = start_watchdog(dispatcher)  # и дальше раз в минуту ищем застрявшие
     yield
@@ -70,7 +70,7 @@ def redoc():
     )
 
 
-# Порядок важен: добавленный последним middleware — внешний. CORS снаружи, чтобы его заголовки
+# Порядок важен: добавленный последним middleware считается внешним. CORS снаружи, чтобы его заголовки
 # были и у ответа 500, который формирует RequestIdMiddleware.
 app.add_middleware(RequestIdMiddleware)
 app.add_middleware(
@@ -85,7 +85,7 @@ register_error_handlers(app)
 
 API_PREFIX = "/api/v1"
 
-# Все ошибки приходят в одном формате {"error": {"code", "message", "details"}} — описываем это в схеме API
+# Все ошибки приходят в одном формате {"error": {"code", "message", "details"}}, и это описано в схеме API
 ERROR_RESPONSES = {
     status_code: {"model": ErrorResponse, "description": description}
     for status_code, description in {

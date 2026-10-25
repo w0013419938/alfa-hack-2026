@@ -32,6 +32,6 @@ export const CHECKLIST: ChecklistItem[] = [
 
 export const CHECKLIST_COLLATERAL: ChecklistItem = {
   title: "Описание залога",
-  why: "Банк берёт в залог то, что вы покупаете или вносите в качестве обеспечения. Опишите его своими словами.",
+  why: "В залог идёт то, что вы покупаете, или имущество, которое у вас уже есть. Опишите его своими словами.",
   required: true,
 };

@@ -1,4 +1,4 @@
-/** История заявки из поля timeline. Новые события сверху; только что появившиеся — подсвечены. */
+/** История заявки из поля timeline. Новые события сверху; только что появившиеся подсвечены. */
 import { Box, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
 
@@ -33,7 +33,7 @@ export function Timeline({ items }: { items: Item[] }) {
   const seen = useRef<number | null>(null);
   const [freshFrom, setFreshFrom] = useState<number | null>(null);
 
-  // При первой загрузке ничего не подсвечиваем; дальше — подсвечиваем добавившиеся события
+  // При первой загрузке ничего не подсвечиваем; дальше подсвечиваем добавившиеся события
   useEffect(() => {
     if (seen.current !== null && items.length > seen.current) {
       setFreshFrom(seen.current);

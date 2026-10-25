@@ -1,4 +1,4 @@
-"""Машина состояний заявки — ЕДИНСТВЕННОЕ место, где меняется статус.
+"""Машина состояний заявки. Это единственное место, где меняется статус.
 
 Таблица TRANSITIONS описывает все допустимые переходы:
     (из каких статусов, действие) → в какой статус, кто может выполнить, предусловие.
@@ -6,7 +6,7 @@
 Любая смена статуса идёт через apply_transition():
 - строка заявки блокируется (SELECT ... FOR UPDATE), поэтому два одновременных действия не «перетрут» друг друга;
 - проверяются допустимость перехода, роль и предусловие;
-- статус меняется и пишется ApplicationEvent — в одной транзакции (коммит делает вызывающий код).
+- статус меняется и пишется ApplicationEvent в одной транзакции (коммит делает вызывающий код).
 Недопустимый переход → ConflictError (HTTP 409) с понятным сообщением.
 """
 
@@ -171,7 +171,7 @@ def lock_application(db: Session, application_id: uuid.UUID) -> Application:
 
 
 def ensure_transition_allowed(db: Session, application: Application, action: str, actor: Actor, comment: str | None) -> Transition:
-    """Проверяет, можно ли сейчас выполнить действие. Если нельзя — бросает ошибку с понятным текстом."""
+    """Проверяет, можно ли сейчас выполнить действие. Если нельзя, бросает ошибку с понятным текстом."""
     labels = get_business_config().labels
     transition = find_transition(application.status, action)
     if transition is None:
@@ -201,7 +201,7 @@ def apply_transition(
     comment: str | None = None,
     payload: dict | None = None,
 ) -> tuple[Application, ApplicationEvent]:
-    """Выполняет переход. Коммит транзакции — на стороне вызывающего кода."""
+    """Выполняет переход. Коммит транзакции делает вызывающий код."""
     application = lock_application(db, application_id)
     current = application.status
     transition = ensure_transition_allowed(db, application, action, actor, comment)
@@ -269,7 +269,7 @@ def available_actions(db: Session, application: Application, actor: Actor) -> li
     """Какие кнопки показать пользователю с этой ролью прямо сейчас.
 
     Если действие есть, но предусловие не выполнено (например, не загружен документ),
-    кнопка возвращается с enabled=False и причиной — фронт покажет её неактивной с подсказкой.
+    кнопка возвращается с enabled=False и причиной, а фронт покажет её неактивной с подсказкой.
     """
     result: list[AvailableAction] = []
     if actor == Actor.CLIENT and application.status in EDITABLE_STATUSES:

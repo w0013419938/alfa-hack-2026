@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 import { applicationNumber, createAndSubmitStandardApplication, expectStatus, loginAs, newClientPage, PDF_FILE } from "./helpers";
 
-test("ручное рассмотрение: сотрудник одобряет — клиент сразу видит предложение", async ({ browser }) => {
+test("ручное рассмотрение: сотрудник одобряет, клиент сразу видит предложение", async ({ browser }) => {
   const client = await newClientPage(browser, "client_border");
   await createAndSubmitStandardApplication(client);
   await expectStatus(client, "MANUAL_REVIEW");
@@ -61,7 +61,7 @@ test("запрос уточнений сотрудником → клиент з
   await expectStatus(employee, "MANUAL_REVIEW");
 });
 
-test("роли разведены: клиент не видит бэкофис, сотрудник — клиентский кабинет", async ({ page, browser }) => {
+test("роли разведены: клиент не видит бэкофис, а сотрудник клиентский кабинет", async ({ page, browser }) => {
   await loginAs(page, "client_good");
   await page.goto("/bank");
   await expect(page).toHaveURL(/\/client$/);
@@ -85,7 +85,7 @@ test("лента подсказок отличается у разных кли�
   await expect(info.getByTestId("feed-reason").filter({ hasText: "ИП" })).toBeVisible();
 });
 
-test("неверный пароль — понятное сообщение", async ({ page }) => {
+test("неверный пароль дают понятное сообщение", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Логин").fill("client_good");
   await page.getByLabel("Пароль").fill("wrong-password");

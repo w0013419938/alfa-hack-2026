@@ -56,12 +56,12 @@ def setup_logging(level: str = "INFO") -> None:
     root.handlers = [handler]
     root.setLevel(level)
 
-    # uvicorn настраивает свои логгеры сам — перенаправляем их в общий JSON-формат
+    # uvicorn настраивает свои логгеры сам, поэтому перенаправляем их в общий JSON-формат
     for name in ("uvicorn", "uvicorn.error"):
         logger = logging.getLogger(name)
         logger.handlers = []
         logger.propagate = True
-    # Журнал запросов пишет наш RequestIdMiddleware; access-лог uvicorn содержит IP-адреса — отключаем
+    # Журнал запросов пишет наш RequestIdMiddleware; access-лог uvicorn содержит IP-адреса, поэтому отключаем его
     logging.getLogger("uvicorn.access").disabled = True
     # Подробные логи HTTP-клиента не нужны (в них есть адреса запросов с ИНН)
     logging.getLogger("httpx").setLevel(logging.WARNING)

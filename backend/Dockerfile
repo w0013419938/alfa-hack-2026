@@ -1,6 +1,6 @@
 FROM python:3.12.15-slim
 
-# uv — менеджер зависимостей; ставит ровно те версии, что зафиксированы в uv.lock
+# uv, менеджер зависимостей: ставит ровно те версии, что зафиксированы в uv.lock
 COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /usr/local/bin/uv
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -12,7 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Сначала только зависимости — этот слой кэшируется, пока не меняется uv.lock.
+# Сначала только зависимости. Этот слой кэшируется, пока не меняется uv.lock.
 # Dev-зависимости (pytest) ставим тоже, чтобы тесты запускались в этом же образе.
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project

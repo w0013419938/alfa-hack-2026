@@ -1,7 +1,7 @@
 """Шаг VALIDATION: полнота и корректность анкеты по правилам продукта.
 
-Функция чистая (без БД): на вход — заявка, продукт, ИНН компании и конфиг, на выход — список проблем.
-Пустой список — анкета в порядке.
+Функция чистая (без БД): на вход идут заявка, продукт, ИНН компании и конфиг, на выходе список проблем.
+Пустой список значит, что анкета в порядке.
 """
 
 from dataclasses import dataclass
@@ -15,7 +15,7 @@ from app.domain.inn import is_valid_inn
 @dataclass
 class ValidationProblem:
     message: str
-    field: str | None = None  # поле анкеты, которое нужно исправить (None — проблема не в анкете)
+    field: str | None = None  # поле анкеты, которое нужно исправить (None, если проблема не в анкете)
 
 
 def _is_empty(value) -> bool:
@@ -23,7 +23,7 @@ def _is_empty(value) -> bool:
 
 
 def validate_application(application, product, company_inn: str, config: BusinessConfig) -> list[ValidationProblem]:
-    """application и product — объекты с атрибутами (модели SQLAlchemy или их аналоги в тестах)."""
+    """application и product это объекты с атрибутами (модели SQLAlchemy или их аналоги в тестах)."""
     texts = config.labels.validation
     field_labels = config.labels.fields
     rules = config.decision.validation

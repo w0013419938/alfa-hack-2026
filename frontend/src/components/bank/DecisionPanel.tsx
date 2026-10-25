@@ -1,6 +1,6 @@
 /**
- * Панель решения сотрудника. Какие решения доступны — строго из available_actions;
- * условия по умолчанию — из suggested_offer; комментарий обязателен (requires_comment из API).
+ * Панель решения сотрудника. Какие решения доступны, берётся строго из available_actions;
+ * условия по умолчанию берутся из suggested_offer; комментарий обязателен (requires_comment из API).
  */
 import { Alert, Button, Card, Group, Modal, MultiSelect, NumberInput, SegmentedControl, Stack, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -32,7 +32,7 @@ export function DecisionPanel({ application }: { application: BankApplication })
   const [documents, setDocuments] = useState<string[]>([]);
   const [confirming, setConfirming] = useState(false);
 
-  // Если набор доступных действий изменился (заявку решили в другом окне) — выбираем заново
+  // Если набор доступных действий изменился (заявку решили в другом окне), выбираем заново
   useEffect(() => {
     if (!actions.some((item) => item.code === action)) setAction(actions[0]?.code ?? null);
   }, [actions, action]);

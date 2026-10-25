@@ -85,11 +85,11 @@ def test_repeated_action_is_idempotent(api):
     client = api("client_good")
     draft = client.create_application()
     client.action(draft["id"], "submit")
-    # Повтор сразу (заявка ещё в обработке) — не ошибка и не новое событие
+    # Повтор сразу (заявка ещё в обработке) не ошибка и не новое событие
     repeated = client.action(draft["id"], "submit")
     assert [item["action"] for item in repeated["timeline"]].count("submit") == 1
 
-    # Когда процесс дошёл до нового решения, «повтор» — это уже недопустимое действие
+    # Когда процесс дошёл до нового решения, «повтор» уже недопустимое действие
     assert client.wait_until_processed(draft["id"])["status"] == "OFFER_SENT"
     late = client.post(f"/applications/{draft['id']}/actions/submit")
     assert late.status_code == 409
@@ -224,7 +224,7 @@ def test_feed_is_personalized(api):
     feed = api("client_info").get("/feed").json()
     assert feed
     assert all(item["reason"] for item in feed)
-    assert any("ИП" in item["reason"] for item in feed)  # client_info — индивидуальный предприниматель
+    assert any("ИП" in item["reason"] for item in feed)  # client_info это индивидуальный предприниматель
 
 
 def test_backoffice_queue_filters_and_stats(api):
@@ -270,7 +270,7 @@ def test_too_many_documents(api, monkeypatch):
 
 
 def test_watchdog_resumes_stuck_application(api):
-    """Заявка «застряла» в автоматическом статусе (например, упал поток) — сторож её возобновляет."""
+    """Заявка «застряла» в автоматическом статусе (например, упал поток), сторож её возобновляет."""
     from datetime import UTC, datetime, timedelta
 
     from app.core.db import SessionLocal

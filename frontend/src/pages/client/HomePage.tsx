@@ -12,9 +12,9 @@ import { dateTime, money, months } from "../../utils/format";
 
 const STATE_COLOR: Record<string, string> = { current: "brand", action: "violet", stopped: "gray" };
 
-/** Следующий шаг для клиента: подписи доступных действий из API, иначе — пояснение статуса */
+/** Следующий шаг для клиента: подписи доступных действий из API, иначе пояснение статуса */
 function nextStep(application: Application): { text: string; isAction: boolean } {
-  // «Редактировать», «Загрузить документ» и «Отозвать» — не следующий шаг, а возможности; показываем главное действие
+  // «Редактировать», «Загрузить документ» и «Отозвать» не следующий шаг, а возможности; показываем главное действие
   const actions = application.available_actions.filter((action) => action.enabled && !["edit", "upload_document", "cancel"].includes(action.code));
   if (actions.length > 0) {
     const labels = actions.map((action, index) => (index === 0 ? action.label : action.label.charAt(0).toLowerCase() + action.label.slice(1)));
@@ -62,7 +62,7 @@ function ApplicationRow({ application }: { application: Application }) {
   );
 }
 
-/** Мини-шкала этапов: полоска из сегментов по полю progress, цвет сегмента — состояние этапа */
+/** Мини-шкала этапов: полоска из сегментов по полю progress, цвет сегмента показывает состояние этапа */
 const SEGMENT_COLOR: Record<string, string> = {
   done: COLORS.positive,
   current: COLORS.accent,
@@ -96,7 +96,7 @@ function MiniProgress({ application }: { application: Application }) {
   );
 }
 
-/** Текущая заявка — самая свежая незавершённая: крупно, со шкалой и следующим шагом */
+/** Текущая заявка это самая свежая незавершённая: крупно, со шкалой и следующим шагом */
 function CurrentApplication({ application }: { application: Application }) {
   const next = nextStep(application);
   return (

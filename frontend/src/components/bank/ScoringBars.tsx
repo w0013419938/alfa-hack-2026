@@ -1,8 +1,8 @@
 /**
  * Скоринг для сотрудника.
- * ScoringSummary — сводка сверху карточки: балл и грейд, решение системы, главные риски, долговая нагрузка.
- * ScoringBars — вклад факторов: у каждого фактора дорожка длиной в его максимум баллов,
- * набранное залито зелёным, недобранное — бледно-красным. Цвет значит «набрано / потеряно».
+ * ScoringSummary это сводка сверху карточки: балл и грейд, решение системы, главные риски, долговая нагрузка.
+ * ScoringBars показывает вклад факторов: у каждого фактора дорожка длиной в его максимум баллов,
+ * набранное залито зелёным, недобранное бледно-красным. Цвет значит «набрано / потеряно».
  * Все числа и тексты приходят из API; здесь только рисунок и сортировка для списка рисков.
  */
 import { Box, Group, List, SimpleGrid, Stack, Text } from "@mantine/core";
@@ -53,7 +53,7 @@ function DebtLoad({ value }: { value: number }) {
 export function ScoringSummary({ application }: { application: BankApplication }) {
   const scoring = application.scoring;
   const decision = application.decision;
-  // Главные риски — факторы, где потеряно больше всего баллов (по данным API)
+  // Главные риски это факторы, где потеряно больше всего баллов (по данным API)
   const risks = scoring
     ? [...scoring.factors].filter((factor) => factor.max_points > factor.points).sort((a, b) => b.max_points - b.points - (a.max_points - a.points)).slice(0, 3)
     : [];

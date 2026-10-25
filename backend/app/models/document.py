@@ -8,13 +8,13 @@ from app.models.base import Base, created_at_column, uuid_pk
 
 
 class Document(Base):
-    """Файл, приложенный к заявке. Сам файл лежит на диске (volume), в БД — только метаданные."""
+    """Файл, приложенный к заявке. Сам файл лежит на диске (volume), в БД только метаданные."""
 
     __tablename__ = "documents"
 
     id: Mapped[uuid.UUID] = uuid_pk()
     application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("applications.id"), nullable=False, index=True)
-    uploaded_by_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)  # None — система
+    uploaded_by_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)  # None, если файл создала система
     kind: Mapped[str] = mapped_column(String(32), nullable=False)  # код вида документа из dictionaries.yaml
     original_filename: Mapped[str] = mapped_column(String(255), nullable=False)  # уже очищенное имя
     stored_path: Mapped[str] = mapped_column(String(512), nullable=False)  # путь внутри UPLOAD_DIR

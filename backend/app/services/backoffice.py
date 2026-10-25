@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.business_config import get_business_config
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.domain.decision import OfferTerms, offer_rate
-from app.domain.formatting import format_money
+from app.domain.formatting import days_text, format_money
 from app.domain.payments import annuity_payment
 from app.domain.state_machine import EMPLOYEE_ACTIONS, apply_transition, ensure_transition_allowed, lock_application
 from app.domain.statuses import FINAL_STATUSES, Actor
@@ -128,7 +128,7 @@ def get_application(db: Session, application_id: uuid.UUID) -> Application:
 
 
 def check_summary(check: ExternalCheck, company_status_labels: dict[str, str]) -> list[str]:
-    """Главное из ответа внешнего сервиса — коротко, чтобы сотруднику не читать JSON."""
+    """Главное из ответа внешнего сервиса, коротко, чтобы сотруднику не читать JSON."""
     data = check.response or {}
     if check.status != CHECK_OK:
         return [f"Сервис не ответил: {check.error_message} (попыток: {check.attempts})"]
@@ -150,8 +150,8 @@ def check_summary(check: ExternalCheck, company_status_labels: dict[str, str]) -
         return [
             f"Кредитный рейтинг бюро: {data.get('rating', '—')}",
             f"Действующих кредитов: {len(loans)}, платежи {format_money(payments)} ₽ в месяц",
-            f"Текущая просрочка: {current_overdue} дн." if current_overdue else "Текущей просрочки нет",
-            f"Просрочек в истории: {history.get('count', 0)}, самая долгая {history.get('max_days', 0)} дн.",
+            f"Текущая просрочка: {days_text(current_overdue)}" if current_overdue else "Текущей просрочки нет",
+            f"Просрочек в истории: {history.get('count', 0)}, самая долгая {days_text(history.get('max_days', 0))}",
         ]
     return []
 
@@ -212,7 +212,7 @@ def build_decision(db: Session, application_id: uuid.UUID) -> DecisionOut | None
 
 
 def grade_for_offer(scoring: ScoringResult | None) -> str:
-    """Грейд для расчёта ставки: из скоринга, а если скоринга нет — грейд по умолчанию из decision.yaml."""
+    """Грейд для расчёта ставки: из скоринга, а если скоринга нет, то грейд по умолчанию из decision.yaml."""
     return scoring.grade if scoring else get_business_config().decision.manual_review_default_grade
 
 
@@ -303,7 +303,7 @@ def check_offer_terms(application: Application, amount: Decimal, term_months: in
 
 
 def build_employee_offer(db: Session, application: Application, action: str, body: EmployeeActionRequest) -> OfferTerms:
-    """Условия предложения сотрудника: то, что он указал, а остальное — по умолчанию (запрошенное и ставка по грейду)."""
+    """Условия предложения сотрудника: то, что он указал, а остальное по умолчанию (запрошенное и ставка по грейду)."""
     if action == "counter_offer" and (body.amount is None or body.term_months is None):
         raise AppError("Для встречного предложения укажите сумму и срок.", code="offer_terms_required")
     amount = body.amount if body.amount is not None else application.amount
@@ -338,7 +338,7 @@ def perform_employee_action(db: Session, user: User, application_id: uuid.UUID, 
     try:
         application = lock_application(db, application_id)
         check_version(application, body.version)
-        # Сначала проверяем, что действие вообще допустимо (понятный 409), и только потом — сумму и срок
+        # Сначала проверяем, что действие вообще допустимо (понятный 409), и только потом сумму и срок
         ensure_transition_allowed(db, application, action, Actor.EMPLOYEE, body.comment)
 
         payload: dict = {"employee_id": str(user.id)}

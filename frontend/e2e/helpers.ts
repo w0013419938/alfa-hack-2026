@@ -1,6 +1,6 @@
 import { expect, type Browser, type Page } from "@playwright/test";
 
-/** Вход через кнопку «Демо-доступ» — так же, как это сделает жюри */
+/** Вход через кнопку «Демо-доступ», так же, как это сделает жюри */
 export async function loginAs(page: Page, login: string) {
   await page.goto("/login");
   await page.getByTestId(`demo-${login}`).click();
@@ -14,7 +14,7 @@ export async function newClientPage(browser: Browser, login: string): Promise<Pa
   return page;
 }
 
-/** Стандартная анкета из docs/test-scenarios.md — через пошаговую форму */
+/** Стандартная анкета из docs/test-scenarios.md, через пошаговую форму */
 export async function createAndSubmitStandardApplication(page: Page) {
   await page.goto("/client/apply?product=working_capital&amount=1500000&term=24&purpose=working_capital");
   await page.getByTestId("form-next").click(); // 1. параметры → черновик сохранён
@@ -28,7 +28,7 @@ export async function createAndSubmitStandardApplication(page: Page) {
   await expect(page).toHaveURL(/\/client\/applications\/[0-9a-f-]+$/);
 }
 
-/** Ждём статус заявки на открытой странице — без перезагрузки: страница опрашивает API сама */
+/** Ждём статус заявки на открытой странице, без перезагрузки: страница опрашивает API сама */
 export async function expectStatus(page: Page, status: string, timeout = 60_000) {
   await expect(page.getByTestId("status-label")).toHaveAttribute("data-status", status, { timeout });
 }

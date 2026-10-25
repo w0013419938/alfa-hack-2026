@@ -12,11 +12,11 @@ from app.schemas.company import CompanyOut, DocumentOut
 
 
 class EmployeeActionRequest(BaseModel):
-    """Тело действия сотрудника. Какие поля нужны — зависит от действия:
+    """Тело действия сотрудника. Какие поля нужны, зависит от действия:
 
-    - approve: comment; amount, term_months, rate — по желанию (если не указаны, берутся из suggested_offer);
-    - counter_offer: comment, amount, term_months; rate — по желанию;
-    - request_info: comment; requested_fields и/или requested_documents — по желанию;
+    - approve: comment; amount, term_months, rate по желанию (если не указаны, берутся из suggested_offer);
+    - counter_offer: comment, amount, term_months; rate по желанию;
+    - request_info: comment; requested_fields и/или requested_documents по желанию;
     - reject: comment (причину увидит клиент).
     """
 

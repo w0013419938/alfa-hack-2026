@@ -1,4 +1,4 @@
-# Шаг 1: сборка фронта (версии пакетов — строго по package-lock.json)
+# Шаг 1: сборка фронта (версии пакетов строго по package-lock.json)
 FROM node:22.23.4-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./

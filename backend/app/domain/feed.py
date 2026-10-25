@@ -1,7 +1,7 @@
 """Персональная лента подсказок: отбор по правилам config/feed.yaml.
 
 Подсказка показывается, если выполнены ВСЕ её условия (отрасль, тип компании, статус и продукт текущей заявки).
-Чем больше условий совпало, тем выше подсказка в ленте. У каждой — объяснение «почему показано».
+Чем больше условий совпало, тем выше подсказка в ленте. У каждой есть объяснение «почему показано».
 """
 
 from dataclasses import dataclass
@@ -15,7 +15,7 @@ class FeedContext:
     industry: str
     company_type: str
     company_type_label: str
-    application_status: str | None  # статус текущей заявки (None — заявок нет)
+    application_status: str | None  # статус текущей заявки (None, если заявок нет)
     application_status_label: str | None
     product_code: str | None
     product_name: str | None

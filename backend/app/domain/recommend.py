@@ -2,7 +2,7 @@
 
 Простая логика на правилах: за каждое совпадение (цель, сумма, срок, скорость, залог) продукт получает
 баллы из config/products.yaml (recommendation.weights). Продукты сортируются по баллам.
-«Подходит» — продукт, у которого совпали цель, сумма, срок и требования к залогу.
+«Подходит» значит, что у продукта совпали цель, сумма, срок и требования к залогу.
 """
 
 from dataclasses import dataclass, field
@@ -78,7 +78,7 @@ def recommend_products(
         term_ok = product.min_term_months <= request.term_months <= product.max_term_months
         check(term_ok, "term", texts["term_ok"].format(**term_values), texts["term_bad"].format(**term_values))
 
-        # Скорость — не критична: продукт подходит, просто решение дольше
+        # Скорость не критична: продукт подходит, просто решение дольше
         speed_ok = product.decision_days <= days_client_can_wait
         check(speed_ok, "speed", texts["speed_ok"].format(days=product.decision_days, days_text=days_text(product.decision_days)), texts["speed_bad"].format(days=product.decision_days, days_text=days_text(product.decision_days)), critical=False)
 
@@ -89,6 +89,6 @@ def recommend_products(
 
         results.append(item)
 
-    # Сначала подходящие, затем по баллам; при равенстве — продукт с более быстрым решением
+    # Сначала подходящие, затем по баллам; при равенстве выше продукт с более быстрым решением
     results.sort(key=lambda item: (not item.suitable, -item.score, item.product.decision_days))
     return results

@@ -83,7 +83,7 @@ class CalculatorOut(BaseModel):
     rate: Money
     payment_type: str = Field(description="annuity (одинаковый каждый месяц) или differentiated (уменьшается со временем)")
     payment_type_options: list[PaymentTypeOption]
-    monthly_payment: Money = Field(description="Аннуитетный платёж; при дифференцированном — первый, самый большой платёж")
+    monthly_payment: Money = Field(description="Аннуитетный платёж; при дифференцированном первый, самый большой платёж")
     payment_label: str = Field(description="Подпись к главной цифре: «Платёж в месяц» или «Первый платёж»", examples=["Платёж в месяц"])
     payment_caption: str = Field(description="Пояснение под главной цифрой")
     first_payment: Money

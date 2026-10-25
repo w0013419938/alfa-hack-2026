@@ -66,7 +66,7 @@ def run_pipeline(application_id: uuid.UUID, step_delay: float | None = None, cli
         try:
             run_step(application_id, status, client)
         except ConflictError:
-            logger.info("Статус заявки изменился во время шага — останавливаемся", extra={"application_id": str(application_id)})
+            logger.info("Статус заявки изменился во время шага, останавливаемся", extra={"application_id": str(application_id)})
             return
         except Exception:
             logger.exception("Ошибка на шаге пайплайна", extra={"application_id": str(application_id), "from_status": status})
@@ -122,7 +122,7 @@ def step_checks(application_id: uuid.UUID, client: ExternalDataClient) -> None:
     with SessionLocal() as db:
         inn = db.get(Application, application_id).company.inn
 
-    # Запросы во внешние сервисы — вне транзакции: они могут идти несколько секунд
+    # Запросы во внешние сервисы идут вне транзакции: они могут идти несколько секунд
     results = [client.get_egrul(inn), client.get_bki_report(inn)]
 
     with SessionLocal() as db:
@@ -306,8 +306,8 @@ def send_to_manual_review_after_error(application_id: uuid.UUID) -> None:
 def resume_unfinished_applications(dispatcher, idle_seconds: float = 0) -> int:
     """Возобновляет заявки, которые застряли в автоматических статусах.
 
-    При старте бэкенда (idle_seconds=0) — все такие заявки: их обработка прервалась перезапуском.
-    Сторож (start_watchdog) — только те, что не менялись дольше idle_seconds: значит, их шаг упал или потерялся.
+    При старте бэкенда (idle_seconds=0) берём все такие заявки: их обработка прервалась перезапуском.
+    Сторож (start_watchdog) берёт только те, что не менялись дольше idle_seconds: значит, их шаг упал или потерялся.
     Двойная обработка не страшна: каждый шаг проверяет текущий статус под блокировкой строки.
     """
     threshold = datetime.now(UTC) - timedelta(seconds=idle_seconds)

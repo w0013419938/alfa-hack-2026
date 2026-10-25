@@ -47,7 +47,7 @@ export function QueuePage() {
     setPage(1);
   }
 
-  // Список статусов и их названия для фильтра — из ответа /backoffice/stats (он перечисляет все статусы)
+  // Список статусов и их названия для фильтра берём из ответа /backoffice/stats (он перечисляет все статусы)
   const statusOptions = (stats.data?.by_status ?? []).map((item) => ({ value: item.status, label: `${item.label} (${item.count})` }));
   const manualCount = stats.data?.manual_review_queue ?? 0;
 
@@ -170,7 +170,7 @@ export function QueuePage() {
                         {months(item.term_months)}
                       </Table.Td>
                       <Table.Td>
-                        {/* Ждёт решения — красная точка и жирный текст; остальные статусы спокойные */}
+                        {/* Ждёт решения: красная точка и жирный текст; остальные статусы спокойные */}
                         <Group gap={8} wrap="nowrap" align="baseline">
                           <Box
                             w={8}

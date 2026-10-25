@@ -1,4 +1,4 @@
-# Контекст сборки — корень репозитория (см. docker-compose.yml),
+# Контекст сборки: корень репозитория (см. docker-compose.yml),
 # потому что данные моков лежат в backend/seed/external_mocks.json.
 FROM python:3.12.15-slim
 

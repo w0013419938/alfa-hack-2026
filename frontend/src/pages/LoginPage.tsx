@@ -1,4 +1,4 @@
-/** Вход: форма логина и «Демо-доступ» — вход в один клик под каждой тестовой учёткой. */
+/** Вход: форма логина и «Демо-доступ» (вход в один клик под каждой тестовой учёткой). */
 import { Alert, Box, Button, Card, Container, Grid, Group, Image, PasswordInput, SimpleGrid, Stack, Text, TextInput, Title, UnstyledButton } from "@mantine/core";
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";

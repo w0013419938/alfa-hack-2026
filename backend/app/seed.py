@@ -1,7 +1,7 @@
 """Загрузка справочников и демо-данных: python -m app.seed
 
 Запускается автоматически при старте контейнера (start.sh) и безопасна для повторного запуска:
-- продукты обновляются из config/products.yaml при каждом запуске (конфиг — источник истины);
+- продукты обновляются из config/products.yaml при каждом запуске (источник истины: конфиг);
 - компании и пользователи добавляются, только если их ещё нет (по ИНН и логину);
 - демо-заявки создаются, только если у компании ещё нет заявок.
 Чтобы перезалить демо-данные с нуля: docker compose down -v && docker compose up --build
@@ -123,7 +123,7 @@ def seed_applications() -> None:
         with SessionLocal() as db:
             company = db.scalar(select(Company).where(Company.inn == item["company_inn"]))
             if company is None or db.scalar(select(Application.id).where(Application.company_id == company.id).limit(1)):
-                continue  # компании нет или у неё уже есть заявки — значит, seed уже выполнялся
+                continue  # компании нет или у неё уже есть заявки, значит seed уже выполнялся
             try:
                 author = db.scalar(select(User).where(User.login == item["author_login"]))
                 draft = create_draft(db, author, ApplicationCreate(**{key: value for key, value in item.items() if key in application_fields}))

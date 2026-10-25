@@ -1,4 +1,4 @@
-/** Форматирование чисел и дат для показа (без вычислений — только вид). */
+/** Форматирование чисел и дат для показа (без вычислений, только вид). */
 
 const moneyFormat = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const roundMoneyFormat = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });

@@ -30,5 +30,5 @@ class Offer(Base):
     monthly_payment: Mapped[Decimal] = mapped_column(Numeric(16, 2), nullable=False)
     valid_until: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(String(16), nullable=False, default=OFFER_ACTIVE)
-    created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)  # None — система
+    created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)  # None, если предложение создала система
     created_at: Mapped[datetime] = created_at_column()

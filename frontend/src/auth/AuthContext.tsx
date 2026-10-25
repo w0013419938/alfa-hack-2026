@@ -1,4 +1,4 @@
-/** Кто вошёл в систему. Токен хранится в localStorage, данные пользователя — из GET /auth/me. */
+/** Кто вошёл в систему. Токен хранится в localStorage, данные пользователя берутся из GET /auth/me. */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useState, type ReactNode } from "react";
 

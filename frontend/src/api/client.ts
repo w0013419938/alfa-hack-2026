@@ -39,7 +39,7 @@ export class ApiError extends Error {
   }
 }
 
-// Подставляем токен в каждый запрос; если сессия истекла — отправляем на вход
+// Подставляем токен в каждый запрос; если сессия истекла, отправляем на вход
 const authMiddleware: Middleware = {
   onRequest({ request }) {
     const token = tokenStore.get();
@@ -105,7 +105,7 @@ export async function downloadFile(url: string, filename: string): Promise<void>
   URL.revokeObjectURL(link.href);
 }
 
-/** Загрузка документа (multipart). openapi-fetch плохо дружит с FormData, поэтому — обычный fetch с тем же разбором ошибок. */
+/** Загрузка документа (multipart). openapi-fetch плохо дружит с FormData, поэтому здесь обычный fetch с тем же разбором ошибок. */
 export async function uploadDocument(applicationId: string, kind: string, file: File): Promise<Schemas["DocumentOut"]> {
   const form = new FormData();
   form.append("kind", kind);

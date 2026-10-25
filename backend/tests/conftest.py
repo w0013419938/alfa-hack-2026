@@ -7,7 +7,7 @@
 import os
 
 # Значения задаются жёстко (не setdefault): внутри `docker compose run` уже есть переменные
-# рабочего окружения, а тестам нужны свои — без пауз, с коротким таймаутом и отдельной папкой файлов.
+# рабочего окружения, а тестам нужны свои: без пауз, с коротким таймаутом и отдельной папкой файлов.
 os.environ["JWT_SECRET"] = "test-secret-for-pytest-only-123456"
 os.environ["PIPELINE_STEP_DELAY_SECONDS"] = "0"
 os.environ["EXTERNAL_TIMEOUT_SECONDS"] = "1"

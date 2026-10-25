@@ -308,5 +308,5 @@ def load_business_config(config_dir: Path) -> BusinessConfig:
 
 @lru_cache
 def get_business_config() -> BusinessConfig:
-    """Конфиг читается один раз за запуск. Чтобы применить изменения — перезапустите бэкенд."""
+    """Конфиг читается один раз за запуск. Чтобы применить изменения, перезапустите бэкенд."""
     return load_business_config(get_settings().config_dir)

@@ -1,5 +1,5 @@
 /**
- * Страница заявки — главный экран демо.
+ * Страница заявки это главный экран демо.
  * Пока заявка не в финальном статусе, она опрашивается каждые 3 секунды: статус, шкала этапов и история
  * обновляются на глазах, без перезагрузки страницы.
  */
@@ -32,13 +32,13 @@ export function useApplication(id: string) {
   });
 }
 
-/** Этап, над которым сейчас работает банк (state = current в progress), — для индикатора «Банк работает» */
+/** Этап, над которым сейчас работает банк (state = current в progress), для индикатора «Банк работает» */
 function workingStep(application: Application) {
   if (application.is_final) return null;
   return application.progress.find((item) => item.state === "current") ?? null;
 }
 
-/** Все этапы пройдены — процесс завершён успешно (кредит выдан) */
+/** Все этапы пройдены: процесс завершён успешно (кредит выдан) */
 function allStepsDone(application: Application): boolean {
   return application.progress.length > 0 && application.progress.every((item) => item.state === "done");
 }
@@ -202,7 +202,7 @@ export function ApplicationPage() {
         <Grid.Col span={{ base: 12, md: 7 }}>
           <Stack gap="lg">
             <InfoRequestPanel application={application} />
-            {/* После выдачи условия уже показаны в итоге сверху — второй раз их не повторяем */}
+            {/* После выдачи условия уже показаны в итоге сверху, второй раз их не повторяем */}
             {!finished && <OfferCard application={application} actions={offerOpen ? <ActionBar application={application} /> : undefined} />}
             <ApplicationDetails application={application} />
             <DocumentsBlock application={application} />

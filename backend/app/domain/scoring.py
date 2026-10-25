@@ -1,8 +1,8 @@
 """Скоринг: балльная модель по правилам из config/scoring.yaml.
 
 Два шага:
-1. collect_factor_values() — собирает значения факторов из анкеты, профиля компании, ЕГРЮЛ и БКИ;
-2. calculate_score() — по правилам конфига превращает значения в баллы, грейд и объяснения.
+1. collect_factor_values() собирает значения факторов из анкеты, профиля компании, ЕГРЮЛ и БКИ;
+2. calculate_score() по правилам конфига превращает значения в баллы, грейд и объяснения.
 Обе функции чистые (без БД), поэтому каждый фактор легко проверить юнит-тестом.
 """
 
@@ -11,7 +11,7 @@ from datetime import date
 from decimal import Decimal
 
 from app.core.business_config import IndustryRiskConfig, ScoringFactorConfig, ScoringFile
-from app.domain.formatting import format_money
+from app.domain.formatting import days_text, format_money, months_text, years_text
 from app.domain.payments import annuity_payment
 
 INDUSTRY_GROUP_TEXTS = {"low": "низкий риск", "medium": "средний риск", "high": "повышенный риск"}
@@ -19,7 +19,7 @@ INDUSTRY_GROUP_TEXTS = {"low": "низкий риск", "medium": "средни�
 
 @dataclass
 class FactorValues:
-    """Значения всех источников для факторов. None — данных нет."""
+    """Значения всех источников для факторов. None значит, что данных нет."""
 
     business_age_months: int | None = None
     debt_to_income: float | None = None
@@ -90,7 +90,7 @@ def collect_facts(
     industry_config: IndustryRiskConfig,
     today: date,
 ) -> ScoringFacts:
-    """application, company — объекты с атрибутами; egrul и bki — ответы сервисов (None, если сервис не ответил)."""
+    """application и company это объекты с атрибутами; egrul и bki это ответы сервисов (None, если сервис не ответил)."""
     values = FactorValues()
 
     # Возраст бизнеса: дата регистрации из госреестра надёжнее, чем из профиля
@@ -142,11 +142,13 @@ def format_value(source: str, value) -> str:
         return "нет данных"
     if source == "business_age_months":
         years, months = divmod(int(value), 12)
-        return f"{years} г. {months} мес." if years else f"{months} мес."
+        if years:
+            return f"{years_text(years)} {months_text(months)}" if months else years_text(years)
+        return months_text(months)
     if source in ("debt_to_income", "amount_to_annual_revenue"):
         return f"{round(value * 100)}%"
     if source == "max_overdue_days":
-        return "нет просрочек" if value == 0 else f"{value} дн."
+        return "нет просрочек" if value == 0 else days_text(int(value))
     if source == "industry_risk_group":
         return INDUSTRY_GROUP_TEXTS.get(value, value)
     return format_money(value) if isinstance(value, Decimal) else str(value)
@@ -187,7 +189,7 @@ def calculate_score(values: FactorValues, config: ScoringFile) -> ScoreResult:
     total = sum(item.points for item in factors)
     max_score = sum(item.max_points for item in factors)
 
-    # Грейды в конфиге — от лучшего к худшему; берём первый, порог которого пройден
+    # Грейды в конфиге идут от лучшего к худшему; берём первый, порог которого пройден
     grades = sorted(config.grades, key=lambda item: item.min_score, reverse=True)
     grade = next((item for item in grades if total >= item.min_score), grades[-1])
     return ScoreResult(total_score=total, max_score=max_score, grade=grade.grade, grade_label=grade.label, factors=factors)

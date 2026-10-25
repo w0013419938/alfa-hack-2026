@@ -1,6 +1,6 @@
 /**
  * Кнопки действий. Рисуются строго из available_actions: какие кнопки есть, их подписи, активность,
- * причина неактивности и текст подтверждения — всё приходит из API.
+ * причина неактивности и текст подтверждения: всё приходит из API.
  * Здесь решается только «как показать»: некоторые действия открывают форму или окно, а не вызываются сразу.
  */
 import { Button, Group, Modal, Stack, Text, Textarea, Tooltip } from "@mantine/core";
@@ -41,7 +41,7 @@ export function ActionBar({ application }: { application: Application }) {
     }
   }
 
-  // Главное действие (первое активное «не отменяющее») — красной кнопкой
+  // Главное действие (первое активное «не отменяющее») показываем красной кнопкой
   const primary = actions.find((action) => action.enabled && !QUIET_ACTIONS.has(action.code) && !NAVIGATION_ACTIONS.has(action.code));
 
   return (

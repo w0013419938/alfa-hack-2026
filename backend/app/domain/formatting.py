@@ -31,6 +31,10 @@ def months_text(number: int) -> str:
     return f"{number} {plural(number, 'месяц', 'месяца', 'месяцев')}"
 
 
+def years_text(number: int) -> str:
+    return f"{number} {plural(number, 'год', 'года', 'лет')}"
+
+
 def months_genitive(number: int) -> str:
     """После «до», «меньше»: до 24 месяцев, меньше 3 месяцев, до 21 месяца."""
     return f"{number} {plural(number, 'месяца', 'месяцев', 'месяцев')}"

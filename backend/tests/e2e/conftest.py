@@ -1,7 +1,7 @@
 """Фикстуры e2e-тестов: чистая тестовая база, миграции, seed и клиент API.
 
 Тестовая база (<основная>_test) пересоздаётся один раз за запуск тестов.
-Внешние сервисы — настоящий mock-external из docker compose.
+Внешние сервисы настоящие: mock-external из docker compose.
 """
 
 import os
@@ -19,7 +19,7 @@ from app.core.settings import BACKEND_DIR
 # Статусы, на которых автоматическая обработка останавливается и ждёт человека
 WAITING_STATUSES = {"NEEDS_INFO", "MANUAL_REVIEW", "OFFER_SENT", "REJECTED", "ISSUED", "CANCELLED", "CLIENT_DECLINED", "DRAFT"}
 
-# Тело заявки из docs/test-scenarios.md — одно и то же для всех демо-клиентов
+# Тело заявки из docs/test-scenarios.md, одно и то же для всех демо-клиентов
 STANDARD_APPLICATION = {
     "product_code": "working_capital",
     "amount": 1500000,
@@ -131,7 +131,7 @@ def action_codes(data: dict, only_enabled: bool = True) -> set[str]:
 
 @pytest.fixture
 def api(client):
-    """api("client_good") — клиент API от имени пользователя."""
+    """api("client_good") даёт клиент API от имени пользователя."""
     return lambda login: Api(client, login)
 
 

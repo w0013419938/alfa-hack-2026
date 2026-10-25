@@ -1,6 +1,6 @@
 ### Сквозные сценарии в формате VS Code REST Client (расширение humao.rest-client).
 ### Выполняйте запросы сверху вниз («Send Request» над каждым). Токены и id подставляются из ответов по имени запроса.
-### Подробное описание сценариев — docs/test-scenarios.md
+### Подробное описание сценариев: docs/test-scenarios.md
 
 @base = http://localhost:8000/api/v1
 

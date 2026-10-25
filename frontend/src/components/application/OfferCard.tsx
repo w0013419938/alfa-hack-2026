@@ -1,7 +1,7 @@
 /**
- * Предложение банка. Главная цифра — платёж в месяц. Ниже сравнение «Вы просили / Банк предлагает»:
+ * Предложение банка. Главная цифра это платёж в месяц. Ниже сравнение «Вы просили / Банк предлагает»:
  * изменённое значение выделено, старое зачёркнуто, а объяснение банка стоит прямо под строками, которые изменились.
- * Все числа и тексты — из API; здесь только сравнение «совпадает / не совпадает» для выделения.
+ * Все числа и тексты приходят из API; здесь только сравнение «совпадает / не совпадает» для выделения.
  */
 import { Badge, Box, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { IconArrowRight } from "@tabler/icons-react";
@@ -26,13 +26,13 @@ function Figure({ label, value }: { label: ReactNode; value: number | null | und
   );
 }
 
-/** actions — кнопки «Принять / Отказаться»: стоят прямо под условиями, чтобы решение принималось рядом с цифрами */
+/** actions это кнопки «Принять / Отказаться», которые стоят прямо под условиями, чтобы решение принималось рядом с цифрами */
 export function OfferCard({ application, actions }: { application: Application; actions?: ReactNode }) {
   const offer = application.offer;
   if (!offer) return null;
 
   const isCounter = offer.offer_type === "counter_offer";
-  // Пояснение банка к предложению — комментарий последнего события, после которого появилось предложение
+  // Пояснение банка к предложению это комментарий последнего события, после которого появилось предложение
   const explanation = [...application.timeline].reverse().find((item) => item.status === "OFFER_SENT")?.comment;
 
   const rows: CompareRow[] = [
@@ -104,7 +104,7 @@ export function OfferCard({ application, actions }: { application: Application; 
           ))}
         </Box>
 
-        {/* Объяснение сразу под сравнением: изменённые строки выделены выше, здесь — почему */}
+        {/* Объяснение сразу под сравнением: изменённые строки выделены выше, а здесь написано почему */}
         {explanation && isCounter && (
           <Box style={{ borderLeft: `3px solid ${COLORS.attention}`, borderRadius: 4 }} px="md" py={4}>
             <Text size="sm" fw={600} c={COLORS.attentionText}>

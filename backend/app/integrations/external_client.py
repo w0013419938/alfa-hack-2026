@@ -1,6 +1,6 @@
 """Клиент внешних сервисов: ЕГРЮЛ/ЕГРИП и бюро кредитных историй (БКИ).
 
-ExternalDataClient — интерфейс (что умеет клиент), HttpExternalDataClient — реализация через HTTP.
+ExternalDataClient это интерфейс (что умеет клиент), HttpExternalDataClient его реализация через HTTP.
 Сейчас HTTP-реализация ходит в локальный mock-external; в продакшене её заменят клиенты настоящих
 сервисов с тем же интерфейсом.
 
@@ -8,7 +8,7 @@ ExternalDataClient — интерфейс (что умеет клиент), Http
 - таймаут на каждую попытку (EXTERNAL_TIMEOUT_SECONDS);
 - повтор при таймауте, обрыве связи и ответах 5xx/429 (EXTERNAL_MAX_ATTEMPTS попыток);
 - пауза между попытками растёт: 0.5 с, 1 с, 2 с ... (EXTERNAL_BACKOFF_SECONDS × 2^номер);
-- клиент никогда не бросает исключение наружу — возвращает результат со статусом ok / error / timeout,
+- клиент никогда не бросает исключение наружу, а возвращает результат со статусом ok / error / timeout,
   чтобы пайплайн мог отправить заявку на ручное рассмотрение, а не упасть.
 """
 
@@ -25,7 +25,7 @@ from app.models.checks import CHECK_BKI, CHECK_EGRUL, CHECK_ERROR, CHECK_OK, CHE
 
 logger = logging.getLogger(__name__)
 
-# На эти ответы повтор не поможет — это ошибка в запросе, а не временный сбой
+# На эти ответы повтор не поможет: это ошибка в запросе, а не временный сбой
 NON_RETRYABLE_STATUS_CODES = {400, 401, 403, 404, 422}
 
 
@@ -63,7 +63,7 @@ class HttpExternalDataClient:
 
     def get_egrul(self, inn: str) -> ExternalCallResult:
         result = self._get(CHECK_EGRUL, f"/egrul/{inn}", params=None, request={"inn": inn})
-        # «Организация не найдена» — это ответ реестра, а не сбой: проверка успешна, компании нет
+        # «Организация не найдена» это ответ реестра, а не сбой: проверка успешна, компании нет
         if result.status == CHECK_ERROR and result.error_message == "HTTP 404":
             result.status = CHECK_OK
             result.data = {"inn": inn, "not_found": True}
@@ -97,7 +97,7 @@ class HttpExternalDataClient:
                 except httpx.TimeoutException:
                     last_status, last_error = CHECK_TIMEOUT, f"Нет ответа за {self.timeout_seconds} с"
                 except (httpx.TransportError, ValueError) as error:
-                    # ValueError — ответ пришёл, но это не JSON
+                    # ValueError значит, что ответ пришёл, но это не JSON
                     last_status, last_error = CHECK_ERROR, f"Ошибка соединения: {type(error).__name__}"
 
                 logger.warning(

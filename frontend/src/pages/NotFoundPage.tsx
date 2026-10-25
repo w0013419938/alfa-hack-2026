@@ -8,7 +8,7 @@ export function NotFoundPage() {
     <Center mih="80vh">
       <EmptyState
         title="Такой страницы нет"
-        text="Возможно, ссылка устарела. Вернитесь в кабинет."
+        text="Ссылка устарела или в ней опечатка. Вернитесь в кабинет."
         action={
           <Button component={Link} to="/">
             В кабинет

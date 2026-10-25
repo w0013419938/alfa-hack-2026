@@ -10,7 +10,7 @@ from app.domain.payments import ANNUITY, DIFFERENTIATED, annuity_payment, max_am
 
 
 def reference_annuity(amount: float, annual_rate: float, months: int) -> float:
-    """Независимый расчёт той же формулы во float — для сверки."""
+    """Независимый расчёт той же формулы во float, для сверки."""
     rate = annual_rate / 12 / 100
     return amount * rate / (1 - (1 + rate) ** -months)
 

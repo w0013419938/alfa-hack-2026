@@ -40,7 +40,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
             response.headers["X-Content-Type-Options"] = "nosniff"
             return response
         finally:
-            # Healthcheck Docker приходит каждые несколько секунд — не засоряем им журнал.
+            # Healthcheck Docker приходит каждые несколько секунд, поэтому не засоряем им журнал.
             # Пишем только метод, путь и статус: в query-параметрах могут быть данные клиента.
             if not request.url.path.endswith("/health"):
                 logger.info(

@@ -29,7 +29,7 @@ purposes:
     requires_comment: true
 
 # Виды документов (GET /dictionaries/document-kinds)
-# client_can_upload: false — документ формирует только система (например, договор)
+# client_can_upload: false значит, что документ формирует только система (например, договор)
 document_kinds:
   - code: bank_statement
     label: "Выписка по расчётному счёту за 6 месяцев"

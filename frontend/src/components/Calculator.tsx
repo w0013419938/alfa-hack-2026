@@ -140,7 +140,7 @@ export function Calculator({
           </Text>
         )}
         {result.data && !result.isError && (
-          // Пока пересчёт в пути, старое значение остаётся на месте и слегка бледнеет — без мигания
+          // Пока пересчёт в пути, старое значение остаётся на месте и слегка бледнеет, без мигания
           <Group
             justify="space-between"
             align="flex-end"

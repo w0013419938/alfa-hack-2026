@@ -112,7 +112,7 @@ def calculator(
     amount: Decimal = Query(gt=0, le=1_000_000_000, description="Сумма, ₽", examples=[1500000]),
     term: int = Query(gt=0, le=360, description="Срок, мес.", examples=[24]),
     payment_type: Literal["annuity", "differentiated"] = Query(
-        default="annuity", description="annuity — одинаковый платёж каждый месяц, differentiated — платёж уменьшается со временем"
+        default="annuity", description="annuity (одинаковый платёж каждый месяц) или differentiated (платёж уменьшается со временем)"
     ),
     db: Session = Depends(get_db),
 ):

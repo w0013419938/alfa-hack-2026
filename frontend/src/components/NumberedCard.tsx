@@ -1,4 +1,4 @@
-/** Карточка с красным номером и заголовком — как на слайде «Как помогает предпринимателю» в макете. */
+/** Карточка с красным номером и заголовком, как на слайде «Как помогает предпринимателю» в макете. */
 import { Box, Card, Group, Stack, Title } from "@mantine/core";
 import type { ReactNode } from "react";
 
@@ -15,7 +15,7 @@ export function NumberBadge({ number, muted }: { number: number; muted?: boolean
         color: muted ? COLORS.textSecondary : "#fff",
         display: "grid",
         placeItems: "center",
-        // 20 px весом 700 — крупный текст по WCAG: белому на фирменном красном (4.1:1) хватает нормы 3:1
+        // 20 px весом 700 это крупный текст по WCAG: белому на фирменном красном (4.1:1) хватает нормы 3:1
         fontWeight: 700,
         fontSize: 20,
         flexShrink: 0,

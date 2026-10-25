@@ -1,7 +1,7 @@
 /**
  * Анкета заявки по шагам: параметры кредита → о компании → финансовые показатели → проверка и отправка.
  * Черновик сохраняется на сервере при переходе между шагами (POST, затем PATCH с версией).
- * Здесь только простые проверки заполненности и диапазонов продукта — окончательно анкету проверяет бэкенд.
+ * Здесь только простые проверки заполненности и диапазонов продукта, а окончательно анкету проверяет бэкенд.
  */
 import { Alert, Box, Button, Card, Group, NumberInput, Select, SimpleGrid, Stack, Stepper, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -73,7 +73,7 @@ const STEP_HINTS = [
   "Проверьте данные. После отправки банк проверит заявку, обычно меньше минуты.",
 ];
 
-/** Простые проверки шага. Сообщения — понятным языком, диапазоны — из данных продукта (API). */
+/** Простые проверки шага. Сообщения написаны понятным языком, диапазоны берутся из данных продукта (API). */
 function validateStep(step: number, form: Form, product: Schemas["ProductOut"] | undefined, purposeNeedsComment: boolean): Record<string, string> {
   const errors: Record<string, string> = {};
   if (step === 0) {
@@ -149,7 +149,7 @@ export function ApplicationFormPage() {
 
   const product = products.data?.find((item) => item.code === form.product_code);
 
-  // Если продукту подходит ровно одна цель, а цель не выбрана — подставляем её, чтобы не спрашивать очевидное
+  // Если продукту подходит ровно одна цель, а цель не выбрана, подставляем её, чтобы не спрашивать очевидное
   useEffect(() => {
     if (product && !form.purpose_code && product.purposes.length === 1) {
       setForm((current) => ({ ...current, purpose_code: product.purposes[0].code }));

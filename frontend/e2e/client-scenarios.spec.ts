@@ -1,4 +1,4 @@
-/** Сквозные сценарии каждой демо-учётки клиента — от создания заявки до ожидаемого исхода, в браузере. */
+/** Сквозные сценарии каждой демо-учётки клиента, от создания заявки до ожидаемого исхода, в браузере. */
 import { expect, test } from "@playwright/test";
 
 import { applicationNumber, createAndSubmitStandardApplication, expectStatus, loginAs, newClientPage, PDF_FILE } from "./helpers";

@@ -34,7 +34,7 @@ def load_feed_items() -> list[dict]:
 
 
 def current_application(db: Session, user: User) -> Application | None:
-    """Текущая заявка: последняя незавершённая, а если таких нет — просто последняя."""
+    """Текущая заявка: последняя незавершённая, а если таких нет, то просто последняя."""
     applications = db.scalars(select(Application).where(Application.company_id == user.company_id).order_by(Application.created_at.desc())).all()
     active = [item for item in applications if item.status not in FINAL_STATUSES]
     return (active or applications or [None])[0]
@@ -44,7 +44,7 @@ def current_application(db: Session, user: User) -> Application | None:
     "/feed",
     response_model=list[FeedItemOut],
     summary="Персональная лента подсказок",
-    description="Подборка по отрасли (ОКВЭД), типу компании, статусу и продукту текущей заявки. У каждой подсказки есть `reason` — почему она показана.",
+    description="Подборка по отрасли (ОКВЭД), типу компании, статусу и продукту текущей заявки. У каждой подсказки есть `reason` с объяснением, почему она показана.",
 )
 def get_feed(user: User = Depends(get_current_client), db: Session = Depends(get_db)):
     config = get_business_config()

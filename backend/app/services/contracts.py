@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.business_config import get_business_config
 from app.core.errors import ConflictError
-from app.domain.formatting import format_money, format_percent
+from app.domain.formatting import format_money, format_percent, months_text
 from app.domain.payments import payment_summary
 from app.domain.state_machine import get_current_offer
 from app.models import Application, Document, User
@@ -37,6 +37,7 @@ def render_contract(db: Session, application: Application, signer: User | None, 
         "product_name": application.product.name,
         "amount": format_money(offer.amount),
         "term_months": offer.term_months,
+        "term_text": months_text(offer.term_months),
         "rate": format_percent(offer.rate),
         "monthly_payment": format_money(offer.monthly_payment),
         "total_payment": format_money(summary["total_payment"]),

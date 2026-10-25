@@ -141,7 +141,7 @@ def test_client_info_needs_document_then_offer(api):
     assert request["comment"]
     assert [item["kind"] for item in request["documents"]] == ["bank_statement"]
     assert request["documents"][0]["uploaded"] is False
-    # Пока документа нет, кнопка есть, но неактивна — и объясняет почему
+    # Пока документа нет, кнопка есть, но неактивна и объясняет почему
     provide = next(item for item in needs_info["available_actions"] if item["code"] == "provide_info")
     assert provide["enabled"] is False and provide["disabled_reason"]
     client.action(draft["id"], "provide_info", expected_status_code=409)
@@ -220,14 +220,14 @@ def test_employee_request_info_then_client_answers(api):
     assert needs_info["info_request"]["fields"][0]["field"] == "monthly_revenue"
 
     client.upload(draft["id"], "financial_report", "отчётность.pdf", PDF)
-    # Клиент «улучшает» анкету — но раз уточнения просил специалист, решение всё равно за ним
+    # Клиент «улучшает» анкету, но раз уточнения просил специалист, решение всё равно за ним
     client.patch(f"/applications/{draft['id']}", json={"monthly_revenue": 9000000, "amount": 500000})
     client.action(draft["id"], "provide_info")
     after = client.wait_until_processed(draft["id"])
     assert after["status"] == "MANUAL_REVIEW"
     card = employee.get(f"/backoffice/applications/{draft['id']}").json()
     assert card["decision"]["reasons"][0]["code"] == "returned_to_employee"
-    # Проверки и скоринг пересчитаны по свежим данным — специалисту видна актуальная картина
+    # Проверки и скоринг пересчитаны по свежим данным, и специалисту видна актуальная картина
     assert len([check for check in card["checks"] if check["check_type"] == "bki"]) == 2
 
 

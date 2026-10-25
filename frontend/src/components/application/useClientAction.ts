@@ -26,7 +26,7 @@ export function useClientAction(application: Application) {
     },
     onError: (error) => {
       notifications.show({ color: "brand", title: "Действие не выполнено", message: errorText(error) });
-      // Возможно, заявку изменили в другом месте — перечитываем
+      // Возможно, заявку изменили в другом месте, поэтому перечитываем
       void queryClient.invalidateQueries({ queryKey: ["application", application.id] });
     },
   });

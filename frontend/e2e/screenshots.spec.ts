@@ -31,7 +31,7 @@ test("@screenshots ключевые экраны", async ({ page, browser }) => 
   await page.goto("/client/apply?product=working_capital&amount=1500000&term=24&purpose=working_capital");
   await page.getByTestId("form-next").click();
   await expect(page.getByTestId("company-data")).toBeVisible();
-  await page.waitForTimeout(600); // шкала шагов анкеты плавно перекрашивается — снимаем после перехода
+  await page.waitForTimeout(600); // шкала шагов анкеты плавно перекрашивается, поэтому снимаем после перехода
   await page.screenshot({ path: `${DIR}/04-application-form.png`, fullPage: true });
 
   // Статус меняется на глазах: снимок во время проверки и после решения

@@ -5,7 +5,7 @@ from typing import Annotated, Generic, TypeVar
 
 from pydantic import BaseModel, PlainSerializer
 
-# Деньги храним как Decimal (без ошибок округления), а в JSON отдаём числом — так удобнее фронту
+# Деньги храним как Decimal (без ошибок округления), а в JSON отдаём числом, так удобнее фронту
 Money = Annotated[Decimal, PlainSerializer(lambda value: float(value), return_type=float, when_used="json")]
 
 T = TypeVar("T")
