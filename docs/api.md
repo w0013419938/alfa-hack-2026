@@ -44,7 +44,7 @@ docker compose run --rm -v "$PWD/docs:/docs" backend python -m scripts.export_op
 | POST | `/products/recommend` | Подбор продукта: `purpose_code`, `amount`, `term_months`, `urgency` (asap/week/month), `has_collateral` → список с `suitable`, `reasons`, `warnings` |
 | GET | `/dictionaries/purposes` | Цели кредита |
 | GET | `/dictionaries/document-kinds` | Виды документов |
-| GET | `/calculator?product=&amount=&term=` | Платёж по базовой ставке, общая сумма, переплата |
+| GET | `/calculator?product=&amount=&term=&payment_type=` | Платёж по базовой ставке, общая сумма, переплата и график по месяцам. `payment_type`: `annuity` (одинаковый платёж, по умолчанию) или `differentiated` (платёж уменьшается) |
 
 ### Клиент (`role = client`)
 
@@ -111,7 +111,7 @@ docker compose run --rm -v "$PWD/docs:/docs" backend python -m scripts.export_op
   "timeline": [
     {"at": "2026-10-23T11:32:12Z", "action": "create", "title": "Заявка создана", "status": "DRAFT", "status_label": "Черновик", "actor": "Вы", "comment": null},
     {"at": "2026-10-23T11:32:17Z", "action": "auto_approve", "title": "Банк одобрил заявку", "status": "OFFER_SENT", "status_label": "Есть предложение",
-     "actor": "Система", "comment": "Условия: 1 500 000 ₽ на 24 мес. под 17,5% годовых."}
+     "actor": "Система", "comment": "Условия: 1 500 000 ₽ на 24 месяца под 17,5% годовых."}
   ],
   "info_request": null,
   "offer": {"offer_type": "as_requested", "offer_type_label": "На запрошенных условиях", "amount": 1500000.0, "term_months": 24,
@@ -134,7 +134,7 @@ docker compose run --rm -v "$PWD/docs:/docs" backend python -m scripts.export_op
 ```text
 POST /auth/login                                    → токен
 GET  /products, POST /products/recommend            → выбор продукта
-GET  /calculator?product=...&amount=...&term=...    → предварительный платёж
+GET  /calculator?product=...&amount=...&term=...&payment_type=...    → предварительный платёж и график
 POST /applications                                  → черновик (DRAFT)
 PATCH /applications/{id}                            → правки анкеты
 POST /applications/{id}/actions/submit              → SUBMITTED, дальше система
