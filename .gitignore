@@ -12,3 +12,6 @@ frontend/test-results/
 # Рабочие файлы дизайн-скилов, в репозиторий не попадают
 .taste-skill/
 skills-install.tgz
+
+# Скриншоты дизайн-аудита, только для локальной проверки
+docs/screenshots/audit/
