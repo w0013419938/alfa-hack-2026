@@ -632,6 +632,22 @@
               "title": "Term"
             },
             "description": "Срок, мес."
+          },
+          {
+            "name": "payment_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "annuity",
+                "differentiated"
+              ],
+              "type": "string",
+              "description": "annuity — одинаковый платёж каждый месяц, differentiated — платёж уменьшается со временем",
+              "default": "annuity",
+              "title": "Payment Type"
+            },
+            "description": "annuity — одинаковый платёж каждый месяц, differentiated — платёж уменьшается со временем"
           }
         ],
         "responses": {
@@ -3508,9 +3524,43 @@
             "type": "number",
             "title": "Rate"
           },
+          "payment_type": {
+            "type": "string",
+            "title": "Payment Type",
+            "description": "annuity (одинаковый каждый месяц) или differentiated (уменьшается со временем)"
+          },
+          "payment_type_options": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentTypeOption"
+            },
+            "type": "array",
+            "title": "Payment Type Options"
+          },
           "monthly_payment": {
             "type": "number",
-            "title": "Monthly Payment"
+            "title": "Monthly Payment",
+            "description": "Аннуитетный платёж; при дифференцированном — первый, самый большой платёж"
+          },
+          "payment_label": {
+            "type": "string",
+            "title": "Payment Label",
+            "description": "Подпись к главной цифре: «Платёж в месяц» или «Первый платёж»",
+            "examples": [
+              "Платёж в месяц"
+            ]
+          },
+          "payment_caption": {
+            "type": "string",
+            "title": "Payment Caption",
+            "description": "Пояснение под главной цифрой"
+          },
+          "first_payment": {
+            "type": "number",
+            "title": "First Payment"
+          },
+          "last_payment": {
+            "type": "number",
+            "title": "Last Payment"
           },
           "total_payment": {
             "type": "number",
@@ -3523,6 +3573,13 @@
           "note": {
             "type": "string",
             "title": "Note"
+          },
+          "schedule": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduleRow"
+            },
+            "type": "array",
+            "title": "Schedule"
           }
         },
         "type": "object",
@@ -3531,10 +3588,17 @@
           "amount",
           "term_months",
           "rate",
+          "payment_type",
+          "payment_type_options",
           "monthly_payment",
+          "payment_label",
+          "payment_caption",
+          "first_payment",
+          "last_payment",
           "total_payment",
           "overpayment",
-          "note"
+          "note",
+          "schedule"
         ],
         "title": "CalculatorOut"
       },
@@ -4454,6 +4518,31 @@
         ],
         "title": "Page[BackofficeListItem]"
       },
+      "PaymentTypeOption": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "annuity или differentiated",
+            "examples": [
+              "annuity"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "examples": [
+              "Одинаковый каждый месяц"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "label"
+        ],
+        "title": "PaymentTypeOption"
+      },
       "ProductOut": {
         "properties": {
           "code": {
@@ -4762,6 +4851,42 @@
           "label"
         ],
         "title": "RequestedField"
+      },
+      "ScheduleRow": {
+        "properties": {
+          "month": {
+            "type": "integer",
+            "title": "Month"
+          },
+          "payment": {
+            "type": "number",
+            "title": "Payment"
+          },
+          "principal": {
+            "type": "number",
+            "title": "Principal",
+            "description": "Часть платежа, которая гасит сам кредит"
+          },
+          "interest": {
+            "type": "number",
+            "title": "Interest",
+            "description": "Часть платежа, которая идёт на проценты"
+          },
+          "balance": {
+            "type": "number",
+            "title": "Balance",
+            "description": "Сколько останется должен после платежа"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "payment",
+          "principal",
+          "interest",
+          "balance"
+        ],
+        "title": "ScheduleRow"
       },
       "ScoringOut": {
         "properties": {

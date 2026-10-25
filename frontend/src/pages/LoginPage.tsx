@@ -131,7 +131,7 @@ export function LoginPage() {
               </Stack>
               {params.get("expired") && (
                 <Alert color="violet" radius="lg">
-                  Сессия истекла. Войдите снова.
+                  Вы долго были неактивны, поэтому мы вышли из кабинета. Войдите снова, заявка сохранена.
                 </Alert>
               )}
               {demoAccess}

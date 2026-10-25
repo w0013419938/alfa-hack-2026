@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Schemas } from "../api/client";
 import { COLORS, RADIUS } from "../theme";
-import { dateTime } from "../utils/format";
+import { dateTimeSeconds } from "../utils/format";
 
 type Item = Schemas["TimelineItem"];
 
@@ -64,7 +64,7 @@ export function Timeline({ items }: { items: Item[] }) {
               </Text>
             </Stack>
             <Text size="xs" c={COLORS.textSecondary} style={{ whiteSpace: "nowrap" }}>
-              {dateTime(item.at)}
+              {dateTimeSeconds(item.at)}
             </Text>
           </Group>
         </Box>

@@ -63,7 +63,7 @@ export function OfferCard({ application, actions }: { application: Application; 
             </Text>
           </Stack>
           <Group gap="xl" wrap="nowrap">
-            <Figure label="Всего вернуть" value={offer.total_payment} />
+            <Figure label={<Term id="total_cost">Всего вы вернёте</Term>} value={offer.total_payment} />
             <Figure label={<Term id="overpayment">Переплата</Term>} value={offer.overpayment} />
           </Group>
         </Group>

@@ -49,7 +49,7 @@ function BankWorking({ label }: { label: string }) {
     <Group gap="sm" wrap="nowrap" role="status" data-testid="bank-working">
       <Box className="working-track" w={96} style={{ flexShrink: 0 }} />
       <Text size="sm" fw={500}>
-        Банк работает: {label.charAt(0).toLowerCase() + label.slice(1)}
+        Идёт проверка: {label.charAt(0).toLowerCase() + label.slice(1)}
       </Text>
       <Text size="sm" c={COLORS.textSecondary} visibleFrom="sm">
         Страница обновится сама
