@@ -15,7 +15,8 @@ export function NumberBadge({ number, muted }: { number: number; muted?: boolean
         color: muted ? COLORS.textSecondary : "#fff",
         display: "grid",
         placeItems: "center",
-        fontWeight: 600,
+        // 20 px весом 700 — крупный текст по WCAG: белому на фирменном красном (4.1:1) хватает нормы 3:1
+        fontWeight: 700,
         fontSize: 20,
         flexShrink: 0,
       }}

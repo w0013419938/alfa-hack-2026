@@ -39,6 +39,13 @@ function StepIcon({ step, index }: { step: Step; index: number }) {
   if (step.state === "done") return <IconCheck size={18} stroke={3} aria-hidden />;
   if (step.state === "stopped") return <IconX size={18} stroke={3} aria-hidden />;
   if (step.state === "action") return <IconUser size={18} stroke={2.5} aria-hidden />;
+  // У текущего шага номер белый на фирменном красном (4.1:1): 19 px весом 700 — крупный текст по WCAG, ему хватает 3:1
+  if (step.state === "current")
+    return (
+      <span aria-hidden style={{ fontSize: 19, fontWeight: 700, lineHeight: 1 }}>
+        {index + 1}
+      </span>
+    );
   return <span aria-hidden>{index + 1}</span>;
 }
 
