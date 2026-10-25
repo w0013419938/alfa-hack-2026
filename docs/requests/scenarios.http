@@ -120,7 +120,7 @@ POST {{base}}/backoffice/applications/{{borderApp.response.body.id}}/actions/app
 Authorization: Bearer {{employeeLogin.response.body.access_token}}
 Content-Type: application/json
 
-{"comment": "Одобряем на меньшую сумму", "amount": 1200000, "term_months": 30}
+{"comment": "Одобряем на меньшую сумму", "amount": 1200000, "term_months": 18}
 
 ### ===== 4. client_bad: отказ =====
 

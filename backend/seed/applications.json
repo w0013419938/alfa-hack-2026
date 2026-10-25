@@ -14,7 +14,7 @@
       "company_inn": "7702008028",
       "author_login": "demo2",
       "product_code": "working_capital",
-      "amount": 3000000, "term_months": 36, "purpose_code": "goods_purchase",
+      "amount": 3000000, "term_months": 24, "purpose_code": "goods_purchase",
       "monthly_revenue": 1500000, "monthly_expenses": 1100000, "current_loan_payments": 100000,
       "steps": [
         {"actor": "client", "action": "submit"},
@@ -45,7 +45,7 @@
       "company_inn": "7702011052",
       "author_login": "demo5",
       "product_code": "working_capital",
-      "amount": 5000000, "term_months": 24, "purpose_code": "working_capital",
+      "amount": 3000000, "term_months": 24, "purpose_code": "working_capital",
       "monthly_revenue": 2000000, "monthly_expenses": 1400000, "current_loan_payments": 0,
       "steps": [{"actor": "client", "action": "submit"}],
       "expected_status": "OFFER_SENT"
