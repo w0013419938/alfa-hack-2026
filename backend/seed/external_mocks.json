@@ -1,11 +1,11 @@
 {
-  "_comment": "Ответы моков ЕГРЮЛ/ЕГРИП и БКИ по ИНН. TODO(участник 3): заменить на данные синтетического датасета. Для ИНН, которых здесь нет, mock-external генерирует ответ детерминированно из ИНН.",
+  "_comment": "Ответы моков ЕГРЮЛ/ЕГРИП и БКИ по ИНН. Данные синхронизированы с синтетическим датасетом компаний. Для ИНН, которых здесь нет, mock-external генерирует ответ детерминированно из ИНН.",
   "_failure_modes": "Поле failure_mode в разделе egrul или bki: timeout — сервис не отвечает дольше таймаута клиента; error — отвечает 500; flaky — каждый нечётный запрос падает с 503 (видно ретраи).",
   "_bki_fields": "rating — кредитный рейтинг бюро 300–850; active_loans — действующие кредиты (monthly_payment — платёж в месяц, current_overdue_days — текущая непогашенная просрочка); overdue_history — просрочки за всю историю: count — сколько раз, max_days — максимальная длительность.",
 
   "7701001012": {
     "egrul": {
-      "name": "ООО «Северный ветер»", "ogrn": "1177746123451", "company_type": "LLC", "status": "active",
+      "name": "ООО «Северный ветер»", "ogrn": "1177746123455", "company_type": "LLC", "status": "active",
       "registration_date": "2017-03-15", "okved": "47.19", "region": "г. Москва",
       "director": {"full_name": "Орлов Дмитрий Викторович", "position": "Генеральный директор"}
     },
@@ -20,7 +20,7 @@
 
   "7701002023": {
     "egrul": {
-      "name": "ООО «Пекарня Каравай»", "ogrn": "1227700234562", "company_type": "LLC", "status": "active",
+      "name": "ООО «Пекарня Каравай»", "ogrn": "1227700234563", "company_type": "LLC", "status": "active",
       "registration_date": "2022-02-10", "okved": "10.71", "region": "Московская область",
       "director": {"full_name": "Смирнова Елена Олеговна", "position": "Генеральный директор"}
     },
@@ -36,7 +36,7 @@
 
   "770100010180": {
     "egrul": {
-      "name": "ИП Сидоров Павел Андреевич", "ogrn": "324774600012345", "company_type": "IE", "status": "active",
+      "name": "ИП Сидоров Павел Андреевич", "ogrn": "324774600012341", "company_type": "IE", "status": "active",
       "registration_date": "2024-12-01", "okved": "43.32", "region": "г. Москва",
       "director": {"full_name": "Сидоров Павел Андреевич", "position": "Индивидуальный предприниматель"}
     },
@@ -52,7 +52,7 @@
 
   "7701004045": {
     "egrul": {
-      "name": "ООО «Ромашка-Строй»", "ogrn": "1197746456784", "company_type": "LLC", "status": "liquidating",
+      "name": "ООО «Ромашка-Строй»", "ogrn": "1197746456786", "company_type": "LLC", "status": "liquidating",
       "registration_date": "2019-06-04", "okved": "41.20", "region": "г. Москва",
       "director": {"full_name": "Козлов Игорь Петрович", "position": "Ликвидатор"}
     },
@@ -67,7 +67,7 @@
 
   "770200020287": {
     "egrul": {
-      "name": "ИП Петрова Мария Игоревна", "ogrn": "323774600054321", "company_type": "IE", "status": "active",
+      "name": "ИП Петрова Мария Игоревна", "ogrn": "323774600054329", "company_type": "IE", "status": "active",
       "registration_date": "2023-05-20", "okved": "96.02", "region": "г. Санкт-Петербург",
       "director": {"full_name": "Петрова Мария Игоревна", "position": "Индивидуальный предприниматель"}
     },
@@ -80,7 +80,7 @@
 
   "7710005052": {
     "egrul": {
-      "name": "ООО «ТехноСервис»", "ogrn": "1207700567895", "company_type": "LLC", "status": "active",
+      "name": "ООО «ТехноСервис»", "ogrn": "1207700567898", "company_type": "LLC", "status": "active",
       "registration_date": "2020-09-01", "okved": "62.01", "region": "г. Москва",
       "director": {"full_name": "Волков Артём Сергеевич", "position": "Генеральный директор"}
     },
@@ -89,7 +89,7 @@
 
   "7702007017": {
     "egrul": {
-      "name": "ООО «Лесная поляна»", "ogrn": "1247700700011", "company_type": "LLC", "status": "active",
+      "name": "ООО «Лесная поляна»", "ogrn": "1247700700015", "company_type": "LLC", "status": "active",
       "registration_date": "2024-09-10", "okved": "56.10", "region": "Тверская область",
       "director": {"full_name": "Лебедева Ольга Николаевна", "position": "Генеральный директор"}
     },
@@ -104,7 +104,7 @@
 
   "7702008028": {
     "egrul": {
-      "name": "ООО «Альфа-Логистик»", "ogrn": "1157746800022", "company_type": "LLC", "status": "active",
+      "name": "ООО «Альфа-Логистик»", "ogrn": "1157746800023", "company_type": "LLC", "status": "active",
       "registration_date": "2015-04-22", "okved": "49.41", "region": "г. Москва",
       "director": {"full_name": "Фёдоров Сергей Алексеевич", "position": "Генеральный директор"}
     },
@@ -119,7 +119,7 @@
 
   "7702009039": {
     "egrul": {
-      "name": "ООО «Мастер Окон»", "ogrn": "1187746900033", "company_type": "LLC", "status": "active",
+      "name": "ООО «Мастер Окон»", "ogrn": "1187746900032", "company_type": "LLC", "status": "active",
       "registration_date": "2018-11-12", "okved": "43.34", "region": "Московская область",
       "director": {"full_name": "Морозов Алексей Ильич", "position": "Генеральный директор"}
     },
@@ -128,7 +128,7 @@
 
   "7702010041": {
     "egrul": {
-      "name": "ООО «Сладкий дом»", "ogrn": "1167746100044", "company_type": "LLC", "status": "active",
+      "name": "ООО «Сладкий дом»", "ogrn": "1167746100048", "company_type": "LLC", "status": "active",
       "registration_date": "2016-07-07", "okved": "10.71", "region": "г. Москва",
       "director": {"full_name": "Никитина Ирина Павловна", "position": "Генеральный директор"}
     },
@@ -157,7 +157,7 @@
 
   "7702012063": {
     "egrul": {
-      "name": "ООО «Зелёный сад»", "ogrn": "1217700120066", "company_type": "LLC", "status": "active",
+      "name": "ООО «Зелёный сад»", "ogrn": "1217700120065", "company_type": "LLC", "status": "active",
       "registration_date": "2021-01-25", "okved": "01.13", "region": "Краснодарский край",
       "director": {"full_name": "Романова Татьяна Юрьевна", "position": "Генеральный директор"}
     },
@@ -172,7 +172,7 @@
 
   "7702013074": {
     "egrul": {
-      "name": "ООО «Книжный угол»", "ogrn": "1237700130077", "company_type": "LLC", "status": "active",
+      "name": "ООО «Книжный угол»", "ogrn": "1237700130073", "company_type": "LLC", "status": "active",
       "registration_date": "2023-03-03", "okved": "47.61", "region": "г. Казань",
       "director": {"full_name": "Белов Кирилл Андреевич", "position": "Генеральный директор"}
     },
@@ -185,7 +185,7 @@
 
   "7702014085": {
     "egrul": {
-      "name": "ООО «Фитнес Плюс»", "ogrn": "1247700140088", "company_type": "LLC", "status": "active",
+      "name": "ООО «Фитнес Плюс»", "ogrn": "1247700140082", "company_type": "LLC", "status": "active",
       "registration_date": "2024-06-01", "okved": "93.13", "region": "г. Екатеринбург",
       "director": {"full_name": "Тихонова Анастасия Викторовна", "position": "Генеральный директор"}
     },
@@ -195,6 +195,110 @@
         {"type": "Кредит на оборудование", "amount": 4500000, "balance": 3300000, "monthly_payment": 300000, "current_overdue_days": 0}
       ],
       "overdue_history": {"count": 2, "max_days": 50}
+    }
+  },
+
+  "6690015019": {
+    "egrul": {
+      "name": "ООО «УралТоргСнаб»", "ogrn": "1186600015018", "company_type": "LLC", "status": "active",
+      "registration_date": "2018-04-12", "okved": "47.52", "region": "Свердловская область",
+      "director": {"full_name": "Самойлов Денис Аркадьевич", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 810,
+      "active_loans": [
+        {"type": "Кредит на оборотные средства", "amount": 2400000, "balance": 960000, "monthly_payment": 80000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "789000240104": {
+    "egrul": {
+      "name": "ИП Соколова Дарья Андреевна", "ogrn": "322780000240100", "company_type": "IE", "status": "active",
+      "registration_date": "2022-05-18", "okved": "56.10", "region": "г. Санкт-Петербург",
+      "director": {"full_name": "Соколова Дарья Андреевна", "position": "Индивидуальный предприниматель"}
+    },
+    "bki": {
+      "rating": 670,
+      "active_loans": [
+        {"type": "Кредит на оборудование", "amount": 1800000, "balance": 1050000, "monthly_payment": 95000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 1, "max_days": 14}
+    }
+  },
+
+  "5490016020": {
+    "egrul": {
+      "name": "ООО «СибирьТрансАвто»", "ogrn": "1205400016029", "company_type": "LLC", "status": "active",
+      "registration_date": "2020-10-15", "okved": "49.41", "region": "Новосибирская область",
+      "director": {"full_name": "Ермаков Станислав Игоревич", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 660,
+      "active_loans": [
+        {"type": "Лизинг седельных тягачей", "amount": 12000000, "balance": 8400000, "monthly_payment": 550000, "current_overdue_days": 0},
+        {"type": "Кредит на оборотные средства", "amount": 4500000, "balance": 3100000, "monthly_payment": 300000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 1, "max_days": 10}
+    }
+  },
+
+  "5290017034": {
+    "egrul": {
+      "name": "ООО «Волжский молочный двор»", "ogrn": "1165200017036", "company_type": "LLC", "status": "active",
+      "registration_date": "2016-08-23", "okved": "10.51", "region": "Нижегородская область",
+      "director": {"full_name": "Ларионова Вера Константиновна", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 775,
+      "active_loans": [
+        {"type": "Инвестиционный кредит на линию розлива", "amount": 7500000, "balance": 3600000, "monthly_payment": 180000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "1690018042": {
+    "egrul": {
+      "name": "ООО «КазаньСофтЛаб»", "ogrn": "1251600018042", "company_type": "LLC", "status": "active",
+      "registration_date": "2025-09-15", "okved": "62.01", "region": "Республика Татарстан",
+      "director": {"full_name": "Хабибуллин Тимур Рустамович", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 690,
+      "active_loans": [],
+      "overdue_history": {"count": 0, "max_days": 0}
+    }
+  },
+
+  "6190019054": {
+    "egrul": {
+      "name": "ООО «ДонАгроПоле»", "ogrn": "1196100019059", "company_type": "LLC", "status": "active",
+      "registration_date": "2019-03-11", "okved": "01.11", "region": "Ростовская область",
+      "director": {"full_name": "Гончаров Роман Степанович", "position": "Генеральный директор"}
+    },
+    "bki": {
+      "rating": 510,
+      "active_loans": [
+        {"type": "Кредит на закупку семян и ГСМ", "amount": 4200000, "balance": 3400000, "monthly_payment": 240000, "current_overdue_days": 42}
+      ],
+      "overdue_history": {"count": 4, "max_days": 60}
+    }
+  },
+
+  "239000350292": {
+    "egrul": {
+      "name": "ИП Кравцов Илья Романович", "ogrn": "325230000350201", "company_type": "IE", "status": "active",
+      "registration_date": "2025-11-10", "okved": "96.01", "region": "Краснодарский край",
+      "director": {"full_name": "Кравцов Илья Романович", "position": "Индивидуальный предприниматель"}
+    },
+    "bki": {
+      "rating": 645,
+      "active_loans": [
+        {"type": "Кредит на прачечное оборудование", "amount": 900000, "balance": 780000, "monthly_payment": 45000, "current_overdue_days": 0}
+      ],
+      "overdue_history": {"count": 1, "max_days": 8}
     }
   }
 }

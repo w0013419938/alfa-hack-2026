@@ -1,5 +1,5 @@
 {
-  "_comment": "Демо-пользователи. Пароль каждого — <логин>123. TODO(участник 3): заменить на персонажей из синтетического датасета. scenario — что демонстрирует учётка (для README и тестов).",
+  "_comment": "Демо-пользователи. Пароль каждого — <логин>123. scenario — что демонстрирует учётка (для README и тестов).",
   "users": [
     {
       "login": "employee",
@@ -64,6 +64,13 @@
     {"login": "demo5", "full_name": "Григорьев Максим Олегович", "role": "client", "position": "director", "company_inn": "7702011052", "scenario": "Фоновая история для очереди сотрудника"},
     {"login": "demo6", "full_name": "Романова Татьяна Юрьевна", "role": "client", "position": "owner", "company_inn": "7702012063", "scenario": "Фоновая история для очереди сотрудника"},
     {"login": "demo7", "full_name": "Белов Кирилл Андреевич", "role": "client", "position": "owner", "company_inn": "7702013074", "scenario": "Фоновая история для очереди сотрудника"},
-    {"login": "demo8", "full_name": "Тихонова Анастасия Викторовна", "role": "client", "position": "director", "company_inn": "7702014085", "scenario": "Фоновая история для очереди сотрудника"}
+    {"login": "demo8", "full_name": "Тихонова Анастасия Викторовна", "role": "client", "position": "director", "company_inn": "7702014085", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo9", "full_name": "Самойлов Денис Аркадьевич", "role": "client", "position": "director", "company_inn": "6690015019", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo10", "full_name": "Соколова Дарья Андреевна", "role": "client", "position": "owner", "company_inn": "789000240104", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo11", "full_name": "Ермаков Станислав Игоревич", "role": "client", "position": "director", "company_inn": "5490016020", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo12", "full_name": "Ларионова Вера Константиновна", "role": "client", "position": "director", "company_inn": "5290017034", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo13", "full_name": "Хабибуллин Тимур Рустамович", "role": "client", "position": "director", "company_inn": "1690018042", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo14", "full_name": "Гончаров Роман Степанович", "role": "client", "position": "director", "company_inn": "6190019054", "scenario": "Фоновая история для очереди сотрудника"},
+    {"login": "demo15", "full_name": "Кравцов Илья Романович", "role": "client", "position": "owner", "company_inn": "239000350292", "scenario": "Фоновая история для очереди сотрудника"}
   ]
 }
