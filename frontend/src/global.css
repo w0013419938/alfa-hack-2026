@@ -193,6 +193,18 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Запасной слой: переходы из разметки (цвет кружков шкалы, мини-шкала, калькулятор) и у Mantine
+     заканчиваются сразу, элемент показывается в конечном состоянии */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
   .step-line-fill {
     transition: none;
   }
