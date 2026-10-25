@@ -1,7 +1,10 @@
-"""Расчёт аннуитетного (равного ежемесячного) платежа.
+"""Расчёт платежей по кредиту.
 
-Формула: платёж = S × r / (1 − (1 + r)^(−n)),
+Аннуитетный (равный ежемесячный) платёж: платёж = S × r / (1 − (1 + r)^(−n)),
 где S — сумма кредита, r — месячная ставка (годовая / 12 / 100), n — срок в месяцах.
+
+Дифференцированный платёж: основной долг делится на равные части, проценты считаются с остатка,
+поэтому платёж каждый месяц меньше предыдущего.
 """
 
 from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
@@ -36,6 +39,46 @@ def max_amount_for_payment(payment: Decimal, annual_rate_percent: Decimal, term_
         return (payment * term_months).quantize(KOPECK, ROUND_DOWN)
     amount = payment * (1 - (1 + rate) ** -term_months) / rate
     return amount.quantize(KOPECK, ROUND_DOWN)
+
+
+ANNUITY = "annuity"
+DIFFERENTIATED = "differentiated"
+
+
+def payment_schedule(amount: Decimal, annual_rate_percent: Decimal, term_months: int, payment_type: str = ANNUITY) -> list[dict]:
+    """График платежей по месяцам: платёж, основной долг, проценты и остаток долга после платежа."""
+    amount = Decimal(amount)
+    rate = monthly_rate(annual_rate_percent)
+    balance = amount
+    rows = []
+    if payment_type == DIFFERENTIATED:
+        principal_part = (amount / term_months).quantize(KOPECK, ROUND_HALF_UP)
+    else:
+        fixed_payment = annuity_payment(amount, annual_rate_percent, term_months)
+    for month in range(1, term_months + 1):
+        interest = (balance * rate).quantize(KOPECK, ROUND_HALF_UP)
+        if payment_type == DIFFERENTIATED:
+            principal = balance if month == term_months else principal_part
+            payment = principal + interest
+        else:
+            payment = fixed_payment
+            # В последнем месяце гасим весь остаток, платёж остаётся прежним
+            principal = balance if month == term_months else payment - interest
+            interest = payment - principal if month == term_months else interest
+        balance = (balance - principal).quantize(KOPECK)
+        rows.append({"month": month, "payment": payment, "principal": principal, "interest": interest, "balance": balance})
+    return rows
+
+
+def schedule_summary(rows: list[dict], amount: Decimal) -> dict:
+    """Итоги по графику: первый и последний платёж, сколько вернём всего и переплата."""
+    total = sum((row["payment"] for row in rows), Decimal("0.00")).quantize(KOPECK)
+    return {
+        "first_payment": rows[0]["payment"],
+        "last_payment": rows[-1]["payment"],
+        "total_payment": total,
+        "overpayment": (total - Decimal(amount)).quantize(KOPECK),
+    }
 
 
 def payment_summary(amount: Decimal, annual_rate_percent: Decimal, term_months: int) -> dict:

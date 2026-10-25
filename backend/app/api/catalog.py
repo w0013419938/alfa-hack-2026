@@ -1,6 +1,7 @@
 """Справочники, подбор продукта и калькулятор. Доступны без входа: в них нет персональных данных."""
 
 from decimal import Decimal
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
@@ -9,8 +10,8 @@ from sqlalchemy.orm import Session
 from app.core.business_config import get_business_config
 from app.core.db import get_db
 from app.core.errors import AppError
-from app.domain.formatting import format_money, format_percent
-from app.domain.payments import payment_summary
+from app.domain.formatting import format_money, format_percent, months_text
+from app.domain.payments import ANNUITY, DIFFERENTIATED, payment_schedule, schedule_summary
 from app.domain.recommend import RecommendationInput, recommend_products
 from app.models import Product
 from app.schemas.application import ProductShort
@@ -19,10 +20,12 @@ from app.schemas.catalog import (
     CodeLabel,
     DocumentKindOut,
     FieldOut,
+    PaymentTypeOption,
     ProductOut,
     PurposeOut,
     RecommendationOut,
     RecommendRequest,
+    ScheduleRow,
 )
 
 router = APIRouter(tags=["Справочники и калькулятор"])
@@ -108,6 +111,9 @@ def calculator(
     product: str = Query(description="Код продукта", examples=["working_capital"]),
     amount: Decimal = Query(gt=0, le=1_000_000_000, description="Сумма, ₽", examples=[1500000]),
     term: int = Query(gt=0, le=360, description="Срок, мес.", examples=[24]),
+    payment_type: Literal["annuity", "differentiated"] = Query(
+        default="annuity", description="annuity — одинаковый платёж каждый месяц, differentiated — платёж уменьшается со временем"
+    ),
     db: Session = Depends(get_db),
 ):
     item = db.get(Product, product)
@@ -115,27 +121,42 @@ def calculator(
         raise AppError("Такого кредитного продукта нет. Выберите продукт из списка.", code="unknown_product")
     if not item.min_amount <= amount <= item.max_amount:
         raise AppError(
-            f"Сумма для продукта «{item.name}» от {format_money(item.min_amount)} до {format_money(item.max_amount)} ₽.",
+            f"Для продукта «{item.name}» доступна сумма от {format_money(item.min_amount)} до {format_money(item.max_amount)} ₽.",
             code="amount_out_of_range",
             details={"min_amount": float(item.min_amount), "max_amount": float(item.max_amount)},
         )
     if not item.min_term_months <= term <= item.max_term_months:
         raise AppError(
-            f"Срок для продукта «{item.name}» от {item.min_term_months} до {item.max_term_months} мес.",
+            f"Для продукта «{item.name}» доступен срок от {item.min_term_months} до {item.max_term_months} месяцев.",
             code="term_out_of_range",
             details={"min_term_months": item.min_term_months, "max_term_months": item.max_term_months},
         )
     # Максимальная надбавка среди грейдов, по которым банк может дать предложение
     max_premium = max(rule.rate_premium for rule in get_business_config().decision.grade_rules.values() if rule.decision != "reject")
-    summary = payment_summary(amount, item.base_rate, term)
+    texts = get_business_config().labels.calculator
+    rows = payment_schedule(amount, item.base_rate, term, payment_type)
+    summary = schedule_summary(rows, amount)
+    differentiated = payment_type == DIFFERENTIATED
+    note_key = "note_differentiated" if differentiated else "note"
     return CalculatorOut(
         product=ProductShort(code=item.code, name=item.name),
         amount=amount,
         term_months=term,
         rate=item.base_rate,
-        note=(
-            f"Предварительный расчёт по базовой ставке {format_percent(item.base_rate)}% годовых. "
-            f"Итоговая ставка зависит от оценки заявки и может быть выше на {format_percent(max_premium)} п.п."
+        payment_type=payment_type,
+        payment_type_options=[
+            PaymentTypeOption(code=ANNUITY, label=texts["type_annuity"]),
+            PaymentTypeOption(code=DIFFERENTIATED, label=texts["type_differentiated"]),
+        ],
+        monthly_payment=summary["first_payment"],
+        payment_label=texts["label_differentiated" if differentiated else "label_annuity"],
+        payment_caption=texts["caption_differentiated" if differentiated else "caption_annuity"].format(
+            last=format_money(summary["last_payment"]), term_text=months_text(term)
         ),
-        **summary,
+        first_payment=summary["first_payment"],
+        last_payment=summary["last_payment"],
+        total_payment=summary["total_payment"],
+        overpayment=summary["overpayment"],
+        note=texts[note_key].format(rate=format_percent(item.base_rate), max_rate=format_percent(item.base_rate + max_premium)),
+        schedule=[ScheduleRow(**row) for row in rows],
     )

@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from decimal import ROUND_DOWN, Decimal
 
 from app.core.business_config import DecisionFile
-from app.domain.formatting import format_money, format_percent
+from app.domain.formatting import days_text, format_money, format_percent, months_genitive
 from app.domain.payments import annuity_payment, max_amount_for_payment
 from app.domain.scoring import ScoringFacts
 from app.models.offer import OFFER_AS_REQUESTED, OFFER_COUNTER
@@ -50,8 +50,14 @@ class Decision:
     requested_documents: list[str] = field(default_factory=list)
     info_comment: str | None = None
 
-    def reasons_text(self) -> str:
-        return "; ".join(reason.text for reason in self.reasons)
+    def reasons_text(self, first_lowercase: bool = False) -> str:
+        """Причины отдельными предложениями: «По реестрам… Есть просрочка…»."""
+        sentences = []
+        for index, reason in enumerate(self.reasons):
+            text = reason.text.rstrip(".")
+            lead = text[:1].lower() if index == 0 and first_lowercase else text[:1].upper()
+            sentences.append(f"{lead}{text[1:]}.")
+        return " ".join(sentences)
 
 
 @dataclass
@@ -114,15 +120,25 @@ def make_decision(data: DecisionInput, config: DecisionFile, reason_texts: dict[
     facts = data.facts
     stop = config.stop_factors
 
-    def reason(code: str, **values) -> DecisionReason:
-        return DecisionReason(code=code, text=reason_texts[code].format(**values))
+    def reason(code: str, text_key: str | None = None, **values) -> DecisionReason:
+        # Склонения «день, дня, дней» и «месяц, месяца, месяцев» считаем здесь, в шаблонах только подстановки
+        if "days" in values:
+            values["days_text"] = days_text(values["days"])
+        if "months" in values:
+            values["months_genitive"] = months_genitive(values["months"])
+        template = reason_texts.get(text_key or "", reason_texts[code])
+        return DecisionReason(code=code, text=template.format(**values))
 
     # 1. Стоп-факторы (по тем данным, что удалось получить)
     stop_reasons = []
     if facts.company_not_found:
         stop_reasons.append(reason("company_not_found"))
     if facts.company_status in stop.forbidden_company_statuses:
-        stop_reasons.append(reason("company_inactive", company_status=company_status_labels.get(facts.company_status, facts.company_status)))
+        stop_reasons.append(reason(
+                "company_inactive",
+                text_key=f"company_inactive_{facts.company_status}",
+                company_status=company_status_labels.get(facts.company_status, facts.company_status),
+            ))
     if facts.current_overdue_days is not None and facts.current_overdue_days > stop.max_current_overdue_days:
         stop_reasons.append(reason("current_overdue", days=facts.current_overdue_days))
     age = facts.values.business_age_months

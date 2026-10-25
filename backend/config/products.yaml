@@ -69,7 +69,7 @@ products:
     required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments]
 
 # Подбор продукта (POST /products/recommend): за каждое совпадение продукт получает баллы.
-# TODO(участник 2): уточнить веса и тексты объяснений.
+# TODO(участник 2): уточнить веса. Тексты объяснений написаны по материалам участника 1.
 recommendation:
   weights:
     purpose: 4      # продукт подходит под цель
@@ -85,12 +85,12 @@ recommendation:
   texts:
     purpose_ok: "Подходит для цели «{purpose}»"
     purpose_bad: "Не предназначен для цели «{purpose}»"
-    amount_ok: "Сумма {amount} входит в лимит продукта ({min_amount} – {max_amount})"
-    amount_bad: "Сумма {amount} вне лимита продукта ({min_amount} – {max_amount})"
-    term_ok: "Срок {term} мес. подходит (от {min_term} до {max_term} мес.)"
-    term_bad: "Срок {term} мес. не подходит (от {min_term} до {max_term} мес.)"
-    speed_ok: "Решение обычно за {days} дн., успеваем к вашему сроку"
-    speed_bad: "Решение обычно за {days} дн., это дольше, чем вам удобно"
+    amount_ok: "Сумма {amount} ₽ входит в лимит продукта (от {min_amount} до {max_amount} ₽)"
+    amount_bad: "Сумма {amount} ₽ вне лимита продукта (от {min_amount} до {max_amount} ₽)"
+    term_ok: "Срок {term_text} подходит (от {min_term} до {max_term_text})"
+    term_bad: "Срок {term_text} не подходит (от {min_term} до {max_term_text})"
+    speed_ok: "Решение обычно за {days_text}. Успеем к вашему сроку"
+    speed_bad: "Решение обычно за {days_text}. Это дольше, чем вам удобно"
     collateral_ok: "Залог не нужен"
     collateral_have: "Нужен залог. Он у вас есть, поэтому ставка будет ниже"
-    collateral_bad: "Нужен залог, а его нет"
+    collateral_bad: "Нужен залог, а вы указали, что его нет"

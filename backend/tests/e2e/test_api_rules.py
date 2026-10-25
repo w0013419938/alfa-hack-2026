@@ -197,8 +197,20 @@ def test_products_dictionaries_calculator_recommend(client):
     calc = client.get("/api/v1/calculator", params={"product": "working_capital", "amount": 1200000, "term": 12}).json()
     assert calc["monthly_payment"] > 100000
     assert calc["total_payment"] == round(calc["monthly_payment"] * 12, 2)
+    assert calc["payment_type"] == "annuity" and len(calc["schedule"]) == 12
+    assert {item["code"] for item in calc["payment_type_options"]} == {"annuity", "differentiated"}
+    assert "до 23,5%" in calc["note"]
     out_of_range = client.get("/api/v1/calculator", params={"product": "working_capital", "amount": 1, "term": 12})
     assert out_of_range.status_code == 400
+
+    # Платёж, который уменьшается: первый платёж больше последнего, график сходится в ноль
+    differentiated = client.get(
+        "/api/v1/calculator", params={"product": "working_capital", "amount": 1200000, "term": 12, "payment_type": "differentiated"}
+    ).json()
+    assert differentiated["first_payment"] > differentiated["last_payment"]
+    assert differentiated["schedule"][-1]["balance"] == 0
+    assert differentiated["overpayment"] < calc["overpayment"]
+    assert client.get("/api/v1/calculator", params={"product": "working_capital", "amount": 1200000, "term": 12, "payment_type": "other"}).status_code == 422
 
     recommendations = client.post(
         "/api/v1/products/recommend",

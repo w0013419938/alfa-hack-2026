@@ -223,6 +223,9 @@ class LabelsFile(BaseModel):
     actions: dict[str, ActionLabel]
     progress_steps: dict[str, str]
     progress_states: dict[str, str]
+    # Что написать под этапом, где процесс остановился, по статусу заявки: «Отказ» понятнее, чем «Остановлено»
+    progress_stopped_labels: dict[str, str] = {}
+    calculator: dict[str, str] = {}
     timeline: dict[str, str]
     actors: dict[str, str]
     system_comments: dict[str, str]
