@@ -188,7 +188,7 @@ def test_document_upload_rules(api):
 
 def test_products_dictionaries_calculator_recommend(client):
     products = client.get("/api/v1/products").json()
-    assert {item["code"] for item in products} >= {"express", "working_capital", "investment"}
+    assert {item["code"] for item in products} >= {"express", "working_capital", "equipment"}
     assert all(item["description"] and item["rate_text"] for item in products)
 
     purposes = client.get("/api/v1/dictionaries/purposes").json()
@@ -199,7 +199,7 @@ def test_products_dictionaries_calculator_recommend(client):
     assert calc["total_payment"] == round(calc["monthly_payment"] * 12, 2)
     assert calc["payment_type"] == "annuity" and len(calc["schedule"]) == 12
     assert {item["code"] for item in calc["payment_type_options"]} == {"annuity", "differentiated"}
-    assert "до 23,5%" in calc["note"]
+    assert "вырасти до" in calc["note"]
     out_of_range = client.get("/api/v1/calculator", params={"product": "working_capital", "amount": 1, "term": 12})
     assert out_of_range.status_code == 400
 

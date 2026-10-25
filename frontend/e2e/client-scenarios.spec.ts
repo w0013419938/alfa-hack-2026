@@ -1,7 +1,7 @@
 /** Сквозные сценарии каждой демо-учётки клиента — от создания заявки до ожидаемого исхода, в браузере. */
 import { expect, test } from "@playwright/test";
 
-import { createAndSubmitStandardApplication, expectStatus, loginAs, PDF_FILE } from "./helpers";
+import { applicationNumber, createAndSubmitStandardApplication, expectStatus, loginAs, newClientPage, PDF_FILE } from "./helpers";
 
 test("client_good: подбор продукта → одобрение → подписание → выдача", async ({ page }) => {
   await loginAs(page, "client_good");
@@ -42,17 +42,31 @@ test("client_good: подбор продукта → одобрение → по
   await expect(page.locator("#documents").getByText("Кредитный договор")).toBeVisible();
 });
 
-test("client_medium: встречное предложение и отказ клиента", async ({ page }) => {
-  await loginAs(page, "client_medium");
-  await createAndSubmitStandardApplication(page);
-  await expectStatus(page, "OFFER_SENT");
-  const offer = page.getByTestId("offer");
+test("client_medium: ручное рассмотрение → встречное предложение специалиста → отказ клиента", async ({ browser }) => {
+  // С порогами участника 2 высокая нагрузка даёт грейд D: решение принимает специалист
+  const client = await newClientPage(browser, "client_medium");
+  await createAndSubmitStandardApplication(client);
+  await expectStatus(client, "MANUAL_REVIEW");
+  const number = await applicationNumber(client);
+
+  const employee = await newClientPage(browser, "employee");
+  await employee.getByTestId("filter-manual").click();
+  await employee.locator(`[data-testid="queue-row"][data-number="${number}"]`).click();
+  await expect(employee.getByTestId("scoring")).toBeVisible();
+  await employee.getByTestId("decision-actions").getByText("Сделать встречное предложение").click();
+  await employee.getByLabel("Сумма, ₽").fill("1050000");
+  await employee.getByTestId("decision-comment").fill("Можем выдать меньшую сумму из-за высокой нагрузки");
+  await employee.getByTestId("decision-submit").click();
+  await expectStatus(employee, "OFFER_SENT");
+
+  await expectStatus(client, "OFFER_SENT");
+  const offer = client.getByTestId("offer");
   await expect(offer).toBeVisible();
   await expect(offer.getByText("Почему условия изменены")).toBeVisible();
 
-  await page.locator('[data-action="decline_offer"]').click();
-  await page.getByTestId("confirm-action").click();
-  await expectStatus(page, "CLIENT_DECLINED");
+  await client.locator('[data-action="decline_offer"]').click();
+  await client.getByTestId("confirm-action").click();
+  await expectStatus(client, "CLIENT_DECLINED");
 });
 
 test("client_bad: отказ с понятной причиной", async ({ page }) => {

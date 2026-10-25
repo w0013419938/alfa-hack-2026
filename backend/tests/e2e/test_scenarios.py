@@ -52,19 +52,27 @@ def test_client_good_auto_approval_to_issue(api):
     assert "Подписано" in download.text
 
 
-def test_client_medium_counter_offer_then_decline(api):
+def test_client_medium_manual_review_then_employee_counter_offer_and_client_declines(api):
+    # С порогами участника 2 (C от 60 баллов) client_medium с 57 баллами получает грейд D и уходит специалисту
     client = api("client_medium")
+    employee = api("employee")
     draft = client.create_application()
     client.action(draft["id"], "submit")
-    result = client.wait_until_processed(draft["id"])
+    review = client.wait_until_processed(draft["id"])
 
-    assert result["status"] == "OFFER_SENT"
-    offer = result["offer"]
+    assert review["status"] == "MANUAL_REVIEW"
+    card = employee.get(f"/backoffice/applications/{draft['id']}").json()
+    assert card["scoring"]["grade"] == "D"
+    assert card["decision"]["outcome"] == "manual_review"
+
+    # Специалист делает встречное предложение: меньше сумма
+    countered = employee.employee_action(
+        draft["id"], "counter_offer", comment="Можем выдать меньшую сумму из-за высокой нагрузки", amount=1_050_000, term_months=24
+    )
+    assert countered["status"] == "OFFER_SENT"
+    offer = client.application(draft["id"])["offer"]
     assert offer["offer_type"] == "counter_offer"
-    # Встречное предложение: меньше сумма или дольше срок
-    assert offer["amount"] < STANDARD_APPLICATION["amount"] or offer["term_months"] > STANDARD_APPLICATION["term_months"]
-    assert result["timeline"][-1]["action"] == "auto_counter_offer"
-    assert result["timeline"][-1]["comment"]
+    assert offer["amount"] < STANDARD_APPLICATION["amount"]
 
     declined = client.action(draft["id"], "decline_offer", comment="Нужна вся сумма")
     assert declined["status"] == "CLIENT_DECLINED"
@@ -92,7 +100,7 @@ def test_client_border_manual_review_then_employee_approves(api):
 
     # Комментарий обязателен
     employee.employee_action(draft["id"], "approve", expected_status_code=422, comment="")
-    approved = employee.employee_action(draft["id"], "approve", comment="Одобряем на меньшую сумму", amount=1_200_000, term_months=30)
+    approved = employee.employee_action(draft["id"], "approve", comment="Одобряем на меньшую сумму", amount=1_200_000, term_months=18)
     assert approved["status"] == "OFFER_SENT"
     assert approved["offers"][0]["offer_type"] == "counter_offer"
 
