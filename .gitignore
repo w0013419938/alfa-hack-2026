@@ -9,18 +9,7 @@ frontend/node_modules/
 frontend/dist/
 frontend/test-results/
 
-# Рабочие файлы дизайн-скилов, в репозиторий не попадают
-.taste-skill/
-.claude/skills/
-skills-install.tgz
-
-# Скриншоты дизайн-аудита, только для локальной проверки
+# Скриншоты проверки дизайна, только для локальной работы
 docs/screenshots/audit/
-
-# Скриншоты второго прохода дизайн-аудита
 docs/screenshots/audit-2/
 docs/screenshots/audit-3/
-
-# Промпты и задания для ассистента, в репозиторий не попадают
-PROMPT_*.md
-TASK_*.md
