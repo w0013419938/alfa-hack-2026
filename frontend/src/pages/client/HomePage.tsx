@@ -84,7 +84,6 @@ function MiniProgress({ application }: { application: Application }) {
             h={8}
             bg={SEGMENT_COLOR[step.state] ?? SEGMENT_COLOR.upcoming}
             style={{ flex: 1, borderRadius: 4, transition: "background-color 400ms ease" }}
-            className={step.state === "current" ? "step-working" : undefined}
           />
         ))}
       </Box>

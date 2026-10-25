@@ -4,8 +4,8 @@
  *
  * Движение отвечает только на изменение данных:
  * - когда этап пройден, заливка линии дорастает до следующего шага;
- * - новый текущий шаг один раз отмечается расходящимся кольцом (после того, как линия дошла);
- * - пока банк работает над шагом (state = current), кольцо вокруг него мягко «дышит».
+ * - новый текущий шаг один раз отмечается расходящимся кольцом (после того, как линия дошла).
+ * Постоянного движения у шкалы нет: что банк работает, показывает индикатор над шкалой.
  * При prefers-reduced-motion всё это отключено (см. global.css).
  */
 import { Box, Text, VisuallyHidden } from "@mantine/core";
@@ -74,7 +74,7 @@ export function ProgressSteps({ steps }: { steps: Step[] }) {
           const style = DOT_STYLE[step.state] ?? DOT_STYLE.upcoming;
           const isLast = index === steps.length - 1;
           const isActive = step.code === activeCode;
-          const dotClass = [step.code === arrived ? "step-arrived" : "", step.state === "current" ? "step-working" : ""].join(" ").trim();
+          const dotClass = step.code === arrived ? "step-dot step-arrived" : "step-dot";
           return (
             <Box
               component="li"
@@ -111,7 +111,7 @@ export function ProgressSteps({ steps }: { steps: Step[] }) {
                 </Box>
               )}
               <Box
-                className={dotClass || undefined}
+                className={dotClass}
                 w={DOT}
                 h={DOT}
                 style={{
@@ -124,10 +124,9 @@ export function ProgressSteps({ steps }: { steps: Step[] }) {
                   fontWeight: 600,
                   zIndex: 1,
                   transition: "background-color 300ms ease, border-color 300ms ease",
-                  // Кольцо прибытия ждёт, пока линия добежит до шага; «дыхание» начинается после кольца
-                  animationDelay:
-                    step.code === arrived ? (step.state === "current" ? `${runMs + 300}ms, ${runMs + 2100}ms` : `${runMs + 300}ms`) : undefined,
-                  ["--ring-color" as string]: step.state === "action" ? "rgba(155, 92, 255, 0.5)" : "rgba(239, 49, 36, 0.45)",
+                  // Кольцо прибытия ждёт, пока линия добежит до шага
+                  ["--ring-delay" as string]: `${runMs + 300}ms`,
+                  ["--ring-color" as string]: step.state === "action" ? "rgba(155, 92, 255, 0.6)" : "rgba(239, 49, 36, 0.6)",
                 }}
               >
                 <StepIcon step={step} index={index} />
