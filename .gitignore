@@ -20,3 +20,7 @@ docs/screenshots/audit/
 # Скриншоты второго прохода дизайн-аудита
 docs/screenshots/audit-2/
 docs/screenshots/audit-3/
+
+# Промпты и задания для ассистента, в репозиторий не попадают
+PROMPT_*.md
+TASK_*.md

@@ -186,7 +186,7 @@
 
 # Фронтенд
 
-ТЗ — `PROMPT_FRONTEND.md`. Стек: React + Vite + TypeScript, Mantine, React Router, TanStack Query, openapi-fetch
+Стек: React + Vite + TypeScript, Mantine, React Router, TanStack Query, openapi-fetch
 с типами из `docs/openapi.json` (openapi-typescript), nginx (прокси `/api` → backend), Playwright.
 Дизайн — `docs/design/` и Figma «кейс-школа-альфа» (только визуальный язык): точные значения сняты из Figma —
 красный `#EF3124`, текст `#222`, салатовый `#8FEE52`, фон `#F4F5F7`, шрифт Golos Text, карточки со скруглением 32px.
