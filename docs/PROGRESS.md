@@ -275,7 +275,7 @@
 - [x] `decision.yaml`: надбавки 0/+2/+4 и исходы manual_review/reject совпадают по смыслу, файл не менялся. Расхождения (привязка к баллу, а не к грейду, надбавки D/E, профиль оборудования, DSCR) записаны в assumptions.md, п. 65.
 - [x] Документация: assumptions.md (п. 60–66: таблица терминов, продукты, сверка decision.yaml, упрощения), README, test-scenarios.md, api.md, коллекции запросов.
 - [x] Тесты. В двух бэкенд-тестах поменялись входные данные, ожидаемые исходы не трогал: в `test_api_rules.py` код продукта `investment` заменён на `equipment`, в `test_scenarios.py` сотрудник одобряет `client_border` на 18 мес. вместо 30 (новый максимум оборотного кредита 24 мес.). Бэкенд 183 passed, `docker compose down -v && up --build` поднялся без ручных шагов, Playwright 12 passed. Бэкенд-тесты запускаются через `docker compose run --rm backend uv run pytest`: порт базы наружу не опубликован, поэтому `cd backend && uv run pytest` на хосте до базы не достаёт.
-- [ ] Коммит и пуш ветки participant2-config.
+- [x] Коммит и пуш ветки participant2-config.
 
 ## Дизайн-аудит (ветка design-review)
 - [ ] Шаг 0: скилы на месте.
