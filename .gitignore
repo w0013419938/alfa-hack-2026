@@ -15,3 +15,6 @@ skills-install.tgz
 
 # Скриншоты дизайн-аудита, только для локальной проверки
 docs/screenshots/audit/
+
+# Скриншоты второго прохода дизайн-аудита
+docs/screenshots/audit-2/
