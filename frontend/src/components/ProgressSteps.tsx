@@ -18,6 +18,7 @@ import { COLORS } from "../theme";
 type Step = Schemas["ProgressStep"];
 
 const DOT = 36;
+const RING_ROOM = 22; // место над кружком под кольцо прибытия, px
 const SEGMENT_MS = 450; // задержка между отрезками, когда пройдено сразу несколько этапов
 
 const DOT_STYLE: Record<string, { bg: string; color: string; border: string }> = {
@@ -68,7 +69,9 @@ export function ProgressSteps({ steps }: { steps: Step[] }) {
   }, [activeCode, runMs]);
 
   return (
-    <Box style={{ overflowX: "auto" }} data-testid="progress">
+    // overflow-x: auto обрезает и по вертикали, поэтому сверху оставляем место под кольцо прибытия
+    // (расходится на 18 px от кружка) и возвращаем его отрицательным отступом, чтобы шкала не сдвинулась
+    <Box style={{ overflowX: "auto", paddingTop: RING_ROOM, marginTop: -RING_ROOM }} data-testid="progress">
       <Box component="ol" aria-label="Этапы заявки" m={0} p={0} miw={640} style={{ display: "flex", listStyle: "none", alignItems: "flex-start" }}>
         {steps.map((step, index) => {
           const style = DOT_STYLE[step.state] ?? DOT_STYLE.upcoming;
