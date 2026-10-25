@@ -1054,7 +1054,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comment\": \"Одобряем на меньшую сумму\",\n  \"amount\": 1200000,\n  \"term_months\": 30\n}"
+              "raw": "{\n  \"comment\": \"Одобряем на меньшую сумму\",\n  \"amount\": 1200000,\n  \"term_months\": 18\n}"
             }
           },
           "event": [

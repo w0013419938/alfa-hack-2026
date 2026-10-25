@@ -188,7 +188,7 @@ def test_document_upload_rules(api):
 
 def test_products_dictionaries_calculator_recommend(client):
     products = client.get("/api/v1/products").json()
-    assert {item["code"] for item in products} >= {"express", "working_capital", "investment"}
+    assert {item["code"] for item in products} >= {"express", "working_capital", "equipment"}
     assert all(item["description"] and item["rate_text"] for item in products)
 
     purposes = client.get("/api/v1/dictionaries/purposes").json()

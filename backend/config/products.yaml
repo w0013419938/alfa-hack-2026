@@ -1,5 +1,5 @@
 # Кредитные продукты для малого и микробизнеса.
-# TODO(участник 2): заменить значения-заглушки на финальные параметры продуктов.
+# working_capital и equipment взяты из docs/reference/participant2-config.yaml (участник 2).
 #
 # Как устроено:
 # - code — постоянный код продукта (на него ссылаются заявки, менять нельзя);
@@ -9,9 +9,14 @@
 # - decision_days — за сколько рабочих дней обычно принимается решение (используется в подборе продукта).
 # Таблица products в БД обновляется из этого файла при каждом старте бэкенда.
 
-version: "products-draft-1"
+version: "products-participant2-1"
 
 products:
+  # TODO(участник 2): продукта нет в файле участника 2, но он используется:
+  #   backend/seed/applications.json (три демо-заявки фоновых компаний),
+  #   backend/tests/unit/test_validation_recommend_feed.py (подбор продукта и валидация),
+  #   backend/tests/e2e/test_api_rules.py (список продуктов в GET /products).
+  #   Удалить или оставить, решает участник 2.
   - code: express
     name: "Экспресс-кредит"
     description: "Кредит без залога с быстрым решением. Деньги можно потратить на любые цели бизнеса."
@@ -27,33 +32,36 @@ products:
     required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments]
 
   - code: working_capital
-    name: "Кредит на оборотные средства"
-    description: "Пополнение оборотных средств: закупка товаров и сырья, оплата поставщикам, налоги и зарплаты."
+    name: "Оборотный кредит"
+    description: "Пополнение оборотных средств: закупка товаров и сырья, оплата поставщикам, налоги и зарплаты. Без залога, платежи равными суммами каждый месяц."
     suitable_for: "Когда бизнесу нужно закрыть разрыв между оплатой поставщикам и поступлениями от покупателей."
     purposes: [working_capital, goods_purchase]
-    min_amount: 500000
-    max_amount: 15000000
-    min_term_months: 6
-    max_term_months: 36
-    base_rate: 17.5
+    min_amount: 100000
+    max_amount: 3000000
+    min_term_months: 3
+    max_term_months: 24
+    base_rate: 21.0
     requires_collateral: false
     decision_days: 3
     required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments]
 
-  - code: investment
-    name: "Инвестиционный кредит"
-    description: "Крупная сумма на долгий срок под залог: покупка оборудования, транспорта, помещения, открытие новой точки."
-    suitable_for: "Когда вы вкладываетесь в развитие и готовы дать залог. С залогом ставка ниже."
-    purposes: [equipment, vehicles, real_estate, expansion]
-    min_amount: 1000000
-    max_amount: 30000000
+  - code: equipment
+    name: "Кредит на оборудование"
+    description: "Покупка оборудования и техники для бизнеса. Первоначальный взнос от 20%, залогом служит приобретаемое оборудование."
+    suitable_for: "Когда вы покупаете станок, технику или транспорт для работы и можете внести часть стоимости сами."
+    purposes: [equipment, vehicles]
+    min_amount: 500000
+    max_amount: 15000000
     min_term_months: 12
     max_term_months: 60
-    base_rate: 16.0
+    base_rate: 18.0
     requires_collateral: true
     decision_days: 5
     required_fields: [amount, term_months, purpose_code, monthly_revenue, monthly_expenses, current_loan_payments, collateral_description]
 
+  # TODO(участник 2): продукта нет в файле участника 2, но на его цель ссылается справочник:
+  #   backend/config/dictionaries.yaml (цель refinancing «Рефинансирование других кредитов»).
+  #   Без этого продукта для цели не останется ни одного подходящего кредита.
   - code: refinancing
     name: "Рефинансирование"
     description: "Перекредитование займов в других банках, чтобы снизить ежемесячный платёж."

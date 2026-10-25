@@ -92,7 +92,7 @@ def test_client_border_manual_review_then_employee_approves(api):
 
     # Комментарий обязателен
     employee.employee_action(draft["id"], "approve", expected_status_code=422, comment="")
-    approved = employee.employee_action(draft["id"], "approve", comment="Одобряем на меньшую сумму", amount=1_200_000, term_months=30)
+    approved = employee.employee_action(draft["id"], "approve", comment="Одобряем на меньшую сумму", amount=1_200_000, term_months=18)
     assert approved["status"] == "OFFER_SENT"
     assert approved["offers"][0]["offer_type"] == "counter_offer"
 
