@@ -1,8 +1,10 @@
-# Используется сборкой mock-external (контекст — корень репозитория)
+# Контекст сборки mock-external и корневого Dockerfile для Render
 .git
 **/.venv
 **/__pycache__
 **/.pytest_cache
 .env
 docs
-frontend
+frontend/node_modules
+frontend/dist
+frontend/test-results

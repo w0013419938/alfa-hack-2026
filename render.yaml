@@ -1,0 +1,28 @@
+# Blueprint для Render: один веб-сервис из корневого Dockerfile и база PostgreSQL.
+# Подключение: Render → New → Blueprint → этот репозиторий, ветка render.
+services:
+  - type: web
+    name: credit-cabinet
+    runtime: docker
+    plan: free
+    branch: render
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: credit-cabinet-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: APP_ENV
+        value: production
+      - key: PIPELINE_WORKERS
+        value: "2"
+
+databases:
+  - name: credit-cabinet-db
+    plan: free
+    databaseName: credit_cabinet
+    user: credit
